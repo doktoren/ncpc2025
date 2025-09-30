@@ -4,7 +4,7 @@ target-version = "py39"
 exclude = [".ruff_cache", "**/.pytest_cache", "**/venv"]
 [lint]
 select = ["ALL"]
-ignore = ["N", "BLE", "C901", "COM", "D", "E741", "EM101", "ERA001", "G004", "PLC0415", "PLR0913", "PLR2004", "S101", "T201", "TRY003"]
+ignore = ["B011", "N", "BLE", "C901", "COM", "D", "E741", "EM101", "ERA001", "G004", "PLC0415", "PLR0913", "PLR2004", "PT015", "S101", "T201", "TRY003"]
 extend-select = ["D100"]
 # N = pep8-naming
 # BLE = flake8-blind-except

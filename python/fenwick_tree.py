@@ -24,6 +24,7 @@ from typing_extensions import Self
 class Summable(Protocol):
     def __add__(self, other: Self, /) -> Self: ...
     def __sub__(self, other: Self, /) -> Self: ...
+    def __le__(self, other: Self, /) -> bool: ...
 
 
 ValueT = TypeVar("ValueT", bound=Summable)
@@ -95,6 +96,36 @@ class FenwickTree(Generic[ValueT]):
         if index == 0:
             return self.query(0)
         return self.query(index) - self.query(index - 1)
+
+    def first_nonzero_index(self, start_index: int) -> int | None:
+        """Smallest j >= start_index with value(j) > zero.
+        Requires: updates are non-negative and ValueT is totally ordered (e.g. int).
+        """
+        start_index = max(start_index, 0)
+        if start_index >= self.size:
+            return None
+
+        prefix_before = self.query(start_index - 1) if start_index > 0 else self.zero
+        total = self.query(self.size - 1)
+        if total == prefix_before:
+            return None
+
+        # Fenwick lower_bound: first idx with prefix_sum(idx) > prefix_before
+        idx = 0          # 1-based cursor
+        cur = self.zero  # running prefix at 'idx'
+        bit = 1 << (self.size.bit_length() - 1)
+        while bit:
+            nxt = idx + bit
+            if nxt <= self.size:
+                cand = cur + self.tree[nxt]
+                if cand <= prefix_before:   # move right while prefix <= target
+                    cur = cand
+                    idx = nxt
+            bit >>= 1
+
+        # idx is the largest position with prefix <= prefix_before (1-based).
+        # The answer is idx (converted to 0-based).
+        return idx
 
     def __len__(self) -> int:
         return self.size
@@ -239,6 +270,16 @@ def test_linear_from_array() -> None:
     print(f"Linear from_array time for 1000 elements: {optimized_time:.6f}s")
 
 
+def test_first_nonzero_index() -> None:
+    ft = FenwickTree(10, 0)
+    ft.update(2, 1)
+    ft.update(8, 1)
+    assert ft.first_nonzero_index(5) == 8
+    assert ft.first_nonzero_index(8) == 8
+    assert ft.first_nonzero_index(0) == 2
+    assert ft.first_nonzero_index(9) is None
+
+
 def main() -> None:
     test_basic()
     test_from_array()
@@ -246,6 +287,7 @@ def main() -> None:
     test_negative_values()
     test_linear_from_array()
     test_main()
+    test_first_nonzero_index()
     print("All Fenwick tree tests passed!")
 
 

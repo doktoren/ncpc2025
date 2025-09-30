@@ -13,9 +13,17 @@ from __future__ import annotations
 import heapq
 
 # Don't use annotations during contest
-from typing import Final, Generic, TypeVar
+from typing import Final, Generic, Protocol, TypeVar
 
-WeightT = TypeVar("WeightT", int, float)
+from typing_extensions import Self
+
+
+class Comparable(Protocol):
+    def __lt__(self, other: Self, /) -> bool: ...
+    def __add__(self, other: Self, /) -> Self: ...
+
+
+WeightT = TypeVar("WeightT", bound=Comparable)
 NodeT = TypeVar("NodeT")
 
 
@@ -99,7 +107,7 @@ def test_main() -> None:
 
 
 def test_single_node() -> None:
-    d: Dijkstra[str, float] = Dijkstra(float('inf'), 0.0)
+    d: Dijkstra[str, float] = Dijkstra(float("inf"), 0.0)
 
     distances, predecessors = d.shortest_paths("A")
     assert distances == {"A": 0.0}
@@ -124,7 +132,7 @@ def test_unreachable_nodes() -> None:
 
 
 def test_negative_zero_weights() -> None:
-    d: Dijkstra[str, float] = Dijkstra(float('inf'), 0.0)
+    d: Dijkstra[str, float] = Dijkstra(float("inf"), 0.0)
     d.add_edge("A", "B", 0.0)
     d.add_edge("B", "C", 0.0)
     d.add_edge("A", "C", 5.0)
@@ -188,6 +196,7 @@ def test_multiple_equal_paths() -> None:
     assert distances["T"] == 5  # Both paths S->A->T and S->B->T have length 5
 
     path = d.shortest_path("S", "T")
+    assert path is not None
     assert len(path) == 3
     assert path[0] == "S"
     assert path[-1] == "T"
@@ -206,13 +215,13 @@ def test_self_loops() -> None:
 def test_decimal_weights() -> None:
     from decimal import Decimal
 
-    d: Dijkstra[str, Decimal] = Dijkstra(Decimal('999999'), Decimal('0'))
-    d.add_edge("A", "B", Decimal('1.5'))
-    d.add_edge("B", "C", Decimal('2.7'))
-    d.add_edge("A", "C", Decimal('5.0'))
+    d: Dijkstra[str, Decimal] = Dijkstra(Decimal(999999), Decimal(0))
+    d.add_edge("A", "B", Decimal("1.5"))
+    d.add_edge("B", "C", Decimal("2.7"))
+    d.add_edge("A", "C", Decimal("5.0"))
 
     distances, _ = d.shortest_paths("A")
-    assert distances["C"] == Decimal('4.2')  # 1.5 + 2.7
+    assert distances["C"] == Decimal("4.2")  # 1.5 + 2.7
 
 
 def test_stress_many_nodes() -> None:
