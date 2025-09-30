@@ -1,0 +1,5 @@
+*.class
+.docker_build_cache
+Dockerfile.single
+*.jar
+*.log
