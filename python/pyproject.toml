@@ -1,0 +1,10 @@
+[project]
+name = "data-structures"
+version = "1.0.0"
+description = "Helper data structures for programming competitions"
+requires-python = "==3.9.18"
+dependencies = [
+    "mypy>=1.18.2,<2",
+    "pytest>=8.4.2,<9",
+    "ruff>=0.13.1",
+]

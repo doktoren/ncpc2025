@@ -1,0 +1,24 @@
+{
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.formatOnSaveMode": "file",
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.wordBasedSuggestions": "off",
+        "editor.codeActionsOnSave": {
+            "source.unusedImports": "never",  // overridden by "source.fixAll": "always"
+            "source.organizeImports": "always",
+            "source.fixAll": "always",
+        },
+        "editor.detectIndentation": false,
+        "editor.insertSpaces": true,
+        "editor.tabSize": 4,
+    },
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportMissingImports": "none",
+        "reportUnusedImport": "none"
+    },
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+    "python.terminal.activateEnvironment": true,
+    // Avoid ]633;E;…]633;D... when running python in terminal
+    "python.terminal.shellIntegration.enabled": false
+}
