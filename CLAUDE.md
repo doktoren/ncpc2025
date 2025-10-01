@@ -9,12 +9,21 @@ This is a collection of data structure implementations optimized for programming
 **Key constraints**:
 - Python 3.9.18 is locked for NCPC 2025 competition environment compatibility
 - C++ (g++ version 13.2.0) with compiler flags: `-x c++ -g -O2 -std=gnu++20 -static {files}`
+- Java (OpenJDK 21.0.4) with compiler flags: `-encoding UTF-8 -sourcepath . -d . {files}` and runtime flags: `-Dfile.encoding=UTF-8 -XX:+UseSerialGC -Xss64m -Xms1024m -Xmx1024m`
+
+**CRITICAL: Cross-Language Synchronization**:
+All algorithms MUST be kept in sync across Python, C++, and Java implementations:
+- Same functionality and API surface
+- Same test cases with identical expected values
+- Same edge case handling
+- Same complexity guarantees
+- Consistent documentation and comments
 
 ## Development Commands
 
 **Primary development workflow:**
 ```bash
-./test_all.sh  # Test all algorithms (Python + C++)
+./test_all.sh  # Test all algorithms (Python + C++ + Java)
 ./lint.sh      # Python linting, type checking, and testing
 ```
 
@@ -32,6 +41,12 @@ cd cpp && ./test_all.sh
 # Test individual C++ algorithm
 cd cpp && ./test_single.sh <algorithm>
 
+# Test Java algorithms (containerized)
+cd java && ./test_all.sh
+
+# Test individual Java algorithm
+cd java && ./test_single.sh <algorithm>
+
 # Python linting
 ./lint.sh
 ```
@@ -42,10 +57,13 @@ cd cpp && ./test_single.sh <algorithm>
 Each module follows a strict structure optimized for competition typing:
 
 1. **Implementation** (classes/algorithms)
-2. **`test_main()`** - The ONLY function to type during competition
-3. **Competition barrier**: `// Don't write tests below during competition.` (C++) or `# Don't write tests below during competition.` (Python)
+2. **`test_main()`** (Python), `testMain()` (Java), or `test_main()` (C++) - The ONLY function to type during competition
+3. **Competition barrier**:
+   - Python: `# Don't write tests below during competition.`
+   - Java: `// Don't write tests below during competition.`
+   - C++: `// Don't write tests below during competition.`
 4. **Development tests** (comprehensive test suite)
-5. **`main()` function** calling all tests with `test_main()` last
+5. **`main()` function** calling all tests with `test_main()`/`testMain()` last
 
 ### Module-Specific Architecture
 
@@ -63,6 +81,7 @@ Each module follows a strict structure optimized for competition typing:
 - `topological_sort.py` - DAG ordering algorithm
 - `kmp.py` - String matching algorithm
 - `lca.py` - Lowest Common Ancestor queries
+- `polygon_area.py` - Shoelace formula for polygon area
 
 **C++ (`cpp/`):**
 - `fenwick_tree.cpp` - Binary Indexed Tree template implementation
@@ -70,6 +89,27 @@ Each module follows a strict structure optimized for competition typing:
 - `union_find.cpp` - Disjoint Set Union with inheritance-based design
 - `prefix_tree.cpp` - Trie with prefix matching capabilities
 - `edmonds_karp.cpp` - Maximum flow algorithm using adjacency matrix
+- `bipartite_match.cpp` - Maximum bipartite matching
+- `segment_tree.cpp` - Range query data structure
+- `dijkstra.cpp` - Shortest path algorithm
+- `topological_sort.cpp` - DAG ordering algorithm
+- `kmp.cpp` - String matching algorithm
+- `lca.cpp` - Lowest Common Ancestor with binary lifting
+- `polygon_area.cpp` - Shoelace formula for polygon area
+
+**Java (`java/`):**
+- `fenwick_tree.java` - Binary Indexed Tree implementation
+- `priority_queue.java` - Generic heap with update/remove operations
+- `union_find.java` - Disjoint Set Union with path compression and union by rank
+- `prefix_tree.java` - Trie for string prefix operations
+- `edmonds_karp.java` - Maximum flow algorithm
+- `bipartite_match.java` - Maximum bipartite matching
+- `segment_tree.java` - Range query data structure
+- `dijkstra.java` - Shortest path algorithm
+- `topological_sort.java` - DAG ordering algorithm
+- `kmp.java` - String matching algorithm
+- `lca.java` - Lowest Common Ancestor with binary lifting
+- `polygon_area.java` - Shoelace formula for polygon area
 
 **Key Design Patterns:**
 
@@ -85,6 +125,12 @@ Each module follows a strict structure optimized for competition typing:
 - STL container usage for efficiency
 - Exception-based error handling
 
+**Java:**
+- Generic implementations with bounded type parameters
+- Standard library collections (ArrayList, HashMap, PriorityQueue)
+- Static methods within classes matching filename
+- Exception-based error handling with descriptive messages
+
 ### Competition Guidelines
 
 **What to type during contest:**
@@ -93,6 +139,11 @@ Each module follows a strict structure optimized for competition typing:
 1. Copy implementation classes/functions
 2. Copy `test_main()` function only
 3. **Skip all typing imports** (marked with `# Don't use annotations during contest`)
+
+**Java:**
+1. Copy implementation classes/functions
+2. Copy `testMain()` function only
+3. Include necessary imports (`import` statements)
 
 **C++:**
 1. Copy implementation classes/functions
@@ -104,6 +155,10 @@ Each module follows a strict structure optimized for competition typing:
 **Python:**
 - Any `from typing` imports or type annotations
 - Any tests below the competition barrier comment
+
+**Java:**
+- Any tests below the competition barrier comment
+- Unnecessary imports or debugging code
 
 **C++:**
 - Any tests below the competition barrier comment
@@ -125,6 +180,13 @@ The codebase uses advanced typing features for development but they should be co
 
 All modules include `# Don't use annotations during contest` comments above typing imports as clear reminders.
 
+**Java:**
+Uses standard Java features for clean, efficient code:
+- Generics with bounded type parameters (e.g., `<T extends Comparable<T>>`)
+- Standard library collections (ArrayList, HashMap, PriorityQueue, etc.)
+- Static methods within classes (no instances needed)
+- Import statements only for java.util.* when needed
+
 **C++:**
 Uses modern C++20 features for clean, efficient code:
 - Template metaprogramming for generic algorithms
@@ -143,6 +205,15 @@ python3 python/fenwick_tree.py
 ./lint.sh
 ```
 
+**Java:**
+```bash
+# Test all algorithms (containerized - recommended)
+cd java && ./test_all.sh
+
+# Test single algorithm (containerized)
+cd java && ./test_single.sh fenwick_tree
+```
+
 **C++:**
 ```bash
 # Test all algorithms (containerized - recommended)
@@ -157,28 +228,51 @@ cd cpp && g++ -x c++ -g -O2 -std=gnu++20 -static fenwick_tree.cpp -o fenwick_tre
 
 ### Docker Environment
 
-The C++ implementations include a Docker setup that ensures consistent compilation and testing across different environments:
+Both C++ and Java implementations include Docker setups that ensure consistent compilation and testing across different environments:
 
-**Files:**
+**Java Files:**
+- `java/Dockerfile` - Container definition with OpenJDK 21 and NCPC competition flags
+- `java/test_all.sh` - Script to test all algorithms with smart caching
+- `java/test_single.sh` - Script to test individual algorithms in Docker
+
+**Java Benefits:**
+- Exact JDK version matching NCPC 2025 environment
+- Consistent flag application: `-encoding UTF-8 -sourcepath . -d .` (compile) and `-Dfile.encoding=UTF-8 -XX:+UseSerialGC -Xss64m -Xms1024m -Xmx1024m` (runtime)
+- Isolated testing environment
+- Portable across different host systems
+- Smart caching to avoid unnecessary rebuilds
+- Parallel compilation for fast testing
+
+**C++ Files:**
 - `cpp/Dockerfile` - Container definition with g++ 13.2.0 and NCPC competition flags
+- `cpp/test_all.sh` - Script to test all algorithms with smart caching
 - `cpp/test_single.sh` - Script to test individual algorithms in Docker
 
-**Benefits:**
+**C++ Benefits:**
 - Exact compiler version matching NCPC 2025 environment
 - Consistent flag application: `-x c++ -g -O2 -std=gnu++20 -static`
 - Isolated testing environment
 - Portable across different host systems
+- Smart caching to avoid unnecessary rebuilds
+- Parallel compilation for fast testing
 
 **Usage:**
 ```bash
-# Test all algorithms
-cd cpp && docker build -t ncpc-cpp . && docker run --rm ncpc-cpp
+# Test all Java algorithms
+cd java && ./test_all.sh
 
-# Test specific algorithm
+# Test specific Java algorithm
+cd java && ./test_single.sh fenwick_tree
+
+# Test all C++ algorithms
+cd cpp && ./test_all.sh
+
+# Test specific C++ algorithm
 cd cpp && ./test_single.sh fenwick_tree
 
 # Interactive development
 cd cpp && docker run -it --rm -v $(pwd):/workspace gcc:13.2.0 bash
+cd java && docker run -it --rm -v $(pwd):/workspace openjdk:21-slim bash
 ```
 
 ### Memory Management (C++)
@@ -191,10 +285,13 @@ All C++ implementations follow RAII principles:
 
 ### Performance Considerations
 
-Both Python and C++ implementations are optimized for:
+All three language implementations (Python, Java, C++) are optimized for:
 - Minimal code size for fast typing during competition
 - Optimal algorithmic complexity
 - Clear, readable structure for debugging under pressure
 - Comprehensive test coverage to catch errors early
 
-The C++ versions typically offer better performance but Python versions may be faster to implement correctly under time pressure.
+Performance hierarchy:
+- C++ typically offers best runtime performance
+- Java offers good performance with simpler syntax than C++
+- Python may be fastest to implement correctly under time pressure

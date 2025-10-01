@@ -84,8 +84,8 @@ class FenwickTree(Generic[ValueT]):
         return result
 
     def range_query(self, left: int, right: int) -> ValueT:
-        """Return the sum of elements from left to right (inclusive)."""
-        if left > right:
+        """Sum of elements from left to right (inclusive). Returns zero for invalid ranges."""
+        if left > right or left < 0 or right >= self.size:
             return self.zero
         if left == 0:
             return self.query(right)
@@ -93,13 +93,17 @@ class FenwickTree(Generic[ValueT]):
 
     def get_value(self, index: int) -> ValueT:
         """Get the current value at a specific index."""
+        if not (0 <= index < self.size):
+            msg = f"Index {index} out of bounds for size {self.size}"
+            raise IndexError(msg)
         if index == 0:
             return self.query(0)
         return self.query(index) - self.query(index - 1)
 
     def first_nonzero_index(self, start_index: int) -> int | None:
-        """Smallest j >= start_index with value(j) > zero.
-        Requires: updates are non-negative and ValueT is totally ordered (e.g. int).
+        """Find smallest index >= start_index with value > zero.
+
+        REQUIRES: all updates are non-negative, ValueT is totally ordered (e.g., int, float).
         """
         start_index = max(start_index, 0)
         if start_index >= self.size:
@@ -208,6 +212,83 @@ def test_edge_cases() -> None:
     assert ft_large.range_query(5, 3) == 0  # left > right
 
 
+def test_bounds_checking() -> None:
+    """Test that out-of-bounds access raises appropriate errors."""
+    ft = FenwickTree(5, 0)
+
+    # Test update bounds
+    try:
+        ft.update(-1, 10)
+        assert False, "Should raise IndexError for negative index"
+    except IndexError:
+        pass
+
+    try:
+        ft.update(5, 10)
+        assert False, "Should raise IndexError for index >= size"
+    except IndexError:
+        pass
+
+    # Test query bounds
+    try:
+        ft.query(-1)
+        assert False, "Should raise IndexError for negative index"
+    except IndexError:
+        pass
+
+    try:
+        ft.query(5)
+        assert False, "Should raise IndexError for index >= size"
+    except IndexError:
+        pass
+
+    # Test range_query bounds
+    try:
+        ft.range_query(-1, 2)
+        assert False, "Should raise IndexError for negative left"
+    except IndexError:
+        pass
+
+    try:
+        ft.range_query(0, 5)
+        assert False, "Should raise IndexError for right >= size"
+    except IndexError:
+        pass
+
+    # Test get_value bounds
+    try:
+        ft.get_value(-1)
+        assert False, "Should raise IndexError for negative index"
+    except IndexError:
+        pass
+
+    try:
+        ft.get_value(5)
+        assert False, "Should raise IndexError for index >= size"
+    except IndexError:
+        pass
+
+
+def test_first_nonzero_bounds() -> None:
+    """Test first_nonzero_index with boundary conditions."""
+    ft = FenwickTree(10, 0)
+    ft.update(5, 1)
+
+    # Negative start_index should be clamped to 0
+    assert ft.first_nonzero_index(-5) == 5
+
+    # Start from exactly where nonzero is
+    assert ft.first_nonzero_index(5) == 5
+
+    # Start past all nonzero elements
+    assert ft.first_nonzero_index(10) is None
+    assert ft.first_nonzero_index(100) is None
+
+    # Empty tree
+    ft_empty = FenwickTree(10, 0)
+    assert ft_empty.first_nonzero_index(0) is None
+
+
 def test_negative_values() -> None:
     ft = FenwickTree(4, 0)
 
@@ -284,10 +365,12 @@ def main() -> None:
     test_basic()
     test_from_array()
     test_edge_cases()
+    test_bounds_checking()
+    test_first_nonzero_bounds()
     test_negative_values()
     test_linear_from_array()
-    test_main()
     test_first_nonzero_index()
+    test_main()
     print("All Fenwick tree tests passed!")
 
 

@@ -384,6 +384,6 @@ int main() {
     test_large_graph();
     test_string_nodes();
     test_main();
-    std::cout << "All tests passed!" << std::endl;
+    std::cout << "All Topological Sort tests passed!" << std::endl;
     return 0;
 }

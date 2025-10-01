@@ -92,15 +92,12 @@ class segment_tree {
     }
 
     static void testMain() {
-        long[] arr = {1, 3, 5, 7, 9, 11};
+        long[] arr = {1, 3, 5, 7, 9};
         SegmentTree st = new SegmentTree(arr);
-
-        assert st.query(0, 2) == 9;
-        assert st.query(1, 4) == 24;
-
-        st.update(2, 6);
-        assert st.query(0, 2) == 10;
-        assert st.query(1, 4) == 25;
+        assert st.query(1, 3) == 15;
+        st.update(2, 10);
+        assert st.query(1, 3) == 20;
+        assert st.query(0, 4) == 30;
     }
 
     // Don't write tests below during competition.

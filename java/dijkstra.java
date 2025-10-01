@@ -145,19 +145,18 @@ class dijkstra {
     }
 
     static void testMain() {
-        Dijkstra d = new Dijkstra(5);
+        Dijkstra d = new Dijkstra(4);
         d.addEdge(0, 1, 4);
-        d.addEdge(0, 2, 1);
-        d.addEdge(2, 1, 2);
-        d.addEdge(1, 3, 1);
-        d.addEdge(2, 3, 5);
-        d.addEdge(3, 4, 3);
+        d.addEdge(0, 2, 2);
+        d.addEdge(1, 2, 1);
+        d.addEdge(1, 3, 5);
+        d.addEdge(2, 3, 8);
 
         Map<Integer, Integer> distances = d.shortestPaths(0);
-        assert distances.get(4) == 7;
+        assert distances.get(3) == 9;
 
-        List<Integer> path = d.shortestPath(0, 4);
-        assert path.equals(Arrays.asList(0, 2, 1, 3, 4));
+        List<Integer> path = d.shortestPath(0, 3);
+        assert path.equals(Arrays.asList(0, 1, 3));
     }
 
     // Don't write tests below during competition.

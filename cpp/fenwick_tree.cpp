@@ -81,6 +81,9 @@ public:
         if (left > right) {
             return zero;
         }
+        if (left < 0 || right >= size) {
+            throw std::out_of_range("Range out of bounds");
+        }
         if (left == 0) {
             return query(right);
         }
@@ -88,10 +91,50 @@ public:
     }
 
     T get_value(int index) {
+        if (index < 0 || index >= size) {
+            throw std::out_of_range("Index out of bounds");
+        }
         if (index == 0) {
             return query(0);
         }
         return query(index) - query(index - 1);
+    }
+
+    // Find smallest index >= start_index with value > zero (REQUIRES: all updates are non-negative)
+    int first_nonzero_index(int start_index) {
+        start_index = std::max(start_index, 0);
+        if (start_index >= size) {
+            return -1;  // Use -1 to indicate "not found" in C++
+        }
+
+        T prefix_before = (start_index > 0) ? query(start_index - 1) : zero;
+        T total = query(size - 1);
+        if (total == prefix_before) {
+            return -1;
+        }
+
+        // Fenwick lower_bound: first idx with prefix_sum(idx) > prefix_before
+        int idx = 0;  // 1-based cursor
+        T cur = zero;  // running prefix at 'idx'
+        int bit = 1;
+        while (bit <= size) bit <<= 1;
+        bit >>= 1;
+
+        while (bit > 0) {
+            int nxt = idx + bit;
+            if (nxt <= size) {
+                T cand = cur + tree[nxt];
+                if (cand <= prefix_before) {  // move right while prefix <= target
+                    cur = cand;
+                    idx = nxt;
+                }
+            }
+            bit >>= 1;
+        }
+
+        // idx is the largest position with prefix <= prefix_before (1-based).
+        // The answer is idx (converted to 0-based).
+        return idx;
     }
 
     int length() const {
@@ -194,11 +237,163 @@ void test_negative_values() {
     assert(ft.query(3) == 5); // 5 + (-5) + 8 + (-3)
 }
 
+void test_bounds_checking() {
+    FenwickTree<int> ft(5, 0);
+
+    // Test update bounds
+    bool caught = false;
+    try {
+        ft.update(-1, 10);
+    } catch (const std::out_of_range&) {
+        caught = true;
+    }
+    assert(caught);
+
+    caught = false;
+    try {
+        ft.update(5, 10);
+    } catch (const std::out_of_range&) {
+        caught = true;
+    }
+    assert(caught);
+
+    // Test query bounds
+    caught = false;
+    try {
+        ft.query(-1);
+    } catch (const std::out_of_range&) {
+        caught = true;
+    }
+    assert(caught);
+
+    caught = false;
+    try {
+        ft.query(5);
+    } catch (const std::out_of_range&) {
+        caught = true;
+    }
+    assert(caught);
+
+    // Test range_query bounds
+    caught = false;
+    try {
+        ft.range_query(-1, 2);
+    } catch (const std::out_of_range&) {
+        caught = true;
+    }
+    assert(caught);
+
+    caught = false;
+    try {
+        ft.range_query(0, 5);
+    } catch (const std::out_of_range&) {
+        caught = true;
+    }
+    assert(caught);
+
+    // Test get_value bounds
+    caught = false;
+    try {
+        ft.get_value(-1);
+    } catch (const std::out_of_range&) {
+        caught = true;
+    }
+    assert(caught);
+
+    caught = false;
+    try {
+        ft.get_value(5);
+    } catch (const std::out_of_range&) {
+        caught = true;
+    }
+    assert(caught);
+}
+
+void test_first_nonzero_bounds() {
+    FenwickTree<int> ft(10, 0);
+    ft.update(5, 1);
+
+    // Negative start_index should be clamped to 0
+    assert(ft.first_nonzero_index(-5) == 5);
+
+    // Start from exactly where nonzero is
+    assert(ft.first_nonzero_index(5) == 5);
+
+    // Start past all nonzero elements
+    assert(ft.first_nonzero_index(10) == -1);
+    assert(ft.first_nonzero_index(100) == -1);
+
+    // Empty tree
+    FenwickTree<int> ft_empty(10, 0);
+    assert(ft_empty.first_nonzero_index(0) == -1);
+}
+
+void test_linear_from_array() {
+    // Test that the optimized from_array produces identical results
+    std::vector<std::vector<int>> test_cases = {
+        {1, 3, 5, 7, 9, 11},
+        {10, -5, 8, -3, 15, 2, -7, 12},
+    };
+
+    for (const auto& arr : test_cases) {
+        auto ft = FenwickTree<int>::from_array(arr, 0);
+
+        // Verify all prefix sums match expected
+        int expected_sum = 0;
+        for (size_t i = 0; i < arr.size(); i++) {
+            expected_sum += arr[i];
+            assert(ft.query(i) == expected_sum);
+        }
+
+        // Verify individual values
+        for (size_t i = 0; i < arr.size(); i++) {
+            assert(ft.get_value(i) == arr[i]);
+        }
+
+        // Test range queries
+        if (arr.size() >= 3) {
+            int range_sum = arr[1] + arr[2];
+            assert(ft.range_query(1, 2) == range_sum);
+        }
+    }
+
+    // Test on larger array
+    std::vector<int> large_arr(1000);
+    for (int i = 0; i < 1000; i++) {
+        large_arr[i] = i;
+    }
+    auto ft_optimized = FenwickTree<int>::from_array(large_arr, 0);
+
+    // Verify correctness on large array
+    std::vector<int> test_indices = {0, 100, 500, 999};
+    for (int i : test_indices) {
+        int expected = 0;
+        for (int j = 0; j <= i; j++) {
+            expected += large_arr[j];
+        }
+        assert(ft_optimized.query(i) == expected);
+    }
+}
+
+void test_first_nonzero_index() {
+    FenwickTree<int> ft(10, 0);
+    ft.update(2, 1);
+    ft.update(8, 1);
+    assert(ft.first_nonzero_index(5) == 8);
+    assert(ft.first_nonzero_index(8) == 8);
+    assert(ft.first_nonzero_index(0) == 2);
+    assert(ft.first_nonzero_index(9) == -1);
+}
+
 int main() {
     test_basic();
     test_from_array();
     test_edge_cases();
+    test_bounds_checking();
+    test_first_nonzero_bounds();
     test_negative_values();
+    test_linear_from_array();
+    test_first_nonzero_index();
     test_main();
     std::cout << "All Fenwick tree tests passed!" << std::endl;
     return 0;

@@ -76,14 +76,15 @@ class kmp {
     }
 
     static void testMain() {
-        List<Integer> result = search("ABABDABACDABABCABAB", "ABABCABAB");
-        assert result.equals(Arrays.asList(10));
+        String text = "ababcababa";
+        String pattern = "aba";
+        List<Integer> matches = search(text, pattern);
+        assert matches.equals(Arrays.asList(0, 5, 7));
+        assert matches.size() == 3;
 
-        result = search("AABAACAADAABAABA", "AABA");
-        assert result.equals(Arrays.asList(0, 9, 12));
-
-        int[] lps = computeLPS("ABABCABAB");
-        assert lps[8] == 2;
+        // Test failure function
+        int[] failure = computeLPS("abcabcab");
+        assert Arrays.equals(failure, new int[]{0, 0, 0, 1, 2, 3, 4, 5});
     }
 
     // Don't write tests below during competition.

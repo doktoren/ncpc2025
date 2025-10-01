@@ -131,16 +131,67 @@ void test_no_flow() {
 void test_single_edge() {
     // Single edge network
     EdmondsKarp<int> ek(2);
-    ek.add_edge(0, 1, 42);
+    ek.add_edge(0, 1, 5);
 
     int max_flow = ek.max_flow(0, 1);
-    assert(max_flow == 42);
+    assert(max_flow == 5);
+}
+
+void test_bottleneck() {
+    // Path with bottleneck
+    EdmondsKarp<int> ek(4);
+    ek.add_edge(0, 1, 100);
+    ek.add_edge(1, 2, 1);
+    ek.add_edge(2, 3, 100);
+
+    int max_flow = ek.max_flow(0, 3);
+    assert(max_flow == 1);
+}
+
+void test_parallel_edges() {
+    // Multiple parallel paths
+    EdmondsKarp<int> ek(4);
+    ek.add_edge(0, 1, 5);
+    ek.add_edge(0, 2, 5);
+    ek.add_edge(1, 3, 5);
+    ek.add_edge(2, 3, 5);
+
+    int max_flow = ek.max_flow(0, 3);
+    assert(max_flow == 10);
+}
+
+void test_empty_graph() {
+    // Empty graph (no edges)
+    EdmondsKarp<int> ek(2);
+    int max_flow = ek.max_flow(0, 1);
+    assert(max_flow == 0);
+}
+
+void test_complex_network() {
+    // More complex network with multiple paths
+    EdmondsKarp<int> ek(6);
+    ek.add_edge(0, 1, 10);
+    ek.add_edge(0, 2, 10);
+    ek.add_edge(1, 2, 2);
+    ek.add_edge(1, 3, 4);
+    ek.add_edge(1, 4, 8);
+    ek.add_edge(2, 4, 9);
+    ek.add_edge(3, 5, 10);
+    ek.add_edge(4, 3, 6);
+    ek.add_edge(4, 5, 10);
+
+    int max_flow = ek.max_flow(0, 5);
+    assert(max_flow == 19);
 }
 
 int main() {
     test_basic();
     test_no_flow();
     test_single_edge();
+    test_bottleneck();
+    test_parallel_edges();
+    test_empty_graph();
+    test_complex_network();
     test_main();
     std::cout << "All Edmonds-Karp tests passed!" << std::endl;
     return 0;

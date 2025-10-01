@@ -60,11 +60,11 @@ class polygon_area {
     static void testMain() {
         // Simple square with side length 2
         Point[] square = {new Point(0.0, 0.0), new Point(2.0, 0.0), new Point(2.0, 2.0), new Point(0.0, 2.0)};
-        assert polygonArea(square) == 4.0;
+        assert Math.abs(polygonArea(square) - 4.0) < 1e-9;
 
         // Triangle with base 3 and height 4
         Point[] triangle = {new Point(0.0, 0.0), new Point(3.0, 0.0), new Point(1.5, 4.0)};
-        assert polygonArea(triangle) == 6.0;
+        assert Math.abs(polygonArea(triangle) - 6.0) < 1e-9;
 
         // Test orientation
         Point[] ccwSquare = {new Point(0.0, 0.0), new Point(1.0, 0.0), new Point(1.0, 1.0), new Point(0.0, 1.0)};

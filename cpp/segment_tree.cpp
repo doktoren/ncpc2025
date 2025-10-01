@@ -269,6 +269,6 @@ int main() {
     test_multiple_updates();
     test_invalid_indices();
     test_main();
-    std::cout << "All tests passed!" << std::endl;
+    std::cout << "All Segment Tree tests passed!" << std::endl;
     return 0;
 }

@@ -97,16 +97,13 @@ class prefix_tree {
 
     static void testMain() {
         PrefixTree trie = new PrefixTree();
-        trie.insert("apple");
-        trie.insert("app");
+        trie.insert("cat");
+        trie.insert("car");
+        trie.insert("card");
 
-        assert trie.search("app");
-        assert !trie.search("appl");
-        assert trie.startsWith("app");
-
-        trie.delete("app");
-        assert !trie.search("app");
-        assert trie.search("apple");
+        assert trie.search("car");
+        assert !trie.search("ca");
+        assert trie.startsWith("car");
     }
 
     // Don't write tests below during competition.

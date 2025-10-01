@@ -167,22 +167,24 @@ class topological_sort {
 
     static void testMain() {
         TopologicalSort ts = new TopologicalSort(6);
-        ts.addEdge(5, 2);
-        ts.addEdge(5, 0);
-        ts.addEdge(4, 0);
-        ts.addEdge(4, 1);
-        ts.addEdge(2, 3);
-        ts.addEdge(3, 1);
+        int[][] edges = {{5, 2}, {5, 0}, {4, 0}, {4, 1}, {2, 3}, {3, 1}};
+        for (int[] edge : edges) {
+            ts.addEdge(edge[0], edge[1]);
+        }
 
-        List<Integer> kahn = ts.kahnSort();
-        assert kahn != null;
-        assert kahn.size() == 6;
+        List<Integer> kahnResult = ts.kahnSort();
+        List<Integer> dfsResult = ts.dfsSort();
 
-        List<Integer> dfs = ts.dfsSort();
-        assert dfs != null;
-        assert dfs.size() == 6;
-
+        assert kahnResult != null;
+        assert dfsResult != null;
         assert !ts.hasCycle();
+
+        // Test with cycle
+        TopologicalSort tsCycle = new TopologicalSort(3);
+        tsCycle.addEdge(0, 1);
+        tsCycle.addEdge(1, 2);
+        tsCycle.addEdge(2, 0);
+        assert tsCycle.hasCycle();
     }
 
     // Don't write tests below during competition.

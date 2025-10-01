@@ -99,6 +99,7 @@ class EdmondsKarp(Generic[NodeT, CapacityT]):
         self.nodes: dict[NodeT, Node[NodeT, CapacityT]] = init_nodes()
 
     def change_initial_capacities(self, edges: list[tuple[NodeT, NodeT, CapacityT]]) -> None:
+        """Update edge capacities. REQUIRES: new capacity >= current flow."""
         for source, sink, capacity in edges:
             edge = self.nodes[source].edges[sink]
             assert capacity >= edge.flow
@@ -107,13 +108,14 @@ class EdmondsKarp(Generic[NodeT, CapacityT]):
             edge.capacity += increase
 
     def reset_flows(self) -> None:
+        """Reset all flows to zero, keeping capacities."""
         self.total_flow = self.zero
         for node in self.nodes.values():
             for edge in node.edges.values():
                 edge.capacity = edge.initial_capacity
 
     def run(self) -> None:
-        # Run or rerun flow algorithm
+        """Run max-flow algorithm from source to sink."""
         self.color += 1
         progress = True
         while progress:
@@ -158,6 +160,7 @@ class EdmondsKarp(Generic[NodeT, CapacityT]):
                         break
 
     def print(self) -> None:
+        """Print all edges with non-zero flow for debugging."""
         if DEBUG:
             for node in self.nodes.values():
                 for edge in node.edges.values():
@@ -240,6 +243,61 @@ def test_d() -> None:
     assert bm.total_flow == 0, bm.total_flow
 
 
+def test_single_edge() -> None:
+    bm = EdmondsKarp([(0, 1, 5)], main_source=0, main_sink=1, zero=0)
+    bm.run()
+    assert bm.total_flow == 5
+
+
+def test_no_path() -> None:
+    # No path from source to sink
+    bm = EdmondsKarp([(0, 1, 5), (2, 3, 5)], main_source=0, main_sink=3, zero=0)
+    bm.run()
+    assert bm.total_flow == 0
+
+
+def test_bottleneck() -> None:
+    # Path with bottleneck
+    bm = EdmondsKarp([(0, 1, 100), (1, 2, 1), (2, 3, 100)], main_source=0, main_sink=3, zero=0)
+    bm.run()
+    assert bm.total_flow == 1
+
+
+def test_parallel_edges() -> None:
+    # Multiple parallel paths
+    bm = EdmondsKarp(
+        [(0, 1, 5), (0, 2, 5), (1, 3, 5), (2, 3, 5)],
+        main_source=0,
+        main_sink=3,
+        zero=0,
+    )
+    bm.run()
+    assert bm.total_flow == 10
+
+
+def test_reset_flows() -> None:
+    bm = EdmondsKarp([(0, 1, 10), (1, 2, 10)], main_source=0, main_sink=2, zero=0)
+    bm.run()
+    assert bm.total_flow == 10
+
+    bm.reset_flows()
+    assert bm.total_flow == 0
+
+    bm.run()
+    assert bm.total_flow == 10
+
+
+def test_change_capacity() -> None:
+    bm = EdmondsKarp([(0, 1, 5), (1, 2, 10)], main_source=0, main_sink=2, zero=0)
+    bm.run()
+    assert bm.total_flow == 5
+
+    # Increase capacity of bottleneck edge
+    bm.change_initial_capacities([(0, 1, 8)])
+    bm.run()
+    assert bm.total_flow == 8  # Can now push 3 more
+
+
 def main() -> None:
     test_a()
     print()
@@ -248,6 +306,13 @@ def main() -> None:
     test_c()
     print()
     test_d()
+    print()
+    test_single_edge()
+    test_no_path()
+    test_bottleneck()
+    test_parallel_edges()
+    test_reset_flows()
+    test_change_capacity()
     test_main()
 
 

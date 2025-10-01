@@ -41,9 +41,13 @@ class priority_queue {
 
         T peek() {
             if (heap.isEmpty()) {
-                throw new IllegalStateException("Heap is empty");
+                return null;
             }
             return heap.get(0);
+        }
+
+        boolean contains(T item) {
+            return heap.contains(item);
         }
 
         void update(T oldItem, T newItem) {
@@ -117,41 +121,162 @@ class priority_queue {
     }
 
     static void testMain() {
-        PriorityQueue<Integer> pq = new PriorityQueue<>();
-        pq.push(5);
-        pq.push(2);
-        pq.push(8);
-        pq.push(1);
-
-        assert pq.peek() == 1;
-        assert pq.pop() == 1;
-        assert pq.pop() == 2;
-
-        pq.update(8, 3);
-        assert pq.pop() == 3;
+        PriorityQueue<Integer> p = new PriorityQueue<>();
+        p.push(15);
+        p.push(23);
+        p.push(8);
+        assert p.pop() == 8;
+        assert p.pop() == 15;
     }
 
     // Don't write tests below during competition.
 
-    static void testEmpty() {
+    static void testBasicOperations() {
         PriorityQueue<Integer> pq = new PriorityQueue<>();
-        assert pq.isEmpty();
+
+        // Test empty queue
         assert pq.size() == 0;
+        assert pq.peek() == null;
+
+        // Add items
+        pq.push(10);
+        pq.push(5);
+        pq.push(15);
+
+        assert pq.size() == 3;
+        assert pq.peek() == 5;
+
+        // Pop in priority order
+        assert pq.pop() == 5;
+        assert pq.size() == 2;
+        assert pq.pop() == 10;
+        assert pq.pop() == 15;
+
+        assert pq.size() == 0;
+    }
+
+    static void testUpdatePriority() {
+        PriorityQueue<Integer> pq = new PriorityQueue<>();
+
+        pq.push(10);
+        pq.push(5);
+
+        // Update to have higher priority
+        pq.update(10, 3);
+        assert pq.peek() == 3;
+        assert pq.size() == 2;
+
+        // Pop should now give updated value first
+        assert pq.pop() == 3;
+        assert pq.pop() == 5;
     }
 
     static void testRemove() {
         PriorityQueue<Integer> pq = new PriorityQueue<>();
+
+        pq.push(10);
         pq.push(5);
-        pq.push(2);
-        pq.push(8);
-        pq.remove(2);
+        pq.push(15);
+
+        // Remove middle priority task
+        pq.remove(10);
+        assert pq.size() == 2;
+        assert !pq.contains(10);
+
+        // Verify correct items remain
         assert pq.pop() == 5;
-        assert pq.pop() == 8;
+        assert pq.pop() == 15;
+    }
+
+    static void testContains() {
+        PriorityQueue<Integer> pq = new PriorityQueue<>();
+
+        pq.push(10);
+        pq.push(5);
+
+        assert pq.contains(10);
+        assert pq.contains(5);
+        assert !pq.contains(3);
+
+        pq.remove(10);
+        assert !pq.contains(10);
+    }
+
+    static void testEmptyOperations() {
+        PriorityQueue<Integer> pq = new PriorityQueue<>();
+
+        // Test peek on empty queue
+        assert pq.peek() == null;
+
+        // Test pop on empty queue
+        try {
+            pq.pop();
+            assert false : "Should throw IllegalStateException";
+        } catch (IllegalStateException e) {
+            // Expected
+        }
+    }
+
+    static void testRemoveNonexistent() {
+        PriorityQueue<Integer> pq = new PriorityQueue<>();
+
+        pq.push(10);
+
+        try {
+            pq.remove(999);
+            assert false : "Should throw IllegalArgumentException";
+        } catch (IllegalArgumentException e) {
+            // Expected
+        }
+    }
+
+    static void testSingleElement() {
+        PriorityQueue<Integer> pq = new PriorityQueue<>();
+
+        pq.push(42);
+        assert pq.size() == 1;
+        assert pq.peek() == 42;
+        assert pq.pop() == 42;
+        assert pq.size() == 0;
+    }
+
+    static void testDuplicatePriorities() {
+        PriorityQueue<Integer> pq = new PriorityQueue<>();
+
+        pq.push(10);
+        pq.push(10);
+        pq.push(10);
+
+        assert pq.size() == 3;
+
+        // All should pop eventually
+        assert pq.pop() == 10;
+        assert pq.pop() == 10;
+        assert pq.pop() == 10;
+    }
+
+    static void testWithDoubles() {
+        PriorityQueue<Double> pq = new PriorityQueue<>();
+
+        pq.push(1.5);
+        pq.push(0.5);
+        pq.push(2.3);
+
+        assert pq.pop() == 0.5;
+        assert pq.pop() == 1.5;
+        assert pq.pop() == 2.3;
     }
 
     public static void main(String[] args) {
-        testEmpty();
+        testBasicOperations();
+        testUpdatePriority();
         testRemove();
+        testContains();
+        testEmptyOperations();
+        testRemoveNonexistent();
+        testSingleElement();
+        testDuplicatePriorities();
+        testWithDoubles();
         testMain();
         System.out.println("All tests passed!");
     }

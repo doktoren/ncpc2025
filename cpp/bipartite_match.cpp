@@ -154,10 +154,69 @@ void test_c() {
     assert(bm.match.size() == 2);
 }
 
+void test_empty_graph() {
+    BipartiteMatch<int, int> bm({});
+    assert(bm.match.empty());
+}
+
+void test_single_edge() {
+    BipartiteMatch<int, int> bm({{1, 2}});
+    assert(bm.match.size() == 1);
+    assert(bm.match[1] == 2);
+}
+
+void test_no_matching() {
+    // All sources want same sink
+    BipartiteMatch<int, std::string> bm({
+        {1, "A"}, {2, "A"}, {3, "A"}
+    });
+    // Only one can be matched
+    assert(bm.match.size() == 1);
+    assert(bm.match[bm.match.begin()->first] == "A");
+}
+
+void test_perfect_matching() {
+    // Perfect matching possible
+    BipartiteMatch<int, int> bm({
+        {1, 10}, {2, 20}, {3, 30}
+    });
+    assert(bm.match.size() == 3);
+}
+
+void test_augmenting_path() {
+    // Requires augmenting path to find maximum matching
+    BipartiteMatch<int, std::string> bm({
+        {1, "A"}, {1, "B"},
+        {2, "B"}, {2, "C"},
+        {3, "C"}
+    });
+    assert(bm.match.size() == 3);
+}
+
+void test_large_bipartite() {
+    // Larger graph
+    std::vector<std::pair<int, int>> edges;
+    for (int i = 0; i < 10; i++) {
+        for (int j = i; j < std::min(i + 3, 10); j++) {
+            edges.push_back({i, j + 100});
+        }
+    }
+
+    BipartiteMatch<int, int> bm(edges);
+    // Should find a good matching
+    assert(bm.match.size() >= 8);
+}
+
 int main() {
     test_a();
     test_b();
     test_c();
+    test_empty_graph();
+    test_single_edge();
+    test_no_matching();
+    test_perfect_matching();
+    test_augmenting_path();
+    test_large_bipartite();
     test_main();
     std::cout << "All tests passed!" << std::endl;
     return 0;

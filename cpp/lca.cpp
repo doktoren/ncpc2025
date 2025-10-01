@@ -258,6 +258,165 @@ void test_string_nodes() {
     assert(lca.distance("left_child", "right_child") == 4);
 }
 
+void test_unbalanced_tree() {
+    // Highly unbalanced tree (path with branches)
+    LCA<int> lca(1);
+    std::vector<std::pair<int, int>> edges = {
+        {1, 2}, {2, 3}, {3, 4}, {4, 5},
+        {2, 10}, {3, 11}, {4, 12}
+    };
+    for (const auto& [u, v] : edges) {
+        lca.add_edge(u, v);
+    }
+
+    lca.preprocess();
+
+    assert(lca.lca(5, 12) == 4);
+    assert(lca.lca(10, 11) == 2);
+    assert(lca.lca(10, 5) == 2);
+    assert(lca.lca(11, 12) == 3);
+
+    // Distance in unbalanced tree
+    assert(lca.distance(10, 5) == 4);  // 10->2->3->4->5
+    assert(lca.distance(11, 12) == 3);  // 11->3->4->12
+}
+
+void test_large_balanced_tree() {
+    // Complete binary tree with 15 nodes (4 levels)
+    LCA<int> lca(1);
+    std::vector<std::pair<int, int>> edges;
+    for (int i = 1; i <= 7; i++) {  // Internal nodes
+        int left_child = 2 * i;
+        int right_child = 2 * i + 1;
+        if (left_child <= 15) {
+            edges.push_back({i, left_child});
+        }
+        if (right_child <= 15) {
+            edges.push_back({i, right_child});
+        }
+    }
+
+    for (const auto& [u, v] : edges) {
+        lca.add_edge(u, v);
+    }
+
+    lca.preprocess();
+
+    // Test leaf nodes
+    assert(lca.lca(8, 9) == 4);
+    assert(lca.lca(10, 11) == 5);
+    assert(lca.lca(8, 10) == 2);
+    assert(lca.lca(12, 13) == 6);
+    assert(lca.lca(8, 15) == 1);
+
+    // Distance between leaves
+    assert(lca.distance(8, 9) == 2);
+    assert(lca.distance(8, 15) == 6);
+}
+
+void test_complex_tree() {
+    // More complex tree structure
+    LCA<int> lca(0);
+    std::vector<std::pair<int, int>> edges = {
+        {0, 1}, {0, 2}, {0, 3},
+        {1, 4}, {1, 5},
+        {2, 6}, {2, 7}, {2, 8},
+        {3, 9},
+        {4, 10}, {4, 11},
+        {6, 12}, {6, 13},
+        {9, 14}, {9, 15}
+    };
+    for (const auto& [u, v] : edges) {
+        lca.add_edge(u, v);
+    }
+
+    lca.preprocess();
+
+    // Test various combinations
+    assert(lca.lca(10, 11) == 4);
+    assert(lca.lca(4, 5) == 1);
+    assert(lca.lca(10, 5) == 1);
+    assert(lca.lca(12, 8) == 2);
+    assert(lca.lca(14, 15) == 9);
+    assert(lca.lca(10, 14) == 0);
+
+    // Complex distance calculations
+    assert(lca.distance(10, 11) == 2);  // 10->4->11
+    assert(lca.distance(10, 14) == 6);  // 10->4->1->0->3->9->14
+    assert(lca.distance(12, 8) == 3);   // 12->6->2->8
+}
+
+void test_edge_cases() {
+    // Tree with only two nodes
+    LCA<int> lca(1);
+    lca.add_edge(1, 2);
+    lca.preprocess();
+
+    assert(lca.lca(1, 2) == 1);
+    assert(lca.lca(2, 1) == 1);
+    assert(lca.distance(1, 2) == 1);
+
+    // Same node queries
+    assert(lca.lca(1, 1) == 1);
+    assert(lca.lca(2, 2) == 2);
+}
+
+void test_large_star() {
+    // Large star graph to test scalability
+    LCA<int> lca(0);
+    int n = 100;
+    for (int i = 1; i <= n; i++) {
+        lca.add_edge(0, i);
+    }
+
+    lca.preprocess();
+
+    // All leaves should have distance 2 from each other
+    assert(lca.lca(1, 50) == 0);
+    assert(lca.lca(25, 75) == 0);
+    assert(lca.distance(1, 50) == 2);
+    assert(lca.distance(25, 100) == 2);
+}
+
+void test_long_path() {
+    // Very long path to test binary lifting efficiency
+    LCA<int> lca(0);
+    int n = 64;  // Power of 2 for clean binary lifting
+    for (int i = 0; i < n; i++) {
+        lca.add_edge(i, i + 1);
+    }
+
+    lca.preprocess();
+
+    // Test LCA at various distances
+    assert(lca.lca(0, 64) == 0);
+    assert(lca.lca(32, 64) == 32);
+    assert(lca.lca(16, 48) == 16);
+
+    // Distance should be difference in path positions
+    assert(lca.distance(0, 64) == 64);
+    assert(lca.distance(16, 48) == 32);
+    assert(lca.distance(30, 35) == 5);
+}
+
+void test_fibonacci_tree() {
+    // Tree based on Fibonacci structure
+    LCA<int> lca(1);
+    std::vector<std::pair<int, int>> edges = {
+        {1, 2}, {1, 3}, {2, 4}, {2, 5}, {3, 6}, {4, 7}, {5, 8}, {5, 9}
+    };
+    for (const auto& [u, v] : edges) {
+        lca.add_edge(u, v);
+    }
+
+    lca.preprocess();
+
+    assert(lca.lca(7, 8) == 2);
+    assert(lca.lca(7, 6) == 1);
+    assert(lca.lca(8, 9) == 5);
+    assert(lca.distance(7, 9) == 4);  // 7->4->2->5->9
+}
+
 int main() {
     test_linear_chain();
     test_single_node();
@@ -265,7 +424,14 @@ int main() {
     test_star_tree();
     test_deep_tree();
     test_string_nodes();
+    test_unbalanced_tree();
+    test_large_balanced_tree();
+    test_complex_tree();
+    test_edge_cases();
+    test_large_star();
+    test_long_path();
+    test_fibonacci_tree();
     test_main();
-    std::cout << "All tests passed!" << std::endl;
+    std::cout << "All LCA tests passed!" << std::endl;
     return 0;
 }

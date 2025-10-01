@@ -141,10 +141,68 @@ def test_c() -> None:
     assert bm.match == {1: "B", 2: "A"}
 
 
+def test_empty_graph() -> None:
+    bm: BipartiteMatch[int, int] = BipartiteMatch([])
+    assert bm.match == {}
+
+
+def test_single_edge() -> None:
+    bm: BipartiteMatch[int, int] = BipartiteMatch([(1, 2)])
+    assert bm.match == {1: 2}
+
+
+def test_no_matching() -> None:
+    # All sources want same sink
+    bm: BipartiteMatch[int, str] = BipartiteMatch(
+        [(1, "A"), (2, "A"), (3, "A")]
+    )
+    # Only one can be matched
+    assert len(bm.match) == 1
+    assert bm.match[list(bm.match.keys())[0]] == "A"
+
+
+def test_perfect_matching() -> None:
+    # Perfect matching possible
+    bm: BipartiteMatch[int, int] = BipartiteMatch(
+        [(1, 10), (2, 20), (3, 30)]
+    )
+    assert len(bm.match) == 3
+
+
+def test_augmenting_path() -> None:
+    # Requires augmenting path to find maximum matching
+    bm: BipartiteMatch[int, str] = BipartiteMatch(
+        [
+            (1, "A"), (1, "B"),
+            (2, "B"), (2, "C"),
+            (3, "C"),
+        ]
+    )
+    assert len(bm.match) == 3
+
+
+def test_large_bipartite() -> None:
+    # Larger graph
+    edges = []
+    for i in range(10):
+        for j in range(i, min(i + 3, 10)):
+            edges.append((i, j + 100))
+
+    bm: BipartiteMatch[int, int] = BipartiteMatch(edges)
+    # Should find a good matching
+    assert len(bm.match) >= 8
+
+
 def main() -> None:
     test_a()
     test_b()
     test_c()
+    test_empty_graph()
+    test_single_edge()
+    test_no_matching()
+    test_perfect_matching()
+    test_augmenting_path()
+    test_large_bipartite()
     test_main()
 
 

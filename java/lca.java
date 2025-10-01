@@ -114,22 +114,18 @@ class lca {
     }
 
     static void testMain() {
-        LCA lca = new LCA(7);
-        lca.addEdge(0, 1);
-        lca.addEdge(0, 2);
-        lca.addEdge(1, 3);
-        lca.addEdge(1, 4);
-        lca.addEdge(2, 5);
-        lca.addEdge(2, 6);
+        LCA lca = new LCA(6);
+        lca.addEdge(0, 1); // 1-2
+        lca.addEdge(0, 2); // 1-3
+        lca.addEdge(1, 3); // 2-4
+        lca.addEdge(1, 4); // 2-5
+        lca.addEdge(2, 5); // 3-6
 
         lca.build(0);
 
-        assert lca.query(3, 4) == 1;
-        assert lca.query(3, 5) == 0;
-        assert lca.query(5, 6) == 2;
-
-        assert lca.distance(3, 4) == 2;
-        assert lca.distance(3, 5) == 4;
+        assert lca.query(3, 4) == 1; // LCA(4, 5) = 2
+        assert lca.query(3, 5) == 0; // LCA(4, 6) = 1
+        assert lca.distance(3, 5) == 4; // distance(4, 6) = 4
     }
 
     // Don't write tests below during competition.

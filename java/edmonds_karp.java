@@ -92,15 +92,15 @@ class edmonds_karp {
     }
 
     static void testMain() {
-        EdmondsKarp ek = new EdmondsKarp(4);
-        ek.addEdge(0, 1, 10);
-        ek.addEdge(0, 2, 10);
-        ek.addEdge(1, 2, 2);
-        ek.addEdge(1, 3, 10);
-        ek.addEdge(2, 3, 10);
+        EdmondsKarp e = new EdmondsKarp(4);
+        e.addEdge(0, 1, 10);
+        e.addEdge(0, 2, 8);
+        e.addEdge(1, 2, 2);
+        e.addEdge(1, 3, 5);
+        e.addEdge(2, 3, 7);
 
-        int maxFlow = ek.maxFlow(0, 3);
-        assert maxFlow == 20;
+        int maxFlow = e.maxFlow(0, 3);
+        assert maxFlow == 12;
     }
 
     // Don't write tests below during competition.
