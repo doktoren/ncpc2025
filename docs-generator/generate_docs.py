@@ -2,14 +2,22 @@
 """
 Generate printable algorithm documentation for programming competitions.
 
-Creates HTML documents optimized for printing with:
-- Table of contents on page 1
-- Blank page 2 for double-sided alignment
-- Each algorithm starting on odd pages (right-hand side)
+Creates 6 PDF documents optimized for printing:
+- algorithms_python.pdf (competition code only)
+- algorithms_python_extra.pdf (includes dev tests)
+- algorithms_cpp.pdf (competition code only)
+- algorithms_cpp_extra.pdf (includes dev tests)
+- algorithms_java.pdf (competition code only)
+- algorithms_java_extra.pdf (includes dev tests)
+
+Each document includes:
+- Table of contents on first page
+- Each algorithm starting on a new page
 - Fixed-width fonts and competition-optimized formatting
+- Comprehensive syntax highlighting
 """
 
-import argparse
+import asyncio
 import importlib.util
 from pathlib import Path
 
@@ -373,83 +381,107 @@ class DocumentGenerator:
                    .replace('"', '&quot;')
                    .replace("'", '&#x27;'))
 
+    async def generate_pdf(self, algorithms: list[Algorithm], output_file: Path) -> None:
+        """Generate PDF documentation using Playwright."""
+        try:
+            from playwright.async_api import async_playwright
+        except ImportError:
+            print("Error: playwright not available. Install with: uv pip install playwright")
+            print("Then run: uv run playwright install")
+            return
 
-def main():
+        # Generate HTML content
+        html_content = self.generate_html(algorithms)
+
+        # Create temporary HTML file
+        temp_html = output_file.parent / f"temp_{output_file.stem}.html"
+        temp_html.write_text(html_content, encoding='utf-8')
+
+        try:
+            async with async_playwright() as p:
+                browser = await p.chromium.launch()
+                page = await browser.new_page()
+
+                # Load the HTML file
+                await page.goto(f"file://{temp_html.absolute()}")
+
+                # Wait for content to be ready
+                await page.wait_for_load_state('networkidle')
+
+                # Generate PDF
+                await page.pdf(
+                    path=str(output_file),
+                    format='A4',
+                    margin={
+                        'top': '1cm',
+                        'bottom': '1cm',
+                        'left': '0.8cm',
+                        'right': '0.8cm'
+                    },
+                    print_background=True,
+                    prefer_css_page_size=True
+                )
+
+                await browser.close()
+
+        finally:
+            # Clean up temporary file
+            if temp_html.exists():
+                temp_html.unlink()
+
+
+async def generate_documentation(generator: DocumentGenerator, algorithms_basic: list[Algorithm],
+                                 algorithms_extra: list[Algorithm], language: str, output_dir: Path) -> tuple[str, list[Path], int]:
+    """Generate PDF documentation for a single language (both basic and extra versions)."""
+    output_file_basic = output_dir / f"algorithms_{language}.pdf"
+    output_file_extra = output_dir / f"algorithms_{language}_extra.pdf"
+
+    await generator.generate_pdf(algorithms_basic, output_file_basic)
+    await generator.generate_pdf(algorithms_extra, output_file_extra)
+
+    return language, [output_file_basic, output_file_extra], len(algorithms_basic)
+
+
+async def main():
     """Main entry point."""
-    parser = argparse.ArgumentParser(description='Generate printable algorithm documentation')
-    parser.add_argument('language', choices=['python', 'cpp', 'java', 'all'],
-                       help='Programming language to generate docs for (or "all" for all languages)')
-    parser.add_argument('--include-dev-tests', action='store_true',
-                       help='Include development tests (below competition barrier)')
-    parser.add_argument('--output-dir', type=Path, default=Path('./output'),
-                       help='Output directory for generated files')
-
-    args = parser.parse_args()
-
     # Setup paths
-    output_dir = args.output_dir
+    output_dir = Path('./output')
     output_dir.mkdir(exist_ok=True)
 
-    # Handle 'all' language option
-    if args.language == 'all':
-        languages = ['python', 'cpp', 'java']
-        results = []
+    # Always generate for all languages
+    languages = ['python', 'cpp', 'java']
+    results = []
 
-        for language in languages:
-            source_dir = Path('..') / language
-            if not source_dir.exists():
-                print(f"Warning: Source directory '{source_dir}' not found, skipping {language}")
-                continue
-
-            # Generate documentation
-            generator = DocumentGenerator(language, source_dir, output_dir)
-            algorithms = generator.extract_algorithms(args.include_dev_tests)
-
-            if not algorithms:
-                print(f"Warning: No algorithm files found in '{source_dir}', skipping {language}")
-                continue
-
-            html_content = generator.generate_html(algorithms)
-
-            # Write output file
-            output_file = output_dir / f"algorithms_{language}.html"
-            output_file.write_text(html_content, encoding='utf-8')
-
-            results.append((language, output_file, len(algorithms)))
-
-        # Print summary
-        if results:
-            print(f"Generated documentation for {len(results)} languages:")
-            for language, output_file, count in results:
-                print(f"  {language}: {output_file} ({count} algorithms)")
-        else:
-            print("No documentation generated")
-            return 1
-
-    else:
-        # Single language mode
-        source_dir = Path('..') / args.language
-
+    for language in languages:
+        source_dir = Path('..') / language
         if not source_dir.exists():
-            print(f"Error: Source directory '{source_dir}' not found")
-            return 1
+            print(f"Warning: Source directory '{source_dir}' not found, skipping {language}")
+            continue
 
         # Generate documentation
-        generator = DocumentGenerator(args.language, source_dir, output_dir)
-        algorithms = generator.extract_algorithms(args.include_dev_tests)
+        generator = DocumentGenerator(language, source_dir, output_dir)
+        algorithms_basic = generator.extract_algorithms(include_dev_tests=False)
+        algorithms_extra = generator.extract_algorithms(include_dev_tests=True)
 
-        if not algorithms:
-            print(f"No algorithm files found in '{source_dir}'")
-            return 1
+        if not algorithms_basic:
+            print(f"Warning: No algorithm files found in '{source_dir}', skipping {language}")
+            continue
 
-        html_content = generator.generate_html(algorithms)
+        # Generate PDF documentation (both basic and extra)
+        result = await generate_documentation(generator, algorithms_basic, algorithms_extra, language, output_dir)
+        results.append(result)
 
-        # Write output file
-        output_file = output_dir / f"algorithms_{args.language}.html"
-        output_file.write_text(html_content, encoding='utf-8')
-
-        print(f"Generated documentation: {output_file}")
-        print(f"Found {len(algorithms)} algorithms")
+    # Print summary
+    if results:
+        print(f"Generated documentation for {len(results)} languages:")
+        for language, output_files, count in results:
+            for output_file in output_files:
+                suffix = "_extra" if "_extra" in output_file.name else ""
+                test_type = "with dev tests" if suffix else "competition only"
+                print(f"  {language}{suffix}: {output_file} ({count} algorithms, {test_type})")
+    else:
+        print("No documentation generated")
+        return 1
 
     if importlib.util.find_spec("pygments") is not None:
         print("Syntax highlighting: enabled")
@@ -460,4 +492,4 @@ def main():
 
 
 if __name__ == '__main__':
-    exit(main())
+    exit(asyncio.run(main()))

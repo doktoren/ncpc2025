@@ -1,6 +1,6 @@
 # Algorithm Documentation Generator
 
-This tool generates printable HTML documents containing source code for algorithms optimized for programming competitions. It creates clean, fixed-width formatted documents suitable for printing and reference during contests.
+This tool generates printable PDF documents containing source code for algorithms optimized for programming competitions. It creates clean, fixed-width formatted documents with comprehensive syntax highlighting suitable for printing and reference during contests.
 
 ## Usage
 
@@ -12,35 +12,21 @@ uv run --python 3.13 generate_docs.py --help
 
 Basic usage:
 ```bash
-# Generate docs for Python algorithms (with syntax highlighting)
-uv run --python 3.13 --with pygments generate_docs.py python
+# Generate PDF docs for Python algorithms
+uv run --python 3.13 --with pygments --with playwright generate_docs.py python
 
-# Generate docs for all languages
-uv run --python 3.13 --with pygments generate_docs.py all
+# Generate PDF docs for all languages
+uv run --python 3.13 --with pygments --with playwright generate_docs.py all
 
 # Include development tests (normally excluded)
-uv run --python 3.13 --with pygments generate_docs.py python --include-dev-tests
+uv run --python 3.13 --with pygments --with playwright generate_docs.py python --include-dev-tests
 ```
 
-The script processes algorithm files from the parent directory's `python/`, `cpp/`, and `java/` folders and generates HTML documents in the `output/` directory.
+The script processes algorithm files from the parent directory's `python/`, `cpp/`, and `java/` folders and generates PDF documents in the `output/` directory.
 
-## Problems Encountered and Current Status
+## Implementation Details
 
-### 1. Odd Page Alignment Issue ❌ UNRESOLVED
-
-**Problem**: The original requirement was for each algorithm to start on an odd page (right-hand side) for double-sided printing, which would automatically insert blank pages when needed.
-
-**Attempts Made**:
-- Used CSS `page-break-before: right` and `break-before: right` properties
-- Tried both legacy and modern CSS page break properties
-- Implemented manual page counting with explicit spacer pages
-- Added various CSS workarounds and browser-specific properties
-
-**Current Status**: The CSS `page-break-before: right` property has inconsistent browser support. Chrome and Firefox do not reliably implement this feature for forcing content to start on odd pages. The feature has been **removed** from the current implementation.
-
-**Current Behavior**: Each algorithm starts on a new page (using `page-break-before: always`) but not necessarily an odd page.
-
-### 2. Comprehensive Syntax Highlighting ✅ RESOLVED
+### 1. Comprehensive Syntax Highlighting ✅ IMPLEMENTED
 
 **Problem**: Limited syntax highlighting coverage, especially for C++ and Java languages.
 
@@ -79,37 +65,35 @@ The script processes algorithm files from the parent directory's `python/`, `cpp
 
 ## Current Features ✅
 
-- ✅ Generates HTML documents for Python, C++, and Java algorithms
+- ✅ **PDF generation** for Python, C++, and Java algorithms using Playwright
 - ✅ Table of contents on first page
 - ✅ Fixed-width fonts optimized for code display
 - ✅ Extracts only competition-relevant code (stops at competition barriers)
-- ✅ **Syntax highlighting always enabled** with print-friendly colors
+- ✅ **Comprehensive syntax highlighting** with print-friendly colors
 - ✅ Support for all languages or individual language selection
 - ✅ Configurable output directory
 - ✅ Clean page breaks between algorithms
-- ✅ Responsive design (works in browser and print)
-- ✅ **Chrome print color support** (requires "Background graphics" setting)
+- ✅ **Print-optimized PDF output** with proper colors and formatting
 
 ## Future Todos
 
 ### High Priority
-1. **Investigate alternative document formats**: Consider generating PDF directly using libraries like `weasyprint` or `reportlab` which may have better page control than HTML/CSS print
-2. **Browser-specific print guides**: Document optimal print settings for different browsers
-3. **Print preview testing**: Systematic testing across Chrome, Firefox, Safari, and Edge
+1. **Browser-specific print guides**: Document optimal print settings for different browsers
+2. **Print preview testing**: Systematic testing across Chrome, Firefox, Safari, and Edge
+3. **Enhanced print styling**: Improve readability with better font sizing and spacing
 
 ### Medium Priority
-4. **Enhanced print styling**: Improve readability with better font sizing and spacing
-5. **Page numbering**: Add optional page numbers to generated documents
-6. **Algorithm categorization**: Group algorithms by type (data structures, graphs, etc.) in TOC
+4. **Page numbering**: Add optional page numbers to generated documents
+5. **Algorithm categorization**: Group algorithms by type (data structures, graphs, etc.) in TOC
 
 ### Low Priority
-7. **Custom CSS themes**: Allow users to specify custom CSS for different printing preferences
-8. **Batch processing**: Support processing multiple algorithm directories simultaneously
-9. **Integration with build tools**: Add makefile or script integration for automated documentation generation
+6. **Custom CSS themes**: Allow users to specify custom CSS for different printing preferences
+7. **Batch processing**: Support processing multiple algorithm directories simultaneously
+8. **Integration with build tools**: Add makefile or script integration for automated documentation generation
 
 ## Debugging Tools
 
-For debugging print preview and CSS rendering issues, use the included Playwright-based tools:
+For debugging print preview and CSS rendering issues, use the included Playwright-based tools. The same Playwright setup is used for PDF generation:
 
 ### Setup
 ```bash

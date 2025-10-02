@@ -51,7 +51,40 @@ cd java && ./test_single.sh <algorithm>
 
 # Python linting
 ./lint.sh
+
+# Documentation generation
+cd docs-generator && python3 generate_docs.py
 ```
+
+## Documentation Generation
+
+The repository includes an automated documentation generator that creates printable PDF references for all algorithms:
+
+```bash
+# Generate all PDF documentation (6 files total)
+cd docs-generator && python3 generate_docs.py
+```
+
+**Generated files:**
+- `algorithms_python.pdf` - Competition code only (Python)
+- `algorithms_python_extra.pdf` - Includes development tests (Python)
+- `algorithms_cpp.pdf` - Competition code only (C++)
+- `algorithms_cpp_extra.pdf` - Includes development tests (C++)
+- `algorithms_java.pdf` - Competition code only (Java)
+- `algorithms_java_extra.pdf` - Includes development tests (Java)
+
+Each PDF includes:
+- Table of contents on first page
+- Each algorithm starting on a new page
+- Fixed-width fonts optimized for printing
+- Comprehensive syntax highlighting
+- Print-optimized colors and formatting
+
+**Requirements:**
+- `uv run --python 3.13 --with pygments --with playwright generate_docs.py`
+- After first install: `uv run playwright install`
+
+The script automatically processes all algorithms from `python/`, `cpp/`, and `java/` directories, creating both competition-only versions (stopping at competition barriers) and full versions (including development tests).
 
 ## Code Architecture
 
