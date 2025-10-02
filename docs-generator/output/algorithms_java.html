@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithm Reference - Java</title>
+    <style>
+        body {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 9pt;
+            line-height: 1.2;
+            margin: 0;
+            padding: 0;
+            color: #000;
+            background: #fff;
+        }
+
+        @media print {
+            @page {
+                size: A4;
+                margin: 1cm 0.8cm;
+            }
+
+            body {
+                font-size: 9pt;
+            }
+
+            .toc-page {
+                page-break-after: always;
+                page-break-inside: avoid;
+            }
+
+            .blank-page {
+                page-break-after: always;
+                height: 100vh;
+            }
+
+            .algorithm-page {
+                page-break-before: always;
+            }
+
+            .algorithm-page:last-child {
+                page-break-after: auto;
+                break-after: auto;
+            }
+
+            .no-break {
+                page-break-inside: avoid;
+            }
+        }
+
+        @media screen {
+            body {
+                max-width: 21cm;
+                margin: 0 auto;
+                padding: 2cm;
+                background: #f5f5f5;
+            }
+
+            .toc-page, .blank-page, .algorithm-page {
+                page-break-after: unset !important;
+                page-break-before: unset !important;
+                page-break-inside: unset !important;
+                break-after: unset !important;
+                break-before: unset !important;
+                break-inside: unset !important;
+            }
+        }
+
+        h1 {
+            font-size: 14pt;
+            margin: 0 0 0.5em 0;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        h2 {
+            font-size: 14pt;
+            margin: 1.5em 0 0.5em 0;
+            font-weight: bold;
+            border-bottom: 1px solid #333;
+            padding-bottom: 0.2em;
+        }
+
+        .toc-content {
+            font-size: 9pt;
+        }
+
+        .toc-item {
+            margin: 0.1em 0;
+            padding: 0.05em 0;
+            border-bottom: 1px dotted #ccc;
+        }
+
+        .toc-name {
+            font-weight: bold;
+        }
+
+        .blank-page {
+            /* Height set in print media query only */
+        }
+
+        .algorithm-header {
+            margin-bottom: 1em;
+        }
+
+        .algorithm-filename {
+            font-size: 9pt;
+            color: #666;
+            margin-bottom: 0.5em;
+        }
+
+        pre {
+            margin: 0;
+            padding: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: inherit;
+            font-size: inherit;
+            line-height: inherit;
+        }
+
+        code {
+            font-family: inherit;
+            font-size: inherit;
+        }
+
+        /* Syntax highlighting classes */
+        .highlight { background: transparent; }
+        .highlight .c { color: #408080; font-style: italic } /* Comment */
+        .highlight .k { color: #008000; font-weight: bold } /* Keyword */
+        .highlight .o { color: #666666 } /* Operator */
+        .highlight .n { color: #000000 } /* Name */
+        .highlight .s { color: #BA2121 } /* String */
+        .highlight .nb { color: #008000 } /* Name.Builtin */
+        .highlight .nf { color: #0000FF } /* Name.Function */
+        .highlight .nc { color: #0000FF; font-weight: bold } /* Name.Class */
+    </style>
+</head>
+<body>
+    <!-- Table of Contents -->
+    <div class="toc-page">
+        <h1>Algorithm Reference - Java</h1>
+        <div class="toc-content">
+            <div class="toc-item">
+                <span class="toc-name">Bipartite Match</span>
+            </div>
+            <div class="toc-item">
+                <span class="toc-name">Dijkstra</span>
+            </div>
+            <div class="toc-item">
+                <span class="toc-name">Edmonds Karp</span>
+            </div>
+            <div class="toc-item">
+                <span class="toc-name">Fenwick Tree</span>
+            </div>
+            <div class="toc-item">
+                <span class="toc-name">Kmp</span>
+            </div>
+            <div class="toc-item">
+                <span class="toc-name">Lca</span>
+            </div>
+            <div class="toc-item">
+                <span class="toc-name">Polygon Area</span>
+            </div>
+            <div class="toc-item">
+                <span class="toc-name">Prefix Tree</span>
+            </div>
+            <div class="toc-item">
+                <span class="toc-name">Priority Queue</span>
+            </div>
+            <div class="toc-item">
+                <span class="toc-name">Segment Tree</span>
+            </div>
+            <div class="toc-item">
+                <span class="toc-name">Topological Sort</span>
+            </div>
+            <div class="toc-item">
+                <span class="toc-name">Union Find</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Algorithm pages -->
+    <div class="algorithm-page">
+        <div class="algorithm-header">
+            <h2>Bipartite Match</h2>
+            <div class="algorithm-filename">bipartite_match.java</div>
+        </div>
+        <pre><code>/*
+Maximum bipartite matching using augmenting path algorithm.
+
+Given a bipartite graph with left and right vertex sets, finds the maximum
+number of edges such that no two edges share a vertex.
+
+Key operations:
+- addEdge(u, v): Add edge from left vertex u to right vertex v
+- maxMatching(): Compute maximum matching size
+
+Time complexity: O(V * E)
+Space complexity: O(V + E)
+*/
+
+import java.util.*;
+
+class bipartite_match {
+    static class BipartiteMatch {
+        private int leftSize;
+        private int rightSize;
+        private Map&lt;Integer, List&lt;Integer&gt;&gt; graph;
+        private Map&lt;Integer, Integer&gt; match;
+        private Set&lt;Integer&gt; visited;
+
+        BipartiteMatch(int leftSize, int rightSize) {
+            this.leftSize = leftSize;
+            this.rightSize = rightSize;
+            this.graph = new HashMap&lt;&gt;();
+            for (int i = 0; i &lt; leftSize; i++) {
+                graph.put(i, new ArrayList&lt;&gt;());
+            }
+        }
+
+        void addEdge(int u, int v) {
+            graph.get(u).add(v);
+        }
+
+        int maxMatching() {
+            match = new HashMap&lt;&gt;();
+            int matchingSize = 0;
+
+            for (int u = 0; u &lt; leftSize; u++) {
+                visited = new HashSet&lt;&gt;();
+                if (dfs(u)) {
+                    matchingSize++;
+                }
+            }
+
+            return matchingSize;
+        }
+
+        private boolean dfs(int u) {
+            for (int v : graph.get(u)) {
+                if (visited.contains(v)) {
+                    continue;
+                }
+                visited.add(v);
+
+                // If v is not matched or we can find augmenting path from match[v]
+                if (!match.containsKey(v) || dfs(match.get(v))) {
+                    match.put(v, u);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        Map&lt;Integer, Integer&gt; getMatching() {
+            Map&lt;Integer, Integer&gt; result = new HashMap&lt;&gt;();
+            for (Map.Entry&lt;Integer, Integer&gt; entry : match.entrySet()) {
+                result.put(entry.getValue(), entry.getKey());
+            }
+            return result;
+        }
+    }
+
+    static void testMain() {
+        BipartiteMatch b = new BipartiteMatch(3, 3);
+        b.addEdge(0, 0); // 1 -&gt; X
+        b.addEdge(1, 1); // 2 -&gt; Y
+        b.addEdge(2, 0); // 3 -&gt; X
+        b.addEdge(0, 2); // 1 -&gt; Z
+        b.addEdge(1, 2); // 2 -&gt; Z
+        b.addEdge(2, 1); // 3 -&gt; Y
+
+        int matching = b.maxMatching();
+        if (matching != 3) throw new AssertionError(&quot;Expected 3, got &quot; + matching);
+        Map&lt;Integer, Integer&gt; matches = b.getMatching();
+        if (matches.size() != 3) throw new AssertionError(&quot;Expected size 3, got &quot; + matches.size());
+    }
+</code></pre>
+    </div>
+    <div class="algorithm-page">
+        <div class="algorithm-header">
+            <h2>Dijkstra</h2>
+            <div class="algorithm-filename">dijkstra.java</div>
+        </div>
+        <pre><code>/*
+Dijkstra&#x27;s algorithm for single-source shortest paths in weighted graphs.
+
+Finds shortest paths from a source vertex to all other vertices in a graph
+with non-negative edge weights.
+
+Key operations:
+- addEdge(u, v, weight): Add weighted directed edge
+- shortestPaths(source): Compute shortest paths from source to all vertices
+- shortestPath(source, target): Get shortest path between two vertices
+
+Time complexity: O((V + E) log V) with binary heap
+Space complexity: O(V + E)
+*/
+
+import java.util.*;
+
+class dijkstra {
+    static class Edge {
+        int to;
+        int weight;
+
+        Edge(int to, int weight) {
+            this.to = to;
+            this.weight = weight;
+        }
+    }
+
+    static class Node implements Comparable&lt;Node&gt; {
+        int vertex;
+        int distance;
+
+        Node(int vertex, int distance) {
+            this.vertex = vertex;
+            this.distance = distance;
+        }
+
+        @Override
+        public int compareTo(Node other) {
+            return Integer.compare(this.distance, other.distance);
+        }
+    }
+
+    static class Dijkstra {
+        private int n;
+        private Map&lt;Integer, List&lt;Edge&gt;&gt; graph;
+
+        Dijkstra(int n) {
+            this.n = n;
+            this.graph = new HashMap&lt;&gt;();
+            for (int i = 0; i &lt; n; i++) {
+                graph.put(i, new ArrayList&lt;&gt;());
+            }
+        }
+
+        void addEdge(int u, int v, int weight) {
+            graph.get(u).add(new Edge(v, weight));
+        }
+
+        Map&lt;Integer, Integer&gt; shortestPaths(int source) {
+            Map&lt;Integer, Integer&gt; distances = new HashMap&lt;&gt;();
+            for (int i = 0; i &lt; n; i++) {
+                distances.put(i, Integer.MAX_VALUE);
+            }
+            distances.put(source, 0);
+
+            PriorityQueue&lt;Node&gt; pq = new PriorityQueue&lt;&gt;();
+            pq.offer(new Node(source, 0));
+
+            while (!pq.isEmpty()) {
+                Node current = pq.poll();
+                int u = current.vertex;
+                int dist = current.distance;
+
+                if (dist &gt; distances.get(u)) {
+                    continue;
+                }
+
+                for (Edge edge : graph.get(u)) {
+                    int v = edge.to;
+                    int newDist = dist + edge.weight;
+
+                    if (newDist &lt; distances.get(v)) {
+                        distances.put(v, newDist);
+                        pq.offer(new Node(v, newDist));
+                    }
+                }
+            }
+
+            return distances;
+        }
+
+        List&lt;Integer&gt; shortestPath(int source, int target) {
+            Map&lt;Integer, Integer&gt; distances = new HashMap&lt;&gt;();
+            Map&lt;Integer, Integer&gt; previous = new HashMap&lt;&gt;();
+
+            for (int i = 0; i &lt; n; i++) {
+                distances.put(i, Integer.MAX_VALUE);
+            }
+            distances.put(source, 0);
+
+            PriorityQueue&lt;Node&gt; pq = new PriorityQueue&lt;&gt;();
+            pq.offer(new Node(source, 0));
+
+            while (!pq.isEmpty()) {
+                Node current = pq.poll();
+                int u = current.vertex;
+                int dist = current.distance;
+
+                if (u == target) {
+                    break;
+                }
+
+                if (dist &gt; distances.get(u)) {
+                    continue;
+                }
+
+                for (Edge edge : graph.get(u)) {
+                    int v = edge.to;
+                    int newDist = dist + edge.weight;
+
+                    if (newDist &lt; distances.get(v)) {
+                        distances.put(v, newDist);
+                        previous.put(v, u);
+                        pq.offer(new Node(v, newDist));
+                    }
+                }
+            }
+
+            if (!previous.containsKey(target) &amp;&amp; target != source) {
+                return null;
+            }
+
+            List&lt;Integer&gt; path = new ArrayList&lt;&gt;();
+            int current = target;
+            while (current != source) {
+                path.add(current);
+                current = previous.get(current);
+            }
+            path.add(source);
+            Collections.reverse(path);
+
+            return path;
+        }
+    }
+
+    static void testMain() {
+        Dijkstra d = new Dijkstra(4);
+        d.addEdge(0, 1, 4);
+        d.addEdge(0, 2, 2);
+        d.addEdge(1, 2, 1);
+        d.addEdge(1, 3, 5);
+        d.addEdge(2, 3, 8);
+
+        Map&lt;Integer, Integer&gt; distances = d.shortestPaths(0);
+        assert distances.get(3) == 9;
+
+        List&lt;Integer&gt; path = d.shortestPath(0, 3);
+        assert path.equals(Arrays.asList(0, 1, 3));
+    }
+</code></pre>
+    </div>
+    <div class="algorithm-page">
+        <div class="algorithm-header">
+            <h2>Edmonds Karp</h2>
+            <div class="algorithm-filename">edmonds_karp.java</div>
+        </div>
+        <pre><code>/*
+Edmonds-Karp algorithm for computing maximum flow in a flow network.
+
+Implementation of the Ford-Fulkerson method using BFS to find augmenting paths.
+Guarantees O(V * E^2) time complexity.
+
+Key operations:
+- addEdge(u, v, capacity): Add a directed edge with given capacity
+- maxFlow(source, sink): Compute maximum flow from source to sink
+
+Space complexity: O(V^2) for adjacency matrix representation
+*/
+
+import java.util.*;
+
+class edmonds_karp {
+    static class EdmondsKarp {
+        private int n;
+        private int[][] capacity;
+        private int[][] flow;
+
+        EdmondsKarp(int n) {
+            this.n = n;
+            this.capacity = new int[n][n];
+            this.flow = new int[n][n];
+        }
+
+        void addEdge(int u, int v, int cap) {
+            capacity[u][v] += cap;
+        }
+
+        int maxFlow(int source, int sink) {
+            // Reset flow
+            for (int i = 0; i &lt; n; i++) {
+                Arrays.fill(flow[i], 0);
+            }
+
+            int totalFlow = 0;
+
+            while (true) {
+                // BFS to find augmenting path
+                int[] parent = new int[n];
+                Arrays.fill(parent, -1);
+                parent[source] = source;
+
+                Queue&lt;Integer&gt; queue = new LinkedList&lt;&gt;();
+                queue.offer(source);
+
+                while (!queue.isEmpty() &amp;&amp; parent[sink] == -1) {
+                    int u = queue.poll();
+
+                    for (int v = 0; v &lt; n; v++) {
+                        if (parent[v] == -1 &amp;&amp; capacity[u][v] - flow[u][v] &gt; 0) {
+                            parent[v] = u;
+                            queue.offer(v);
+                        }
+                    }
+                }
+
+                // No augmenting path found
+                if (parent[sink] == -1) {
+                    break;
+                }
+
+                // Find minimum residual capacity along the path
+                int pathFlow = Integer.MAX_VALUE;
+                int v = sink;
+                while (v != source) {
+                    int u = parent[v];
+                    pathFlow = Math.min(pathFlow, capacity[u][v] - flow[u][v]);
+                    v = u;
+                }
+
+                // Update flow along the path
+                v = sink;
+                while (v != source) {
+                    int u = parent[v];
+                    flow[u][v] += pathFlow;
+                    flow[v][u] -= pathFlow;
+                    v = u;
+                }
+
+                totalFlow += pathFlow;
+            }
+
+            return totalFlow;
+        }
+
+        int getFlow(int u, int v) {
+            return flow[u][v];
+        }
+    }
+
+    static void testMain() {
+        EdmondsKarp e = new EdmondsKarp(4);
+        e.addEdge(0, 1, 10);
+        e.addEdge(0, 2, 8);
+        e.addEdge(1, 2, 2);
+        e.addEdge(1, 3, 5);
+        e.addEdge(2, 3, 7);
+
+        int maxFlow = e.maxFlow(0, 3);
+        assert maxFlow == 12;
+    }
+</code></pre>
+    </div>
+    <div class="algorithm-page">
+        <div class="algorithm-header">
+            <h2>Fenwick Tree</h2>
+            <div class="algorithm-filename">fenwick_tree.java</div>
+        </div>
+        <pre><code>/*
+Fenwick Tree (Binary Indexed Tree) implementation.
+
+A data structure for efficient prefix sum queries and point updates on an array.
+
+Key operations:
+- update(i, delta): Add delta to element at index i - O(log n)
+- query(i): Get sum of elements from index 0 to i (inclusive) - O(log n)
+- range_query(l, r): Get sum from index l to r (inclusive) - O(log n)
+
+Space complexity: O(n)
+
+Note: Uses 1-based indexing internally for simpler bit manipulation.
+*/
+
+import java.util.function.BinaryOperator;
+
+class fenwick_tree {
+    interface Summable&lt;T&gt; {
+        T add(T other);
+        T subtract(T other);
+    }
+
+    static class FenwickTree&lt;T&gt; {
+        private Object[] tree;
+        private int size;
+        private T zero;
+        private BinaryOperator&lt;T&gt; addOp;
+        private BinaryOperator&lt;T&gt; subtractOp;
+
+        FenwickTree(int n, T zero, BinaryOperator&lt;T&gt; addOp, BinaryOperator&lt;T&gt; subtractOp) {
+            this.size = n;
+            this.zero = zero;
+            this.addOp = addOp;
+            this.subtractOp = subtractOp;
+            this.tree = new Object[n + 1];
+            for (int i = 0; i &lt;= n; i++) {
+                tree[i] = zero;
+            }
+        }
+
+        // O(n log n) constructor from array
+        FenwickTree(T[] values, T zero, BinaryOperator&lt;T&gt; addOp, BinaryOperator&lt;T&gt; subtractOp) {
+            this(values.length, zero, addOp, subtractOp);
+            for (int i = 0; i &lt; values.length; i++) {
+                update(i, values[i]);
+            }
+        }
+
+        // O(n) constructor from array using prefix sums
+        static &lt;T&gt; FenwickTree&lt;T&gt; fromArray(T[] arr, T zero, BinaryOperator&lt;T&gt; addOp, BinaryOperator&lt;T&gt; subtractOp) {
+            int n = arr.length;
+            FenwickTree&lt;T&gt; ft = new FenwickTree&lt;&gt;(n, zero, addOp, subtractOp);
+
+            // Compute prefix sums
+            Object[] prefix = new Object[n + 1];
+            prefix[0] = zero;
+            for (int i = 0; i &lt; n; i++) {
+                prefix[i + 1] = addOp.apply((T)prefix[i], arr[i]);
+            }
+
+            // Build tree in O(n): each tree[i] contains sum of range [i - (i &amp; -i) + 1, i]
+            for (int i = 1; i &lt;= n; i++) {
+                int rangeStart = i - (i &amp; (-i)) + 1;
+                ft.tree[i] = subtractOp.apply((T)prefix[i], (T)prefix[rangeStart - 1]);
+            }
+
+            return ft;
+        }
+
+        @SuppressWarnings(&quot;unchecked&quot;)
+        void update(int i, T delta) {
+            if (i &lt; 0 || i &gt;= size) {
+                throw new IndexOutOfBoundsException(&quot;Index &quot; + i + &quot; out of bounds for size &quot; + size);
+            }
+            i++; // Convert to 1-based indexing
+            while (i &lt;= size) {
+                tree[i] = addOp.apply((T)tree[i], delta);
+                i += i &amp; (-i);
+            }
+        }
+
+        @SuppressWarnings(&quot;unchecked&quot;)
+        T query(int i) {
+            if (i &lt; 0 || i &gt;= size) {
+                throw new IndexOutOfBoundsException(&quot;Index &quot; + i + &quot; out of bounds for size &quot; + size);
+            }
+            i++; // Convert to 1-based indexing
+            T sum = zero;
+            while (i &gt; 0) {
+                sum = addOp.apply(sum, (T)tree[i]);
+                i -= i &amp; (-i);
+            }
+            return sum;
+        }
+
+        T rangeQuery(int l, int r) {
+            if (l &gt; r || l &lt; 0 || r &gt;= size) {
+                return zero;
+            }
+            if (l == 0) {
+                return query(r);
+            }
+            return subtractOp.apply(query(r), query(l - 1));
+        }
+
+        // Optional functionality (not always needed during competition)
+
+        T getValue(int i) {
+            if (i &lt; 0 || i &gt;= size) {
+                throw new IndexOutOfBoundsException(&quot;Index &quot; + i + &quot; out of bounds for size &quot; + size);
+            }
+            if (i == 0) {
+                return query(0);
+            }
+            return subtractOp.apply(query(i), query(i - 1));
+        }
+
+        // Find smallest index &gt;= startIndex with value &gt; zero
+        // REQUIRES: all updates are non-negative, T must be comparable
+        @SuppressWarnings(&quot;unchecked&quot;)
+        Integer firstNonzeroIndex(int startIndex, java.util.Comparator&lt;T&gt; comparator) {
+            startIndex = Math.max(startIndex, 0);
+            if (startIndex &gt;= size) {
+                return null;
+            }
+
+            T prefixBefore = startIndex &gt; 0 ? query(startIndex - 1) : zero;
+            T total = query(size - 1);
+            if (comparator.compare(total, prefixBefore) == 0) {
+                return null;
+            }
+
+            // Fenwick lower_bound: first idx with prefix_sum(idx) &gt; prefixBefore
+            int idx = 0; // 1-based cursor
+            T cur = zero; // running prefix at &#x27;idx&#x27;
+            int bit = Integer.highestOneBit(size);
+
+            while (bit &gt; 0) {
+                int nxt = idx + bit;
+                if (nxt &lt;= size) {
+                    T cand = addOp.apply(cur, (T)tree[nxt]);
+                    if (comparator.compare(cand, prefixBefore) &lt;= 0) { // move right while prefix &lt;= target
+                        cur = cand;
+                        idx = nxt;
+                    }
+                }
+                bit &gt;&gt;= 1;
+            }
+
+            // idx is the largest position with prefix &lt;= prefixBefore (1-based).
+            // The answer is idx (converted to 0-based).
+            return idx;
+        }
+    }
+
+    static void testMain() {
+        FenwickTree&lt;Long&gt; f = new FenwickTree&lt;&gt;(5, 0L, (a, b) -&gt; a + b, (a, b) -&gt; a - b);
+        f.update(0, 7L);
+        f.update(2, 13L);
+        f.update(4, 19L);
+        assert f.query(4) == 39L;
+        assert f.rangeQuery(1, 3) == 13L;
+
+        // Optional functionality (not always needed during competition)
+
+        assert f.getValue(2) == 13L;
+        FenwickTree&lt;Long&gt; g = FenwickTree.fromArray(new Long[]{1L, 2L, 3L, 4L, 5L}, 0L, (a, b) -&gt; a + b, (a, b) -&gt; a - b);
+        assert g.query(4) == 15L;
+    }
+</code></pre>
+    </div>
+    <div class="algorithm-page">
+        <div class="algorithm-header">
+            <h2>Kmp</h2>
+            <div class="algorithm-filename">kmp.java</div>
+        </div>
+        <pre><code>/*
+Knuth-Morris-Pratt (KMP) string matching algorithm.
+
+Efficiently finds all occurrences of a pattern in a text string.
+
+Key operations:
+- computeLPS(pattern): Compute Longest Proper Prefix which is also Suffix array
+- search(text, pattern): Find all starting positions where pattern occurs in text
+
+Time complexity: O(n + m) where n is text length and m is pattern length
+Space complexity: O(m) for the LPS array
+*/
+
+import java.util.*;
+
+class kmp {
+    static int[] computeLPS(String pattern) {
+        int m = pattern.length();
+        int[] lps = new int[m];
+        int len = 0;
+        int i = 1;
+
+        lps[0] = 0;
+
+        while (i &lt; m) {
+            if (pattern.charAt(i) == pattern.charAt(len)) {
+                len++;
+                lps[i] = len;
+                i++;
+            } else {
+                if (len != 0) {
+                    len = lps[len - 1];
+                } else {
+                    lps[i] = 0;
+                    i++;
+                }
+            }
+        }
+
+        return lps;
+    }
+
+    static List&lt;Integer&gt; search(String text, String pattern) {
+        List&lt;Integer&gt; result = new ArrayList&lt;&gt;();
+
+        if (pattern.isEmpty()) {
+            return result;
+        }
+
+        int n = text.length();
+        int m = pattern.length();
+        int[] lps = computeLPS(pattern);
+
+        int i = 0; // index for text
+        int j = 0; // index for pattern
+
+        while (i &lt; n) {
+            if (text.charAt(i) == pattern.charAt(j)) {
+                i++;
+                j++;
+            }
+
+            if (j == m) {
+                result.add(i - j);
+                j = lps[j - 1];
+            } else if (i &lt; n &amp;&amp; text.charAt(i) != pattern.charAt(j)) {
+                if (j != 0) {
+                    j = lps[j - 1];
+                } else {
+                    i++;
+                }
+            }
+        }
+
+        return result;
+    }
+
+    static void testMain() {
+        String text = &quot;ababcababa&quot;;
+        String pattern = &quot;aba&quot;;
+        List&lt;Integer&gt; matches = search(text, pattern);
+        assert matches.equals(Arrays.asList(0, 5, 7));
+        assert matches.size() == 3;
+
+        // Test failure function
+        int[] failure = computeLPS(&quot;abcabcab&quot;);
+        assert Arrays.equals(failure, new int[]{0, 0, 0, 1, 2, 3, 4, 5});
+    }
+</code></pre>
+    </div>
+    <div class="algorithm-page">
+        <div class="algorithm-header">
+            <h2>Lca</h2>
+            <div class="algorithm-filename">lca.java</div>
+        </div>
+        <pre><code>/*
+Lowest Common Ancestor (LCA) using Binary Lifting.
+
+Preprocesses a tree to answer LCA queries efficiently.
+
+Key operations:
+- addEdge(u, v): Add undirected edge to tree
+- build(root): Preprocess tree with given root - O(n log n)
+- query(u, v): Find LCA of nodes u and v - O(log n)
+- distance(u, v): Find distance between two nodes - O(log n)
+
+Space complexity: O(n log n)
+
+Binary lifting allows us to &quot;jump&quot; up the tree in powers of 2, enabling
+efficient LCA queries.
+*/
+
+import java.util.*;
+
+class lca {
+    static class LCA {
+        private int n;
+        private int maxLog;
+        private Map&lt;Integer, List&lt;Integer&gt;&gt; graph;
+        private int[] depth;
+        private Map&lt;Integer, Map&lt;Integer, Integer&gt;&gt; up;
+
+        LCA(int n) {
+            this.n = n;
+            this.maxLog = (int) Math.ceil(Math.log(n) / Math.log(2)) + 1;
+            this.graph = new HashMap&lt;&gt;();
+            this.depth = new int[n];
+            this.up = new HashMap&lt;&gt;();
+
+            for (int i = 0; i &lt; n; i++) {
+                graph.put(i, new ArrayList&lt;&gt;());
+                up.put(i, new HashMap&lt;&gt;());
+            }
+        }
+
+        void addEdge(int u, int v) {
+            graph.get(u).add(v);
+            graph.get(v).add(u);
+        }
+
+        void build(int root) {
+            Arrays.fill(depth, 0);
+            dfs(root, -1, 0);
+        }
+
+        private void dfs(int node, int parent, int d) {
+            depth[node] = d;
+
+            if (parent != -1) {
+                up.get(node).put(0, parent);
+            }
+
+            for (int i = 1; i &lt; maxLog; i++) {
+                if (up.get(node).containsKey(i - 1)) {
+                    int ancestor = up.get(node).get(i - 1);
+                    if (up.get(ancestor).containsKey(i - 1)) {
+                        up.get(node).put(i, up.get(ancestor).get(i - 1));
+                    }
+                }
+            }
+
+            for (int child : graph.get(node)) {
+                if (child != parent) {
+                    dfs(child, node, d + 1);
+                }
+            }
+        }
+
+        int query(int u, int v) {
+            if (depth[u] &lt; depth[v]) {
+                int temp = u;
+                u = v;
+                v = temp;
+            }
+
+            // Bring u to the same level as v
+            int diff = depth[u] - depth[v];
+            for (int i = 0; i &lt; maxLog; i++) {
+                if (((diff &gt;&gt; i) &amp; 1) == 1) {
+                    if (up.get(u).containsKey(i)) {
+                        u = up.get(u).get(i);
+                    }
+                }
+            }
+
+            if (u == v) {
+                return u;
+            }
+
+            // Binary search for LCA
+            for (int i = maxLog - 1; i &gt;= 0; i--) {
+                if (up.get(u).containsKey(i) &amp;&amp; up.get(v).containsKey(i)) {
+                    int uAncestor = up.get(u).get(i);
+                    int vAncestor = up.get(v).get(i);
+                    if (uAncestor != vAncestor) {
+                        u = uAncestor;
+                        v = vAncestor;
+                    }
+                }
+            }
+
+            return up.get(u).getOrDefault(0, u);
+        }
+
+        int distance(int u, int v) {
+            int lcaNode = query(u, v);
+            return depth[u] + depth[v] - 2 * depth[lcaNode];
+        }
+    }
+
+    static void testMain() {
+        LCA lca = new LCA(6);
+        lca.addEdge(0, 1); // 1-2
+        lca.addEdge(0, 2); // 1-3
+        lca.addEdge(1, 3); // 2-4
+        lca.addEdge(1, 4); // 2-5
+        lca.addEdge(2, 5); // 3-6
+
+        lca.build(0);
+
+        assert lca.query(3, 4) == 1; // LCA(4, 5) = 2
+        assert lca.query(3, 5) == 0; // LCA(4, 6) = 1
+        assert lca.distance(3, 5) == 4; // distance(4, 6) = 4
+    }
+</code></pre>
+    </div>
+    <div class="algorithm-page">
+        <div class="algorithm-header">
+            <h2>Polygon Area</h2>
+            <div class="algorithm-filename">polygon_area.java</div>
+        </div>
+        <pre><code>/*
+Shoelace formula (Gauss&#x27;s area formula) for computing the area of a polygon.
+
+Computes the area of a simple polygon given its vertices in order (clockwise or
+counter-clockwise). Works for both convex and concave polygons.
+
+The formula: Area = 1/2 * |sum(x_i * y_(i+1) - x_(i+1) * y_i)|
+
+Time complexity: O(n) where n is the number of vertices.
+Space complexity: O(1) additional space.
+*/
+
+class polygon_area {
+    static class Point {
+        double x, y;
+        Point(double x, double y) {
+            this.x = x;
+            this.y = y;
+        }
+    }
+
+    static double polygonArea(Point[] vertices) {
+        if (vertices.length &lt; 3) {
+            return 0.0;
+        }
+
+        int n = vertices.length;
+        double area = 0.0;
+
+        for (int i = 0; i &lt; n; i++) {
+            int j = (i + 1) % n;
+            area += vertices[i].x * vertices[j].y;
+            area -= vertices[j].x * vertices[i].y;
+        }
+
+        return Math.abs(area) / 2.0;
+    }
+
+    static double polygonSignedArea(Point[] vertices) {
+        if (vertices.length &lt; 3) {
+            return 0.0;
+        }
+
+        int n = vertices.length;
+        double area = 0.0;
+
+        for (int i = 0; i &lt; n; i++) {
+            int j = (i + 1) % n;
+            area += vertices[i].x * vertices[j].y;
+            area -= vertices[j].x * vertices[i].y;
+        }
+
+        return area / 2.0;
+    }
+
+    static boolean isClockwise(Point[] vertices) {
+        return polygonSignedArea(vertices) &lt; 0;
+    }
+
+    static void testMain() {
+        // Simple square with side length 2
+        Point[] square = {new Point(0.0, 0.0), new Point(2.0, 0.0), new Point(2.0, 2.0), new Point(0.0, 2.0)};
+        assert Math.abs(polygonArea(square) - 4.0) &lt; 1e-9;
+
+        // Triangle with base 3 and height 4
+        Point[] triangle = {new Point(0.0, 0.0), new Point(3.0, 0.0), new Point(1.5, 4.0)};
+        assert Math.abs(polygonArea(triangle) - 6.0) &lt; 1e-9;
+
+        // Test orientation
+        Point[] ccwSquare = {new Point(0.0, 0.0), new Point(1.0, 0.0), new Point(1.0, 1.0), new Point(0.0, 1.0)};
+        assert !isClockwise(ccwSquare);
+    }
+</code></pre>
+    </div>
+    <div class="algorithm-page">
+        <div class="algorithm-header">
+            <h2>Prefix Tree</h2>
+            <div class="algorithm-filename">prefix_tree.java</div>
+        </div>
+        <pre><code>/*
+Prefix Tree (Trie) implementation for efficient string prefix operations.
+
+Supports:
+- insert(word): Add a word to the trie - O(m) where m is word length
+- search(word): Check if exact word exists - O(m)
+- startsWith(prefix): Check if any word starts with prefix - O(m)
+- delete(word): Remove a word from the trie - O(m)
+
+Space complexity: O(ALPHABET_SIZE * N * M) where N is number of words and M is average length
+*/
+
+import java.util.*;
+
+class prefix_tree {
+    static class TrieNode {
+        Map&lt;Character, TrieNode&gt; children;
+        boolean isEndOfWord;
+
+        TrieNode() {
+            children = new HashMap&lt;&gt;();
+            isEndOfWord = false;
+        }
+    }
+
+    static class PrefixTree {
+        private TrieNode root;
+
+        PrefixTree() {
+            root = new TrieNode();
+        }
+
+        void insert(String word) {
+            TrieNode node = root;
+            for (char c : word.toCharArray()) {
+                node.children.putIfAbsent(c, new TrieNode());
+                node = node.children.get(c);
+            }
+            node.isEndOfWord = true;
+        }
+
+        boolean search(String word) {
+            TrieNode node = root;
+            for (char c : word.toCharArray()) {
+                if (!node.children.containsKey(c)) {
+                    return false;
+                }
+                node = node.children.get(c);
+            }
+            return node.isEndOfWord;
+        }
+
+        boolean startsWith(String prefix) {
+            TrieNode node = root;
+            for (char c : prefix.toCharArray()) {
+                if (!node.children.containsKey(c)) {
+                    return false;
+                }
+                node = node.children.get(c);
+            }
+            return true;
+        }
+
+        boolean delete(String word) {
+            return deleteHelper(root, word, 0);
+        }
+
+        private boolean deleteHelper(TrieNode node, String word, int depth) {
+            if (node == null) {
+                return false;
+            }
+
+            if (depth == word.length()) {
+                if (!node.isEndOfWord) {
+                    return false;
+                }
+                node.isEndOfWord = false;
+                return node.children.isEmpty();
+            }
+
+            char c = word.charAt(depth);
+            if (!node.children.containsKey(c)) {
+                return false;
+            }
+
+            TrieNode child = node.children.get(c);
+            boolean shouldDeleteChild = deleteHelper(child, word, depth + 1);
+
+            if (shouldDeleteChild) {
+                node.children.remove(c);
+                return !node.isEndOfWord &amp;&amp; node.children.isEmpty();
+            }
+
+            return false;
+        }
+    }
+
+    static void testMain() {
+        PrefixTree trie = new PrefixTree();
+        trie.insert(&quot;cat&quot;);
+        trie.insert(&quot;car&quot;);
+        trie.insert(&quot;card&quot;);
+
+        assert trie.search(&quot;car&quot;);
+        assert !trie.search(&quot;ca&quot;);
+        assert trie.startsWith(&quot;car&quot;);
+    }
+</code></pre>
+    </div>
+    <div class="algorithm-page">
+        <div class="algorithm-header">
+            <h2>Priority Queue</h2>
+            <div class="algorithm-filename">priority_queue.java</div>
+        </div>
+        <pre><code>/*
+Generic priority queue (min-heap) with update and remove operations.
+
+Supports:
+- push(item): Add item to heap - O(log n)
+- pop(): Remove and return minimum item - O(log n)
+- peek(): View minimum item without removing - O(1)
+- update(old_item, new_item): Update item in heap - O(n)
+- remove(item): Remove specific item - O(n)
+
+Space complexity: O(n)
+*/
+
+import java.util.*;
+
+class priority_queue {
+    static class PriorityQueue&lt;T extends Comparable&lt;T&gt;&gt; {
+        private List&lt;T&gt; heap;
+
+        PriorityQueue() {
+            this.heap = new ArrayList&lt;&gt;();
+        }
+
+        void push(T item) {
+            heap.add(item);
+            siftUp(heap.size() - 1);
+        }
+
+        T pop() {
+            if (heap.isEmpty()) {
+                throw new IllegalStateException(&quot;Heap is empty&quot;);
+            }
+            T item = heap.get(0);
+            T last = heap.remove(heap.size() - 1);
+            if (!heap.isEmpty()) {
+                heap.set(0, last);
+                siftDown(0);
+            }
+            return item;
+        }
+
+        T peek() {
+            if (heap.isEmpty()) {
+                return null;
+            }
+            return heap.get(0);
+        }
+
+        boolean contains(T item) {
+            return heap.contains(item);
+        }
+
+        void update(T oldItem, T newItem) {
+            int idx = heap.indexOf(oldItem);
+            if (idx == -1) {
+                throw new IllegalArgumentException(&quot;Item not in heap&quot;);
+            }
+            heap.set(idx, newItem);
+            if (newItem.compareTo(oldItem) &lt; 0) {
+                siftUp(idx);
+            } else {
+                siftDown(idx);
+            }
+        }
+
+        void remove(T item) {
+            int idx = heap.indexOf(item);
+            if (idx == -1) {
+                throw new IllegalArgumentException(&quot;Item not in heap&quot;);
+            }
+            T last = heap.remove(heap.size() - 1);
+            if (idx &lt; heap.size()) {
+                T oldItem = heap.get(idx);
+                heap.set(idx, last);
+                if (last.compareTo(oldItem) &lt; 0) {
+                    siftUp(idx);
+                } else {
+                    siftDown(idx);
+                }
+            }
+        }
+
+        int size() {
+            return heap.size();
+        }
+
+        boolean isEmpty() {
+            return heap.isEmpty();
+        }
+
+        private void siftUp(int idx) {
+            while (idx &gt; 0) {
+                int parent = (idx - 1) / 2;
+                if (heap.get(idx).compareTo(heap.get(parent)) &gt;= 0) {
+                    break;
+                }
+                Collections.swap(heap, idx, parent);
+                idx = parent;
+            }
+        }
+
+        private void siftDown(int idx) {
+            while (true) {
+                int smallest = idx;
+                int left = 2 * idx + 1;
+                int right = 2 * idx + 2;
+
+                if (left &lt; heap.size() &amp;&amp; heap.get(left).compareTo(heap.get(smallest)) &lt; 0) {
+                    smallest = left;
+                }
+                if (right &lt; heap.size() &amp;&amp; heap.get(right).compareTo(heap.get(smallest)) &lt; 0) {
+                    smallest = right;
+                }
+                if (smallest == idx) {
+                    break;
+                }
+                Collections.swap(heap, idx, smallest);
+                idx = smallest;
+            }
+        }
+    }
+
+    static void testMain() {
+        PriorityQueue&lt;Integer&gt; p = new PriorityQueue&lt;&gt;();
+        p.push(15);
+        p.push(23);
+        p.push(8);
+        assert p.peek() == 8;
+        assert p.pop() == 8;
+        assert p.pop() == 15;
+    }
+</code></pre>
+    </div>
+    <div class="algorithm-page">
+        <div class="algorithm-header">
+            <h2>Segment Tree</h2>
+            <div class="algorithm-filename">segment_tree.java</div>
+        </div>
+        <pre><code>/*
+Segment Tree for range queries and point updates.
+
+Supports efficient range queries (sum, min, max, etc.) and point updates on an array.
+
+Key operations:
+- update(i, value): Update element at index i - O(log n)
+- query(l, r): Query range [l, r] - O(log n)
+
+Space complexity: O(4n) = O(n)
+
+This implementation supports sum queries but can be modified for min/max/gcd/etc.
+*/
+
+import java.util.*;
+import java.util.function.BinaryOperator;
+
+class segment_tree {
+    static class SegmentTree&lt;T&gt; {
+        private Object[] tree;
+        private int n;
+        private T zero;
+        private BinaryOperator&lt;T&gt; combineOp;
+
+        SegmentTree(T[] arr, T zero, BinaryOperator&lt;T&gt; combineOp) {
+            this.n = arr.length;
+            this.zero = zero;
+            this.combineOp = combineOp;
+            this.tree = new Object[4 * n];
+            if (n &gt; 0) {
+                build(arr, 0, 0, n - 1);
+            }
+        }
+
+        private void build(T[] arr, int node, int start, int end) {
+            if (start == end) {
+                tree[node] = arr[start];
+            } else {
+                int mid = (start + end) / 2;
+                int leftChild = 2 * node + 1;
+                int rightChild = 2 * node + 2;
+
+                build(arr, leftChild, start, mid);
+                build(arr, rightChild, mid + 1, end);
+
+                tree[node] = combineOp.apply((T)tree[leftChild], (T)tree[rightChild]);
+            }
+        }
+
+        void update(int idx, T value) {
+            update(0, 0, n - 1, idx, value);
+        }
+
+        @SuppressWarnings(&quot;unchecked&quot;)
+        private void update(int node, int start, int end, int idx, T value) {
+            if (start == end) {
+                tree[node] = value;
+            } else {
+                int mid = (start + end) / 2;
+                int leftChild = 2 * node + 1;
+                int rightChild = 2 * node + 2;
+
+                if (idx &lt;= mid) {
+                    update(leftChild, start, mid, idx, value);
+                } else {
+                    update(rightChild, mid + 1, end, idx, value);
+                }
+
+                tree[node] = combineOp.apply((T)tree[leftChild], (T)tree[rightChild]);
+            }
+        }
+
+        T query(int l, int r) {
+            if (l &lt; 0 || r &gt;= n || l &gt; r) {
+                throw new IllegalArgumentException(&quot;Invalid range&quot;);
+            }
+            return query(0, 0, n - 1, l, r);
+        }
+
+        @SuppressWarnings(&quot;unchecked&quot;)
+        private T query(int node, int start, int end, int l, int r) {
+            if (r &lt; start || l &gt; end) {
+                return zero;
+            }
+
+            if (l &lt;= start &amp;&amp; end &lt;= r) {
+                return (T)tree[node];
+            }
+
+            int mid = (start + end) / 2;
+            int leftChild = 2 * node + 1;
+            int rightChild = 2 * node + 2;
+
+            T leftSum = query(leftChild, start, mid, l, r);
+            T rightSum = query(rightChild, mid + 1, end, l, r);
+
+            return combineOp.apply(leftSum, rightSum);
+        }
+    }
+
+    static void testMain() {
+        Long[] arr = {1L, 3L, 5L, 7L, 9L};
+        SegmentTree&lt;Long&gt; st = new SegmentTree&lt;&gt;(arr, 0L, (a, b) -&gt; a + b);
+        assert st.query(1, 3) == 15L;
+        st.update(2, 10L);
+        assert st.query(1, 3) == 20L;
+        assert st.query(0, 4) == 30L;
+    }
+</code></pre>
+    </div>
+    <div class="algorithm-page">
+        <div class="algorithm-header">
+            <h2>Topological Sort</h2>
+            <div class="algorithm-filename">topological_sort.java</div>
+        </div>
+        <pre><code>/*
+Topological sorting algorithms for Directed Acyclic Graphs (DAG).
+
+Provides two implementations:
+1. Kahn&#x27;s algorithm (BFS-based) - detects cycles
+2. DFS-based algorithm - also detects cycles
+
+Both return a topological ordering of vertices if the graph is a DAG,
+or null if a cycle is detected.
+
+Time complexity: O(V + E)
+Space complexity: O(V + E)
+*/
+
+import java.util.*;
+
+class topological_sort {
+    static class TopologicalSort {
+        private int n;
+        private Map&lt;Integer, List&lt;Integer&gt;&gt; graph;
+
+        TopologicalSort(int n) {
+            this.n = n;
+            this.graph = new HashMap&lt;&gt;();
+            for (int i = 0; i &lt; n; i++) {
+                graph.put(i, new ArrayList&lt;&gt;());
+            }
+        }
+
+        void addEdge(int u, int v) {
+            graph.get(u).add(v);
+        }
+
+        List&lt;Integer&gt; kahnSort() {
+            int[] inDegree = new int[n];
+
+            for (int u = 0; u &lt; n; u++) {
+                for (int v : graph.get(u)) {
+                    inDegree[v]++;
+                }
+            }
+
+            Queue&lt;Integer&gt; queue = new LinkedList&lt;&gt;();
+            for (int i = 0; i &lt; n; i++) {
+                if (inDegree[i] == 0) {
+                    queue.offer(i);
+                }
+            }
+
+            List&lt;Integer&gt; result = new ArrayList&lt;&gt;();
+
+            while (!queue.isEmpty()) {
+                int u = queue.poll();
+                result.add(u);
+
+                for (int v : graph.get(u)) {
+                    inDegree[v]--;
+                    if (inDegree[v] == 0) {
+                        queue.offer(v);
+                    }
+                }
+            }
+
+            if (result.size() != n) {
+                return null; // Cycle detected
+            }
+
+            return result;
+        }
+
+        List&lt;Integer&gt; dfsSort() {
+            Set&lt;Integer&gt; visited = new HashSet&lt;&gt;();
+            Set&lt;Integer&gt; recStack = new HashSet&lt;&gt;();
+            Stack&lt;Integer&gt; stack = new Stack&lt;&gt;();
+
+            for (int i = 0; i &lt; n; i++) {
+                if (!visited.contains(i)) {
+                    if (!dfsVisit(i, visited, recStack, stack)) {
+                        return null; // Cycle detected
+                    }
+                }
+            }
+
+            List&lt;Integer&gt; result = new ArrayList&lt;&gt;();
+            while (!stack.isEmpty()) {
+                result.add(stack.pop());
+            }
+
+            return result;
+        }
+
+        private boolean dfsVisit(int u, Set&lt;Integer&gt; visited, Set&lt;Integer&gt; recStack, Stack&lt;Integer&gt; stack) {
+            visited.add(u);
+            recStack.add(u);
+
+            for (int v : graph.get(u)) {
+                if (!visited.contains(v)) {
+                    if (!dfsVisit(v, visited, recStack, stack)) {
+                        return false;
+                    }
+                } else if (recStack.contains(v)) {
+                    return false; // Cycle detected
+                }
+            }
+
+            recStack.remove(u);
+            stack.push(u);
+            return true;
+        }
+
+        boolean hasCycle() {
+            return kahnSort() == null;
+        }
+
+        List&lt;Integer&gt; longestPath(int source) {
+            List&lt;Integer&gt; topoOrder = kahnSort();
+            if (topoOrder == null) {
+                return null; // Has cycle
+            }
+
+            Map&lt;Integer, Integer&gt; dist = new HashMap&lt;&gt;();
+            Map&lt;Integer, Integer&gt; parent = new HashMap&lt;&gt;();
+
+            for (int i = 0; i &lt; n; i++) {
+                dist.put(i, Integer.MIN_VALUE);
+            }
+            dist.put(source, 0);
+
+            for (int u : topoOrder) {
+                if (dist.get(u) != Integer.MIN_VALUE) {
+                    for (int v : graph.get(u)) {
+                        if (dist.get(u) + 1 &gt; dist.get(v)) {
+                            dist.put(v, dist.get(u) + 1);
+                            parent.put(v, u);
+                        }
+                    }
+                }
+            }
+
+            // Find vertex with maximum distance
+            int maxDist = Integer.MIN_VALUE;
+            int endVertex = -1;
+            for (int i = 0; i &lt; n; i++) {
+                if (dist.get(i) &gt; maxDist) {
+                    maxDist = dist.get(i);
+                    endVertex = i;
+                }
+            }
+
+            if (endVertex == -1 || maxDist == Integer.MIN_VALUE) {
+                return Arrays.asList(source);
+            }
+
+            // Reconstruct path
+            List&lt;Integer&gt; path = new ArrayList&lt;&gt;();
+            int current = endVertex;
+            while (current != source) {
+                path.add(current);
+                current = parent.get(current);
+            }
+            path.add(source);
+            Collections.reverse(path);
+
+            return path;
+        }
+    }
+
+    static void testMain() {
+        TopologicalSort ts = new TopologicalSort(6);
+        int[][] edges = {{5, 2}, {5, 0}, {4, 0}, {4, 1}, {2, 3}, {3, 1}};
+        for (int[] edge : edges) {
+            ts.addEdge(edge[0], edge[1]);
+        }
+
+        List&lt;Integer&gt; kahnResult = ts.kahnSort();
+        List&lt;Integer&gt; dfsResult = ts.dfsSort();
+
+        assert kahnResult != null;
+        assert dfsResult != null;
+        assert !ts.hasCycle();
+
+        // Test with cycle
+        TopologicalSort tsCycle = new TopologicalSort(3);
+        tsCycle.addEdge(0, 1);
+        tsCycle.addEdge(1, 2);
+        tsCycle.addEdge(2, 0);
+        assert tsCycle.hasCycle();
+    }
+</code></pre>
+    </div>
+    <div class="algorithm-page">
+        <div class="algorithm-header">
+            <h2>Union Find</h2>
+            <div class="algorithm-filename">union_find.java</div>
+        </div>
+        <pre><code>/*
+Union-Find (Disjoint Set Union) data structure with path compression and union by rank.
+
+Supports:
+- find(x): Find the representative of the set containing x - O(α(n)) amortized
+- union(x, y): Merge the sets containing x and y - O(α(n)) amortized
+- connected(x, y): Check if x and y are in the same set - O(α(n)) amortized
+
+Space complexity: O(n)
+
+α(n) is the inverse Ackermann function, which is effectively constant for all practical values of n.
+*/
+
+class union_find {
+    static class UnionFind {
+        private int[] parent;
+        private int[] rank;
+
+        UnionFind(int n) {
+            parent = new int[n];
+            rank = new int[n];
+            for (int i = 0; i &lt; n; i++) {
+                parent[i] = i;
+                rank[i] = 0;
+            }
+        }
+
+        int find(int x) {
+            if (parent[x] != x) {
+                parent[x] = find(parent[x]); // Path compression
+            }
+            return parent[x];
+        }
+
+        int union(int x, int y) {
+            int rootX = find(x);
+            int rootY = find(y);
+
+            if (rootX == rootY) {
+                return rootX;
+            }
+
+            // Union by rank
+            if (rank[rootX] &lt; rank[rootY]) {
+                parent[rootX] = rootY;
+                merge(rootY, rootX);
+                return rootY;
+            } else if (rank[rootX] &gt; rank[rootY]) {
+                parent[rootY] = rootX;
+                merge(rootX, rootY);
+                return rootX;
+            } else {
+                parent[rootY] = rootX;
+                merge(rootX, rootY);
+                rank[rootX]++;
+                return rootX;
+            }
+        }
+
+        boolean connected(int x, int y) {
+            return find(x) == find(y);
+        }
+
+        void merge(int root, int child) {
+            // Override to define custom merge behavior when sets are united
+        }
+    }
+
+    static class Test extends UnionFind {
+        private int[] size;
+
+        Test(int n) {
+            super(n);
+            size = new int[n];
+            for (int i = 0; i &lt; n; i++) {
+                size[i] = 1;
+            }
+        }
+
+        @Override
+        void merge(int root, int child) {
+            size[root] += size[child];
+        }
+
+        int getSize(int x) {
+            return size[find(x)];
+        }
+    }
+
+    static void testMain() {
+        Test a = new Test(3);
+        int d = a.union(0, 1);
+        int e = a.union(d, 2);
+        assert a.getSize(e) == 3;
+        assert a.getSize(a.find(0)) == 3;
+    }
+</code></pre>
+    </div>
+</body>
+</html>

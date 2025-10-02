@@ -1,0 +1,1590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Algorithm Reference - Python</title>
+    <style>
+        body {
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 9pt;
+            line-height: 1.2;
+            margin: 0;
+            padding: 0;
+            color: #000;
+            background: #fff;
+        }
+
+        @media print {
+            @page {
+                size: A4;
+                margin: 1cm 0.8cm;
+            }
+
+            body {
+                font-size: 9pt;
+            }
+
+            .toc-page {
+                page-break-after: always;
+                page-break-inside: avoid;
+            }
+
+            .blank-page {
+                page-break-after: always;
+                height: 100vh;
+            }
+
+            .algorithm-page {
+                page-break-before: always;
+            }
+
+            .algorithm-page:last-child {
+                page-break-after: auto;
+                break-after: auto;
+            }
+
+            .no-break {
+                page-break-inside: avoid;
+            }
+        }
+
+        @media screen {
+            body {
+                max-width: 21cm;
+                margin: 0 auto;
+                padding: 2cm;
+                background: #f5f5f5;
+            }
+
+            .toc-page, .blank-page, .algorithm-page {
+                page-break-after: unset !important;
+                page-break-before: unset !important;
+                page-break-inside: unset !important;
+                break-after: unset !important;
+                break-before: unset !important;
+                break-inside: unset !important;
+            }
+        }
+
+        h1 {
+            font-size: 14pt;
+            margin: 0 0 0.5em 0;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        h2 {
+            font-size: 14pt;
+            margin: 1.5em 0 0.5em 0;
+            font-weight: bold;
+            border-bottom: 1px solid #333;
+            padding-bottom: 0.2em;
+        }
+
+        .toc-content {
+            font-size: 9pt;
+        }
+
+        .toc-item {
+            margin: 0.1em 0;
+            padding: 0.05em 0;
+            border-bottom: 1px dotted #ccc;
+        }
+
+        .toc-name {
+            font-weight: bold;
+        }
+
+        .blank-page {
+            /* Height set in print media query only */
+        }
+
+        .algorithm-header {
+            margin-bottom: 1em;
+        }
+
+        .algorithm-filename {
+            font-size: 9pt;
+            color: #666;
+            margin-bottom: 0.5em;
+        }
+
+        pre {
+            margin: 0;
+            padding: 0;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: inherit;
+            font-size: inherit;
+            line-height: inherit;
+        }
+
+        code {
+            font-family: inherit;
+            font-size: inherit;
+        }
+
+        /* Syntax highlighting classes */
+        .highlight { background: transparent; }
+        .highlight .c { color: #408080; font-style: italic } /* Comment */
+        .highlight .k { color: #008000; font-weight: bold } /* Keyword */
+        .highlight .o { color: #666666 } /* Operator */
+        .highlight .n { color: #000000 } /* Name */
+        .highlight .s { color: #BA2121 } /* String */
+        .highlight .nb { color: #008000 } /* Name.Builtin */
+        .highlight .nf { color: #0000FF } /* Name.Function */
+        .highlight .nc { color: #0000FF; font-weight: bold } /* Name.Class */
+    </style>
+</head>
+<body>
+    <!-- Table of Contents -->
+    <div class="toc-page">
+        <h1>Algorithm Reference - Python</h1>
+        <div class="toc-content">
+            <div class="toc-item">
+                <span class="toc-name">Bipartite Match</span>
+            </div>
+            <div class="toc-item">
+                <span class="toc-name">Dijkstra</span>
+            </div>
+            <div class="toc-item">
+                <span class="toc-name">Edmonds Karp</span>
+            </div>
+            <div class="toc-item">
+                <span class="toc-name">Fenwick Tree</span>
+            </div>
+            <div class="toc-item">
+                <span class="toc-name">Kmp</span>
+            </div>
+            <div class="toc-item">
+                <span class="toc-name">Lca</span>
+            </div>
+            <div class="toc-item">
+                <span class="toc-name">Polygon Area</span>
+            </div>
+            <div class="toc-item">
+                <span class="toc-name">Prefix Tree</span>
+            </div>
+            <div class="toc-item">
+                <span class="toc-name">Priority Queue</span>
+            </div>
+            <div class="toc-item">
+                <span class="toc-name">Segment Tree</span>
+            </div>
+            <div class="toc-item">
+                <span class="toc-name">Topological Sort</span>
+            </div>
+            <div class="toc-item">
+                <span class="toc-name">Union Find</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Algorithm pages -->
+    <div class="algorithm-page">
+        <div class="algorithm-header">
+            <h2>Bipartite Match</h2>
+            <div class="algorithm-filename">bipartite_match.py</div>
+        </div>
+        <pre><code>&quot;&quot;&quot;
+A bipartite matching algorithm finds the largest set of pairings between two disjoint vertex sets U and V
+in a bipartite graph such that no vertex is in more than one pair.
+
+Augmenting paths: repeatedly search for a path that alternates between unmatched and matched edges,
+starting and ending at free vertices. Flipping the edges along such a path increases the matching size by 1.
+
+Time complexity: O(V · E), where V is the number of vertices and E the number of edges.
+&quot;&quot;&quot;
+
+from __future__ import annotations
+
+from collections import defaultdict
+
+# Don&#x27;t use annotations during contest
+from typing import Final, Generic, Protocol, TypeVar
+
+from typing_extensions import Self
+
+
+class Comparable(Protocol):
+    def __lt__(self, other: Self, /) -&gt; bool: ...
+
+
+SourceT = TypeVar(&quot;SourceT&quot;, bound=Comparable)
+SinkT = TypeVar(&quot;SinkT&quot;)
+
+
+class BipartiteMatch(Generic[SourceT, SinkT]):
+    def __init__(self, edges: list[tuple[SourceT, SinkT]]) -&gt; None:
+        self.edges: defaultdict[SourceT, list[SinkT]] = defaultdict(list)
+        for source, sink in edges:
+            self.edges[source].append(sink)
+
+        # For deterministic behaviour
+        ordered_sources = sorted(self.edges)
+
+        used_sources: dict[SourceT, SinkT] = {}
+        used_sinks: dict[SinkT, SourceT] = {}
+        # Initial pass
+        for source, sink in edges:
+            if used_sources.get(source) is None and used_sinks.get(sink) is None:
+                progress = True
+                used_sources[source] = sink
+                used_sinks[sink] = source
+                break
+
+        coloring = dict.fromkeys(ordered_sources, 0)
+
+        def update(source: SourceT, cur_color: int) -&gt; bool:
+            sink = used_sources.get(source)
+            if sink is not None:
+                return False
+            source_stack: list[SourceT] = [source]
+            sink_stack: list[SinkT] = []
+            index_stack: list[int] = [0]
+
+            def flip() -&gt; None:
+                while source_stack:
+                    used_sources[source_stack[-1]] = sink_stack[-1]
+                    used_sinks[sink_stack[-1]] = source_stack[-1]
+                    source_stack.pop()
+                    sink_stack.pop()
+
+            while True:
+                source = source_stack[-1]
+                index = index_stack.pop()
+                if index == len(self.edges[source]):
+                    if not index_stack:
+                        return False
+                    source_stack.pop()
+                    sink_stack.pop()
+                    continue
+                index_stack.append(index + 1)
+
+                sink = self.edges[source][index]
+                sink_stack.append(sink)
+                if sink not in used_sinks:
+                    flip()
+                    return True
+                source = used_sinks[sink]
+                if coloring[source] == cur_color:
+                    sink_stack.pop()
+                else:
+                    coloring[source] = cur_color
+                    source_stack.append(source)
+                    index_stack.append(0)
+
+        progress = True
+        cur_color = 1
+        while progress:
+            progress = any(update(source, cur_color) for source in ordered_sources)
+            cur_color += 1
+
+        self.match: Final = used_sources
+
+
+def test_main() -&gt; None:
+    b = BipartiteMatch([(1, &quot;X&quot;), (2, &quot;Y&quot;), (3, &quot;X&quot;), (1, &quot;Z&quot;), (2, &quot;Z&quot;), (3, &quot;Y&quot;)])
+    assert len(b.match) == 3
+    assert b.match == {1: &quot;Z&quot;, 2: &quot;Y&quot;, 3: &quot;X&quot;}
+
+</code></pre>
+    </div>
+    <div class="algorithm-page">
+        <div class="algorithm-header">
+            <h2>Dijkstra</h2>
+            <div class="algorithm-filename">dijkstra.py</div>
+        </div>
+        <pre><code>&quot;&quot;&quot;
+Dijkstra&#x27;s algorithm for single-source shortest path in weighted graphs.
+
+Finds shortest paths from a source vertex to all other vertices in a graph with
+non-negative edge weights. Uses a priority queue (heap) for efficient vertex selection.
+
+Time complexity: O((V + E) log V) with binary heap, where V is vertices and E is edges.
+Space complexity: O(V + E) for the graph representation and auxiliary data structures.
+&quot;&quot;&quot;
+
+from __future__ import annotations
+
+import heapq
+
+# Don&#x27;t use annotations during contest
+from typing import Final, Generic, Protocol, TypeVar
+
+from typing_extensions import Self
+
+
+class Comparable(Protocol):
+    def __lt__(self, other: Self, /) -&gt; bool: ...
+    def __add__(self, other: Self, /) -&gt; Self: ...
+
+
+WeightT = TypeVar(&quot;WeightT&quot;, bound=Comparable)
+NodeT = TypeVar(&quot;NodeT&quot;)
+
+
+class Dijkstra(Generic[NodeT, WeightT]):
+    def __init__(self, infinity: WeightT, zero: WeightT) -&gt; None:
+        self.infinity: Final[WeightT] = infinity
+        self.zero: Final[WeightT] = zero
+        self.graph: dict[NodeT, list[tuple[NodeT, WeightT]]] = {}
+
+    def add_edge(self, u: NodeT, v: NodeT, weight: WeightT) -&gt; None:
+        &quot;&quot;&quot;Add directed edge from u to v with given weight.&quot;&quot;&quot;
+        if u not in self.graph:
+            self.graph[u] = []
+        self.graph[u].append((v, weight))
+
+    def shortest_paths(self, source: NodeT) -&gt; tuple[dict[NodeT, WeightT], dict[NodeT, NodeT | None]]:
+        &quot;&quot;&quot;
+        Find shortest paths from source to all reachable vertices.
+
+        Returns (distances, predecessors) where:
+        - distances[v] = shortest distance from source to v
+        - predecessors[v] = previous vertex in shortest path to v (None for source)
+        &quot;&quot;&quot;
+        distances: dict[NodeT, WeightT] = {source: self.zero}
+        predecessors: dict[NodeT, NodeT | None] = {source: None}
+        pq: list[tuple[WeightT, NodeT]] = [(self.zero, source)]
+        visited: set[NodeT] = set()
+
+        while pq:
+            current_dist, u = heapq.heappop(pq)
+
+            if u in visited:
+                continue
+            visited.add(u)
+
+            if u not in self.graph:
+                continue
+
+            for v, weight in self.graph[u]:
+                new_dist = current_dist + weight
+
+                if v not in distances or new_dist &lt; distances[v]:
+                    distances[v] = new_dist
+                    predecessors[v] = u
+                    heapq.heappush(pq, (new_dist, v))
+
+        return distances, predecessors
+
+    def shortest_path(self, source: NodeT, target: NodeT) -&gt; list[NodeT] | None:
+        &quot;&quot;&quot;Get the shortest path from source to target, or None if unreachable.&quot;&quot;&quot;
+        _, predecessors = self.shortest_paths(source)
+
+        if target not in predecessors:
+            return None
+
+        path = []
+        current: NodeT | None = target
+        while current is not None:
+            path.append(current)
+            current = predecessors.get(current)
+
+        return path[::-1]
+
+
+def test_main() -&gt; None:
+    d: Dijkstra[str, float] = Dijkstra(float(&quot;inf&quot;), 0.0)
+    d.add_edge(&quot;A&quot;, &quot;B&quot;, 4.0)
+    d.add_edge(&quot;A&quot;, &quot;C&quot;, 2.0)
+    d.add_edge(&quot;B&quot;, &quot;C&quot;, 1.0)
+    d.add_edge(&quot;B&quot;, &quot;D&quot;, 5.0)
+    d.add_edge(&quot;C&quot;, &quot;D&quot;, 8.0)
+
+    distances, _ = d.shortest_paths(&quot;A&quot;)
+    assert distances[&quot;D&quot;] == 9.0
+
+    path = d.shortest_path(&quot;A&quot;, &quot;D&quot;)
+    assert path == [&quot;A&quot;, &quot;B&quot;, &quot;D&quot;]
+
+</code></pre>
+    </div>
+    <div class="algorithm-page">
+        <div class="algorithm-header">
+            <h2>Edmonds Karp</h2>
+            <div class="algorithm-filename">edmonds_karp.py</div>
+        </div>
+        <pre><code>&quot;&quot;&quot;
+Edmonds-Karp is a specialization of the Ford-Fulkerson method for computing the maximum flow in a directed graph.
+
+* It repeatedly searches for an augmenting path from source to sink.
+* The search is done with BFS, guaranteeing the path found is the shortest (fewest edges).
+* Each augmentation increases the total flow, and each edge&#x27;s residual capacity is updated.
+* The algorithm terminates when no augmenting path exists.
+
+Time complexity: O(V · E²), where V is the number of vertices and E the number of edges.
+&quot;&quot;&quot;
+
+from __future__ import annotations
+
+from collections import deque
+from decimal import Decimal
+
+# Don&#x27;t use annotations during contest
+from typing import Final, Generic, TypeVar
+
+DEBUG: Final = True
+
+CapacityT = TypeVar(&quot;CapacityT&quot;, int, float, Decimal)
+NodeT = TypeVar(&quot;NodeT&quot;)
+
+
+class Edge(Generic[NodeT, CapacityT]):
+    def __init__(
+        self,
+        source: Node[NodeT, CapacityT],
+        sink: Node[NodeT, CapacityT],
+        capacity: CapacityT,
+    ) -&gt; None:
+        self.source: Final[Node[NodeT, CapacityT]] = source
+        self.sink: Final[Node[NodeT, CapacityT]] = sink
+        self.original = True  # Part of the input graph or added for the algorithm?
+        # Modified by EdmondsKarp.run
+        self.initial_capacity: CapacityT = capacity
+        self.capacity: CapacityT = capacity
+
+    @property
+    def rev(self) -&gt; Edge[NodeT, CapacityT]:
+        return self.sink.edges[self.source.node]
+
+    @property
+    def flow(self) -&gt; CapacityT:
+        return self.initial_capacity - self.capacity
+
+    def __str__(self) -&gt; str:
+        return f&quot;Edge({self.source.node}, {self.sink.node}, {self.capacity})&quot;
+
+
+class Node(Generic[NodeT, CapacityT]):
+    def __init__(self, node: NodeT) -&gt; None:
+        self.node: Final = node
+        self.edges: dict[NodeT, Edge[NodeT, CapacityT]] = {}
+        # Modified by EdmondsKarp.run
+        self.color = 0
+        self.used_edge: Edge[NodeT, CapacityT] | None = None
+
+    def __str__(self) -&gt; str:
+        return &quot;Node({}, out={}, color={}, used_edge={})&quot;.format(
+            self.node,
+            &quot;, &quot;.join(str(edge) for edge in self.edges.values()),
+            self.color,
+            self.used_edge,
+        )
+
+
+class EdmondsKarp(Generic[NodeT, CapacityT]):
+    def __init__(
+        self,
+        edges: list[tuple[NodeT, NodeT, CapacityT]],
+        main_source: NodeT,
+        main_sink: NodeT,
+        zero: CapacityT,
+    ) -&gt; None:
+        self.main_source: Final = main_source
+        self.main_sink: Final = main_sink
+        self.zero: Final[CapacityT] = zero
+        self.color = 1
+        self.total_flow: CapacityT = self.zero
+
+        def init_nodes() -&gt; dict[NodeT, Node[NodeT, CapacityT]]:
+            nodes: dict[NodeT, Node[NodeT, CapacityT]] = {}
+            for source_t, sink_t, capacity in edges:
+                source = nodes.setdefault(source_t, Node(source_t))
+                assert sink_t not in source.edges, f&quot;The edge ({source_t}, {sink_t}) is specified more than once&quot;
+                source.edges[sink_t] = Edge(source, nodes.setdefault(sink_t, Node(sink_t)), capacity)
+            for source_t, sink_t, _ in edges:
+                sink = nodes[sink_t]
+                if source_t not in sink.edges:
+                    edge = Edge(sink, nodes[source_t], zero)
+                    edge.original = False
+                    sink.edges[source_t] = edge
+            nodes.setdefault(main_source, Node(main_source))
+            nodes.setdefault(main_sink, Node(main_sink))
+            return nodes
+
+        self.nodes: dict[NodeT, Node[NodeT, CapacityT]] = init_nodes()
+
+    def change_initial_capacities(self, edges: list[tuple[NodeT, NodeT, CapacityT]]) -&gt; None:
+        &quot;&quot;&quot;Update edge capacities. REQUIRES: new capacity &gt;= current flow.&quot;&quot;&quot;
+        for source, sink, capacity in edges:
+            edge = self.nodes[source].edges[sink]
+            assert capacity &gt;= edge.flow
+            increase = capacity - edge.initial_capacity
+            edge.initial_capacity += increase
+            edge.capacity += increase
+
+    def reset_flows(self) -&gt; None:
+        &quot;&quot;&quot;Reset all flows to zero, keeping capacities.&quot;&quot;&quot;
+        self.total_flow = self.zero
+        for node in self.nodes.values():
+            for edge in node.edges.values():
+                edge.capacity = edge.initial_capacity
+
+    def run(self) -&gt; None:
+        &quot;&quot;&quot;Run max-flow algorithm from source to sink.&quot;&quot;&quot;
+        self.color += 1
+        progress = True
+        while progress:
+            progress = False
+
+            border: deque[Node[NodeT, CapacityT]] = deque()
+            self.nodes[self.main_source].color = self.color
+            border.append(self.nodes[self.main_source])
+            while border:
+                source = border.popleft()
+                for edge in source.edges.values():
+                    sink = edge.sink
+                    if sink.color == self.color or edge.capacity == self.zero:
+                        continue
+
+                    sink.used_edge = edge
+                    sink.color = self.color
+                    border.append(sink)
+
+                    if sink.node == self.main_sink:
+                        used_edge = edge
+                        flow = used_edge.capacity
+                        while used_edge.source.node != self.main_source:
+                            assert used_edge.source.used_edge is not None
+                            used_edge = used_edge.source.used_edge
+                            flow = min(flow, used_edge.capacity)
+
+                        self.total_flow += flow
+
+                        used_edge = sink.used_edge
+                        used_edge.capacity -= flow
+                        used_edge.rev.capacity += flow
+                        while used_edge.source.node != self.main_source:
+                            assert used_edge.source.used_edge is not None
+                            used_edge = used_edge.source.used_edge
+                            used_edge.capacity -= flow
+                            used_edge.rev.capacity += flow
+
+                        progress = True
+                        self.color += 1
+                        border.clear()
+                        break
+
+    def print(self) -&gt; None:
+        &quot;&quot;&quot;Print all edges with non-zero flow for debugging.&quot;&quot;&quot;
+        if DEBUG:
+            for node in self.nodes.values():
+                for edge in node.edges.values():
+                    if edge.capacity &lt; edge.initial_capacity:
+                        print(f&quot;Flow {edge.source.node} ---{edge.flow}/{edge.initial_capacity}---&gt; {edge.sink.node}&quot;)
+
+
+def test_main() -&gt; None:
+    e = EdmondsKarp([(0, 1, 10), (0, 2, 8), (1, 2, 2), (1, 3, 5), (2, 3, 7)], 0, 3, 0)
+    e.run()
+    assert e.total_flow == 12
+
+</code></pre>
+    </div>
+    <div class="algorithm-page">
+        <div class="algorithm-header">
+            <h2>Fenwick Tree</h2>
+            <div class="algorithm-filename">fenwick_tree.py</div>
+        </div>
+        <pre><code>&quot;&quot;&quot;
+Fenwick tree (Binary Indexed Tree) for efficient range sum queries and point updates.
+
+A Fenwick tree maintains cumulative frequency information and supports two main operations:
+* update(i, delta): add delta to the element at index i
+* query(i): return the sum of elements from index 0 to i (inclusive)
+* range_query(left, right): return the sum of elements from left to right (inclusive)
+
+The tree uses a clever indexing scheme based on the binary representation of indices
+to achieve logarithmic time complexity for both operations.
+
+Time complexity: O(log n) for update and query operations.
+Space complexity: O(n) where n is the size of the array.
+&quot;&quot;&quot;
+
+from __future__ import annotations
+
+# Don&#x27;t use annotations during contest
+from typing import Final, Generic, Protocol, TypeVar
+
+from typing_extensions import Self
+
+
+class Summable(Protocol):
+    def __add__(self, other: Self, /) -&gt; Self: ...
+    def __sub__(self, other: Self, /) -&gt; Self: ...
+    def __le__(self, other: Self, /) -&gt; bool: ...
+
+
+ValueT = TypeVar(&quot;ValueT&quot;, bound=Summable)
+
+
+class FenwickTree(Generic[ValueT]):
+    def __init__(self, size: int, zero: ValueT) -&gt; None:
+        self.size: Final = size
+        self.zero: Final = zero
+        # 1-indexed tree for easier bit manipulation
+        self.tree: list[ValueT] = [zero] * (size + 1)
+
+    @classmethod
+    def from_array(cls, arr: list[ValueT], zero: ValueT) -&gt; Self:
+        &quot;&quot;&quot;Create a Fenwick tree from an existing array in O(n) time.&quot;&quot;&quot;
+        n = len(arr)
+        tree = cls(n, zero)
+
+        # Compute prefix sums
+        prefix = [zero] * (n + 1)
+        for i in range(n):
+            prefix[i + 1] = prefix[i] + arr[i]
+
+        # Build tree in O(n): each tree[i] contains sum of range [i - (i &amp; -i) + 1, i]
+        for i in range(1, n + 1):
+            range_start = i - (i &amp; (-i)) + 1
+            tree.tree[i] = prefix[i] - prefix[range_start - 1]
+
+        return tree
+
+    def update(self, index: int, delta: ValueT) -&gt; None:
+        &quot;&quot;&quot;Add delta to the element at the given index.&quot;&quot;&quot;
+        if not (0 &lt;= index &lt; self.size):
+            msg = f&quot;Index {index} out of bounds for size {self.size}&quot;
+            raise IndexError(msg)
+
+        # Convert to 1-indexed
+        index += 1
+        while index &lt;= self.size:
+            self.tree[index] = self.tree[index] + delta
+            # Move to next index by adding the lowest set bit
+            index += index &amp; (-index)
+
+    def query(self, index: int) -&gt; ValueT:
+        &quot;&quot;&quot;Return the sum of elements from 0 to index (inclusive).&quot;&quot;&quot;
+        if not (0 &lt;= index &lt; self.size):
+            msg = f&quot;Index {index} out of bounds for size {self.size}&quot;
+            raise IndexError(msg)
+
+        # Convert to 1-indexed
+        index += 1
+        result = self.zero
+        while index &gt; 0:
+            result = result + self.tree[index]
+            # Move to parent by removing the lowest set bit
+            index -= index &amp; (-index)
+        return result
+
+    def range_query(self, left: int, right: int) -&gt; ValueT:
+        &quot;&quot;&quot;Sum of elements from left to right (inclusive). Returns zero for invalid ranges.&quot;&quot;&quot;
+        if left &gt; right or left &lt; 0 or right &gt;= self.size:
+            return self.zero
+        if left == 0:
+            return self.query(right)
+        return self.query(right) - self.query(left - 1)
+
+    # Optional functionality (not always needed during competition)
+
+    def get_value(self, index: int) -&gt; ValueT:
+        &quot;&quot;&quot;Get the current value at a specific index.&quot;&quot;&quot;
+        if not (0 &lt;= index &lt; self.size):
+            msg = f&quot;Index {index} out of bounds for size {self.size}&quot;
+            raise IndexError(msg)
+        if index == 0:
+            return self.query(0)
+        return self.query(index) - self.query(index - 1)
+
+    def first_nonzero_index(self, start_index: int) -&gt; int | None:
+        &quot;&quot;&quot;Find smallest index &gt;= start_index with value &gt; zero.
+
+        REQUIRES: all updates are non-negative, ValueT is totally ordered (e.g., int, float).
+        &quot;&quot;&quot;
+        start_index = max(start_index, 0)
+        if start_index &gt;= self.size:
+            return None
+
+        prefix_before = self.query(start_index - 1) if start_index &gt; 0 else self.zero
+        total = self.query(self.size - 1)
+        if total == prefix_before:
+            return None
+
+        # Fenwick lower_bound: first idx with prefix_sum(idx) &gt; prefix_before
+        idx = 0          # 1-based cursor
+        cur = self.zero  # running prefix at &#x27;idx&#x27;
+        bit = 1 &lt;&lt; (self.size.bit_length() - 1)
+        while bit:
+            nxt = idx + bit
+            if nxt &lt;= self.size:
+                cand = cur + self.tree[nxt]
+                if cand &lt;= prefix_before:   # move right while prefix &lt;= target
+                    cur = cand
+                    idx = nxt
+            bit &gt;&gt;= 1
+
+        # idx is the largest position with prefix &lt;= prefix_before (1-based).
+        # The answer is idx (converted to 0-based).
+        return idx
+
+    def __len__(self) -&gt; int:
+        return self.size
+
+
+def test_main() -&gt; None:
+    f = FenwickTree(5, 0)
+    f.update(0, 7)
+    f.update(2, 13)
+    f.update(4, 19)
+    assert f.query(4) == 39
+    assert f.range_query(1, 3) == 13
+
+    # Optional functionality (not always needed during competition)
+
+    assert f.get_value(2) == 13
+    g = FenwickTree.from_array([1, 2, 3, 4, 5], 0)
+    assert g.query(4) == 15
+
+</code></pre>
+    </div>
+    <div class="algorithm-page">
+        <div class="algorithm-header">
+            <h2>Kmp</h2>
+            <div class="algorithm-filename">kmp.py</div>
+        </div>
+        <pre><code>&quot;&quot;&quot;
+Knuth-Morris-Pratt (KMP) algorithm for efficient string pattern matching.
+
+Finds all occurrences of a pattern string within a text string using a failure function
+to avoid redundant comparisons. The preprocessing phase builds a table that allows
+skipping characters during mismatches.
+
+Time complexity: O(n + m) where n is text length and m is pattern length.
+Space complexity: O(m) for the failure function table.
+&quot;&quot;&quot;
+
+from __future__ import annotations
+
+
+def compute_failure_function(pattern: str) -&gt; list[int]:
+    &quot;&quot;&quot;
+    Compute the failure function for KMP algorithm.
+
+    failure[i] = length of longest proper prefix of pattern[0:i+1]
+    that is also a suffix of pattern[0:i+1]
+    &quot;&quot;&quot;
+    m = len(pattern)
+    failure = [0] * m
+    j = 0
+
+    for i in range(1, m):
+        while j &gt; 0 and pattern[i] != pattern[j]:
+            j = failure[j - 1]
+
+        if pattern[i] == pattern[j]:
+            j += 1
+
+        failure[i] = j
+
+    return failure
+
+
+def kmp_search(text: str, pattern: str) -&gt; list[int]:
+    &quot;&quot;&quot;
+    Find all starting positions where pattern occurs in text.
+
+    Returns a list of 0-indexed positions where pattern begins in text.
+    &quot;&quot;&quot;
+    if not pattern:
+        return []
+
+    n, m = len(text), len(pattern)
+    if m &gt; n:
+        return []
+
+    failure = compute_failure_function(pattern)
+    matches = []
+    j = 0  # index for pattern
+
+    for i in range(n):  # index for text
+        while j &gt; 0 and text[i] != pattern[j]:
+            j = failure[j - 1]
+
+        if text[i] == pattern[j]:
+            j += 1
+
+        if j == m:
+            matches.append(i - m + 1)
+            j = failure[j - 1]
+
+    return matches
+
+
+def kmp_count(text: str, pattern: str) -&gt; int:
+    &quot;&quot;&quot;Count number of occurrences of pattern in text.&quot;&quot;&quot;
+    return len(kmp_search(text, pattern))
+
+
+def test_main() -&gt; None:
+    text = &quot;ababcababa&quot;
+    pattern = &quot;aba&quot;
+    matches = kmp_search(text, pattern)
+    assert matches == [0, 5, 7]
+    assert kmp_count(text, pattern) == 3
+
+    # Test failure function
+    failure = compute_failure_function(&quot;abcabcab&quot;)
+    assert failure == [0, 0, 0, 1, 2, 3, 4, 5]
+
+</code></pre>
+    </div>
+    <div class="algorithm-page">
+        <div class="algorithm-header">
+            <h2>Lca</h2>
+            <div class="algorithm-filename">lca.py</div>
+        </div>
+        <pre><code>&quot;&quot;&quot;
+Lowest Common Ancestor (LCA) using binary lifting preprocessing.
+
+Finds the lowest common ancestor of two nodes in a tree efficiently after O(n log n)
+preprocessing. Binary lifting allows answering LCA queries in O(log n) time by
+maintaining ancestors at powers-of-2 distances.
+
+Time complexity: O(n log n) preprocessing, O(log n) per LCA query.
+Space complexity: O(n log n) for the binary lifting table.
+&quot;&quot;&quot;
+
+from __future__ import annotations
+
+# Don&#x27;t use annotations during contest
+from typing import Final, Generic, TypeVar
+
+NodeT = TypeVar(&quot;NodeT&quot;)
+
+
+class LCA(Generic[NodeT]):
+    def __init__(self, root: NodeT) -&gt; None:
+        self.root: Final = root
+        self.graph: dict[NodeT, list[NodeT]] = {}
+        self.depth: dict[NodeT, int] = {}
+        self.parent: dict[NodeT, list[NodeT | None]] = {}
+        self.max_log = 0
+
+    def add_edge(self, u: NodeT, v: NodeT) -&gt; None:
+        &quot;&quot;&quot;Add undirected edge between u and v.&quot;&quot;&quot;
+        if u not in self.graph:
+            self.graph[u] = []
+        if v not in self.graph:
+            self.graph[v] = []
+        self.graph[u].append(v)
+        self.graph[v].append(u)
+
+    def preprocess(self) -&gt; None:
+        &quot;&quot;&quot;Build the binary lifting table. Call after adding all edges.&quot;&quot;&quot;
+        # Find max depth to determine log table size
+        self._dfs_depth(self.root, None, 0)
+
+        nodes = list(self.depth.keys())
+        n = len(nodes)
+        self.max_log = n.bit_length()
+
+        # Initialize parent table
+        for node in nodes:
+            self.parent[node] = [None] * self.max_log
+
+        # Fill first column (direct parents) and compute binary lifting
+        self._dfs_parents(self.root, None)
+
+        # Fill binary lifting table
+        for j in range(1, self.max_log):
+            for node in nodes:
+                parent_j_minus_1 = self.parent[node][j - 1]
+                if parent_j_minus_1 is not None:
+                    self.parent[node][j] = self.parent[parent_j_minus_1][j - 1]
+
+    def _dfs_depth(self, node: NodeT, par: NodeT | None, d: int) -&gt; None:
+        &quot;&quot;&quot;Compute depths of all nodes.&quot;&quot;&quot;
+        self.depth[node] = d
+        for neighbor in self.graph.get(node, []):
+            if neighbor != par:
+                self._dfs_depth(neighbor, node, d + 1)
+
+    def _dfs_parents(self, node: NodeT, par: NodeT | None) -&gt; None:
+        &quot;&quot;&quot;Set direct parents for all nodes.&quot;&quot;&quot;
+        self.parent[node][0] = par
+        for neighbor in self.graph.get(node, []):
+            if neighbor != par:
+                self._dfs_parents(neighbor, node)
+
+    def lca(self, u: NodeT, v: NodeT) -&gt; NodeT:
+        &quot;&quot;&quot;Find lowest common ancestor of u and v.&quot;&quot;&quot;
+        if self.depth[u] &lt; self.depth[v]:
+            u, v = v, u
+
+        # Bring u to same level as v
+        diff = self.depth[u] - self.depth[v]
+        for i in range(self.max_log):
+            if (diff &gt;&gt; i) &amp; 1:
+                u_parent = self.parent[u][i]
+                if u_parent is not None:
+                    u = u_parent
+
+        if u == v:
+            return u
+
+        # Binary search for LCA
+        for i in range(self.max_log - 1, -1, -1):
+            if self.parent[u][i] != self.parent[v][i]:
+                u_parent = self.parent[u][i]
+                v_parent = self.parent[v][i]
+                if u_parent is not None and v_parent is not None:
+                    u = u_parent
+                    v = v_parent
+
+        result = self.parent[u][0]
+        if result is None:
+            msg = &quot;LCA computation failed - invalid tree structure&quot;
+            raise ValueError(msg)
+        return result
+
+    def distance(self, u: NodeT, v: NodeT) -&gt; int:
+        &quot;&quot;&quot;Calculate distance between two nodes.&quot;&quot;&quot;
+        lca_node = self.lca(u, v)
+        return self.depth[u] + self.depth[v] - 2 * self.depth[lca_node]
+
+
+def test_main() -&gt; None:
+    lca = LCA(1)
+    edges = [(1, 2), (1, 3), (2, 4), (2, 5), (3, 6)]
+    for u, v in edges:
+        lca.add_edge(u, v)
+
+    lca.preprocess()
+
+    assert lca.lca(4, 5) == 2
+    assert lca.lca(4, 6) == 1
+    assert lca.distance(4, 6) == 4
+
+</code></pre>
+    </div>
+    <div class="algorithm-page">
+        <div class="algorithm-header">
+            <h2>Polygon Area</h2>
+            <div class="algorithm-filename">polygon_area.py</div>
+        </div>
+        <pre><code>&quot;&quot;&quot;
+Shoelace formula (Gauss&#x27;s area formula) for computing the area of a polygon.
+
+Computes the area of a simple polygon given its vertices in order (clockwise or
+counter-clockwise). Works for both convex and concave polygons.
+
+The formula: Area = 1/2 * |sum(x_i * y_(i+1) - x_(i+1) * y_i)|
+
+Time complexity: O(n) where n is the number of vertices.
+Space complexity: O(1) additional space.
+&quot;&quot;&quot;
+
+from __future__ import annotations
+
+
+def polygon_area(vertices: list[tuple[float, float]]) -&gt; float:
+    &quot;&quot;&quot;
+    Calculate the area of a polygon using the Shoelace formula.
+
+    Args:
+        vertices: List of (x, y) coordinates in order (clockwise or counter-clockwise)
+
+    Returns:
+        The area of the polygon (always positive)
+    &quot;&quot;&quot;
+    if len(vertices) &lt; 3:
+        return 0.0
+
+    n = len(vertices)
+    area = 0.0
+
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i][0] * vertices[j][1]
+        area -= vertices[j][0] * vertices[i][1]
+
+    return abs(area) / 2.0
+
+
+def polygon_signed_area(vertices: list[tuple[float, float]]) -&gt; float:
+    &quot;&quot;&quot;
+    Calculate the signed area of a polygon.
+
+    Returns positive area for counter-clockwise vertices, negative for clockwise.
+    Useful for determining polygon orientation.
+
+    Args:
+        vertices: List of (x, y) coordinates in order
+
+    Returns:
+        The signed area (positive for CCW, negative for CW)
+    &quot;&quot;&quot;
+    if len(vertices) &lt; 3:
+        return 0.0
+
+    n = len(vertices)
+    area = 0.0
+
+    for i in range(n):
+        j = (i + 1) % n
+        area += vertices[i][0] * vertices[j][1]
+        area -= vertices[j][0] * vertices[i][1]
+
+    return area / 2.0
+
+
+def is_clockwise(vertices: list[tuple[float, float]]) -&gt; bool:
+    &quot;&quot;&quot;Check if polygon vertices are in clockwise order.&quot;&quot;&quot;
+    return polygon_signed_area(vertices) &lt; 0
+
+
+def test_main() -&gt; None:
+    # Simple square with side length 2
+    square = [(0.0, 0.0), (2.0, 0.0), (2.0, 2.0), (0.0, 2.0)]
+    assert polygon_area(square) == 4.0
+
+    # Triangle with base 3 and height 4
+    triangle = [(0.0, 0.0), (3.0, 0.0), (1.5, 4.0)]
+    assert polygon_area(triangle) == 6.0
+
+    # Test orientation
+    ccw_square = [(0.0, 0.0), (1.0, 0.0), (1.0, 1.0), (0.0, 1.0)]
+    assert not is_clockwise(ccw_square)
+
+</code></pre>
+    </div>
+    <div class="algorithm-page">
+        <div class="algorithm-header">
+            <h2>Prefix Tree</h2>
+            <div class="algorithm-filename">prefix_tree.py</div>
+        </div>
+        <pre><code>&quot;&quot;&quot;
+Write-only prefix tree (trie) for efficient string storage and retrieval.
+
+Supports adding strings and finding all strings that are prefixes of a given string.
+The tree structure allows for efficient storage of strings with common prefixes.
+
+Time complexity: O(m) for add and find operations, where m is the length of the string.
+Space complexity: O(ALPHABET_SIZE * N * M) in the worst case, where N is the number
+of strings and M is the average length of strings.
+&quot;&quot;&quot;
+
+from __future__ import annotations
+
+import bisect
+
+
+class PrefixTree:
+    def __init__(self) -&gt; None:
+        self.keys: list[str] = []
+        self.values: list[PrefixTree | None] = []
+
+    def pp(self, indent: int = 0) -&gt; None:
+        &quot;&quot;&quot;Pretty-print tree structure for debugging.&quot;&quot;&quot;
+        for key, value in zip(self.keys, self.values):  # Note: add strict=False for Python 3.10+
+            print(&quot; &quot; * indent + key + &quot;: &quot; + (&quot;-&quot; if value is None else &quot;&quot;))
+            if value is not None:
+                value.pp(indent + 2)
+
+    def find_all(self, s: str, offset: int, append_to: list[int]) -&gt; None:
+        &quot;&quot;&quot;Find all strings in tree that are prefixes of s[offset:]. Appends end positions.&quot;&quot;&quot;
+        if self.keys and self.keys[0] == &quot;&quot;:
+            append_to.append(offset)
+        index = bisect.bisect_left(self.keys, s[offset : offset + 1])
+        if index == len(self.keys):
+            return
+        if s[offset : offset + len(self.keys[index])] == self.keys[index]:
+            pt = self.values[index]
+            if pt is None:
+                append_to.append(offset + len(self.keys[index]))
+            else:
+                pt.find_all(s, offset + len(self.keys[index]), append_to)
+
+    def max_len(self) -&gt; int:
+        &quot;&quot;&quot;Return length of longest string in tree.&quot;&quot;&quot;
+        result = 0
+        for key, value in zip(self.keys, self.values):  # Note: add strict=False for Python 3.10+
+            result = max(result, len(key) + (0 if value is None else value.max_len()))
+        return result
+
+    def add(self, s: str) -&gt; None:
+        &quot;&quot;&quot;Add string to tree.&quot;&quot;&quot;
+        if not s or not self.keys:
+            self.keys.insert(0, s)
+            self.values.insert(0, None)
+            return
+
+        pos = bisect.bisect_left(self.keys, s)
+        if pos and self.keys[pos - 1] and self.keys[pos - 1][0] == s[0]:
+            pos -= 1
+        if pos &lt; len(self.keys) and self.keys[pos][:1] == s[:1]:
+            # Merge
+            if s.startswith(self.keys[pos]):
+                pt = self.values[pos]
+                if pt is None:
+                    child = PrefixTree()
+                    child.keys.append(&quot;&quot;)
+                    child.values.append(None)
+                    self.values[pos] = pt = child
+                pt.add(s[len(self.keys[pos]) :])
+            elif self.keys[pos].startswith(s):
+                child = PrefixTree()
+                child.keys.append(&quot;&quot;)
+                child.values.append(None)
+                child.keys.append(self.keys[pos][len(s) :])
+                child.values.append(self.values[pos])
+                self.keys[pos] = s
+                self.values[pos] = child
+            else:
+                prefix = 1
+                while s[prefix] == self.keys[pos][prefix]:
+                    prefix += 1
+                child = PrefixTree()
+                if s &lt; self.keys[pos]:
+                    child.keys.append(s[prefix:])
+                    child.values.append(None)
+                child.keys.append(self.keys[pos][prefix:])
+                child.values.append(self.values[pos])
+                if s &gt;= self.keys[pos]:
+                    child.keys.append(s[prefix:])
+                    child.values.append(None)
+                self.keys[pos] = s[:prefix]
+                self.values[pos] = child
+        else:
+            self.keys.insert(pos, s)
+            self.values.insert(pos, None)
+
+
+def test_main() -&gt; None:
+    p = PrefixTree()
+    p.add(&quot;cat&quot;)
+    p.add(&quot;car&quot;)
+    p.add(&quot;card&quot;)
+    l: list[int] = []
+    p.find_all(&quot;card&quot;, 0, l)
+    assert l == [3, 4]
+    assert p.max_len() == 4
+
+</code></pre>
+    </div>
+    <div class="algorithm-page">
+        <div class="algorithm-header">
+            <h2>Priority Queue</h2>
+            <div class="algorithm-filename">priority_queue.py</div>
+        </div>
+        <pre><code>&quot;&quot;&quot;
+Priority queue implementation using a binary heap.
+
+This module provides a generic priority queue that supports adding items with priorities,
+updating priorities, removing items, and popping the item with the lowest priority.
+The implementation uses Python&#x27;s heapq module for efficient heap operations.
+
+Time complexity: O(log n) for add/update and pop operations, O(log n) for remove.
+Space complexity: O(n) where n is the number of items in the queue.
+&quot;&quot;&quot;
+
+import heapq
+import itertools
+
+# Don&#x27;t use annotations during contest
+from typing import Final, Generic, Protocol, TypeVar, cast
+
+from typing_extensions import Self
+
+
+class Comparable(Protocol):
+    def __lt__(self, other: Self, /) -&gt; bool: ...
+
+
+KeyT = TypeVar(&quot;KeyT&quot;)
+PriorityT = TypeVar(&quot;PriorityT&quot;, bound=Comparable)
+
+
+class PriorityQueue(Generic[KeyT, PriorityT]):
+    _REMOVED: Final = object()  # placeholder for a removed task
+
+    def __init__(self) -&gt; None:
+        self._size = 0
+        # list of entries arranged in a heap
+        self._pq: list[list[object]] = []
+        # mapping of tasks to entries
+        self._entry_finder: dict[KeyT, list[object]] = {}
+        self._counter: Final = itertools.count()  # unique sequence count
+
+    def __setitem__(self, key: KeyT, priority: PriorityT) -&gt; None:
+        &quot;&quot;&quot;Add new task or update priority. Lower priority = popped first.&quot;&quot;&quot;
+        if key in self._entry_finder:
+            self.remove(key)
+        self._size += 1
+        entry = [priority, key]
+        self._entry_finder[key] = entry
+        heapq.heappush(self._pq, entry)
+
+    def remove(self, key: KeyT) -&gt; None:
+        &quot;&quot;&quot;Remove task by key. Raises KeyError if not found.&quot;&quot;&quot;
+        entry = self._entry_finder.pop(key)
+        entry[-1] = PriorityQueue._REMOVED
+        self._size -= 1
+
+    def pop(self) -&gt; tuple[KeyT, PriorityT]:
+        &quot;&quot;&quot;Remove and return (key, priority) with lowest priority. Raises KeyError if empty.&quot;&quot;&quot;
+        while self._pq:
+            priority, task = heapq.heappop(self._pq)
+            if task is not PriorityQueue._REMOVED:
+                del self._entry_finder[cast(&quot;KeyT&quot;, task)]
+                self._size -= 1
+                return cast(&quot;tuple[KeyT, PriorityT]&quot;, (task, priority))
+        raise KeyError(&quot;pop from an empty priority queue&quot;)
+
+    def peek(self) -&gt; tuple[KeyT, PriorityT] | None:
+        &quot;&quot;&quot;Return (key, priority) with lowest priority without removing. Returns None if empty.&quot;&quot;&quot;
+        while self._pq:
+            priority, task = self._pq[0]
+            if task is not PriorityQueue._REMOVED:
+                return cast(&quot;tuple[KeyT, PriorityT]&quot;, (task, priority))
+            # Remove the REMOVED sentinel from the top
+            heapq.heappop(self._pq)
+        return None
+
+    def __contains__(self, key: KeyT) -&gt; bool:
+        &quot;&quot;&quot;Check if key exists in queue.&quot;&quot;&quot;
+        return key in self._entry_finder
+
+    def __len__(self) -&gt; int:
+        return self._size
+
+
+def test_main() -&gt; None:
+    p: PriorityQueue[str, int] = PriorityQueue()
+    p[&quot;x&quot;] = 15
+    p[&quot;y&quot;] = 23
+    p[&quot;z&quot;] = 8
+    assert p.peek() == (&quot;z&quot;, 8)
+    assert p.pop() == (&quot;z&quot;, 8)
+    assert p.pop() == (&quot;x&quot;, 15)
+
+</code></pre>
+    </div>
+    <div class="algorithm-page">
+        <div class="algorithm-header">
+            <h2>Segment Tree</h2>
+            <div class="algorithm-filename">segment_tree.py</div>
+        </div>
+        <pre><code>&quot;&quot;&quot;
+Segment tree for efficient range queries and updates.
+
+Supports range sum queries, point updates, and can be easily modified for other operations
+like range minimum, maximum, or more complex functions. The tree uses 1-indexed array
+representation with lazy propagation for range updates.
+
+Time complexity: O(log n) for query and update operations, O(n) for construction.
+Space complexity: O(n) for the tree structure.
+&quot;&quot;&quot;
+
+from __future__ import annotations
+
+# Don&#x27;t use annotations during contest
+from typing import Final, Generic, Protocol, TypeVar
+
+from typing_extensions import Self
+
+
+class Summable(Protocol):
+    def __add__(self, other: Self, /) -&gt; Self: ...
+
+
+ValueT = TypeVar(&quot;ValueT&quot;, bound=Summable)
+
+
+class SegmentTree(Generic[ValueT]):
+    def __init__(self, arr: list[ValueT], zero: ValueT) -&gt; None:
+        self.n: Final = len(arr)
+        self.zero: Final = zero
+        # Tree needs 4*n space for worst case
+        self.tree: list[ValueT] = [zero] * (4 * self.n)
+        if arr:
+            self._build(arr, 1, 0, self.n - 1)
+
+    def _build(self, arr: list[ValueT], node: int, start: int, end: int) -&gt; None:
+        if start == end:
+            self.tree[node] = arr[start]
+        else:
+            mid = (start + end) // 2
+            self._build(arr, 2 * node, start, mid)
+            self._build(arr, 2 * node + 1, mid + 1, end)
+            self.tree[node] = self.tree[2 * node] + self.tree[2 * node + 1]
+
+    def update(self, idx: int, val: ValueT) -&gt; None:
+        &quot;&quot;&quot;Update value at index idx to val.&quot;&quot;&quot;
+        if not (0 &lt;= idx &lt; self.n):
+            msg = f&quot;Index {idx} out of bounds for size {self.n}&quot;
+            raise IndexError(msg)
+        self._update(1, 0, self.n - 1, idx, val)
+
+    def _update(self, node: int, start: int, end: int, idx: int, val: ValueT) -&gt; None:
+        if start == end:
+            self.tree[node] = val
+        else:
+            mid = (start + end) // 2
+            if idx &lt;= mid:
+                self._update(2 * node, start, mid, idx, val)
+            else:
+                self._update(2 * node + 1, mid + 1, end, idx, val)
+            self.tree[node] = self.tree[2 * node] + self.tree[2 * node + 1]
+
+    def query(self, left: int, right: int) -&gt; ValueT:
+        &quot;&quot;&quot;Query sum of range [left, right] inclusive.&quot;&quot;&quot;
+        if not (0 &lt;= left &lt;= right &lt; self.n):
+            msg = f&quot;Invalid range [{left}, {right}] for size {self.n}&quot;
+            raise IndexError(msg)
+        return self._query(1, 0, self.n - 1, left, right)
+
+    def _query(self, node: int, start: int, end: int, left: int, right: int) -&gt; ValueT:
+        if right &lt; start or left &gt; end:
+            return self.zero
+        if left &lt;= start and end &lt;= right:
+            return self.tree[node]
+        mid = (start + end) // 2
+        left_sum = self._query(2 * node, start, mid, left, right)
+        right_sum = self._query(2 * node + 1, mid + 1, end, left, right)
+        return left_sum + right_sum
+
+
+def test_main() -&gt; None:
+    st = SegmentTree([1, 3, 5, 7, 9], 0)
+    assert st.query(1, 3) == 15
+    st.update(2, 10)
+    assert st.query(1, 3) == 20
+    assert st.query(0, 4) == 30
+
+</code></pre>
+    </div>
+    <div class="algorithm-page">
+        <div class="algorithm-header">
+            <h2>Topological Sort</h2>
+            <div class="algorithm-filename">topological_sort.py</div>
+        </div>
+        <pre><code>&quot;&quot;&quot;
+Topological sorting for Directed Acyclic Graphs (DAGs).
+
+Produces a linear ordering of vertices such that for every directed edge (u, v),
+vertex u comes before v in the ordering. Uses both DFS-based and Kahn&#x27;s algorithm
+(BFS-based) approaches for different use cases.
+
+Time complexity: O(V + E) for both algorithms, where V is vertices and E is edges.
+Space complexity: O(V + E) for the graph representation and auxiliary data structures.
+&quot;&quot;&quot;
+
+from __future__ import annotations
+
+from collections import deque
+
+# Don&#x27;t use annotations during contest
+from typing import Generic, TypeVar
+
+NodeT = TypeVar(&quot;NodeT&quot;)
+
+
+class TopologicalSort(Generic[NodeT]):
+    def __init__(self) -&gt; None:
+        self.graph: dict[NodeT, list[NodeT]] = {}
+        self.in_degree: dict[NodeT, int] = {}
+
+    def add_edge(self, u: NodeT, v: NodeT) -&gt; None:
+        &quot;&quot;&quot;Add directed edge from u to v.&quot;&quot;&quot;
+        if u not in self.graph:
+            self.graph[u] = []
+            self.in_degree[u] = 0
+        if v not in self.in_degree:
+            self.in_degree[v] = 0
+            self.graph[v] = []
+
+        self.graph[u].append(v)
+        self.in_degree[v] += 1
+
+    def kahn_sort(self) -&gt; list[NodeT] | None:
+        &quot;&quot;&quot;
+        Topological sort using Kahn&#x27;s algorithm (BFS-based).
+
+        Returns the topological ordering, or None if the graph has a cycle.
+        &quot;&quot;&quot;
+        in_deg = self.in_degree.copy()
+        queue = deque([node for node, deg in in_deg.items() if deg == 0])
+        result = []
+
+        while queue:
+            node = queue.popleft()
+            result.append(node)
+
+            for neighbor in self.graph[node]:
+                in_deg[neighbor] -= 1
+                if in_deg[neighbor] == 0:
+                    queue.append(neighbor)
+
+        # Check if all nodes are processed (no cycle)
+        if len(result) != len(self.in_degree):
+            return None
+
+        return result
+
+    def dfs_sort(self) -&gt; list[NodeT] | None:
+        &quot;&quot;&quot;
+        Topological sort using DFS.
+
+        Returns the topological ordering, or None if the graph has a cycle.
+        &quot;&quot;&quot;
+        WHITE, GRAY, BLACK = 0, 1, 2
+        color = dict.fromkeys(self.in_degree, WHITE)
+        result = []
+
+        def dfs(node: NodeT) -&gt; bool:
+            if color[node] == GRAY:  # Back edge (cycle)
+                return False
+            if color[node] == BLACK:  # Already processed
+                return True
+
+            color[node] = GRAY
+            for neighbor in self.graph[node]:
+                if not dfs(neighbor):
+                    return False
+
+            color[node] = BLACK
+            result.append(node)
+            return True
+
+        for node in self.in_degree:
+            if color[node] == WHITE and not dfs(node):
+                return None
+
+        return result[::-1]
+
+    def has_cycle(self) -&gt; bool:
+        &quot;&quot;&quot;Check if the graph contains a cycle.&quot;&quot;&quot;
+        return self.kahn_sort() is None
+
+    def longest_path(self) -&gt; dict[NodeT, int]:
+        &quot;&quot;&quot;
+        Find longest path from each node in the DAG.
+
+        Returns a dictionary mapping each node to its longest path length.
+        &quot;&quot;&quot;
+        topo_order = self.kahn_sort()
+        if topo_order is None:
+            msg = &quot;Graph contains a cycle&quot;
+            raise ValueError(msg)
+
+        dist = dict.fromkeys(self.in_degree, 0)
+
+        for node in topo_order:
+            for neighbor in self.graph[node]:
+                dist[neighbor] = max(dist[neighbor], dist[node] + 1)
+
+        return dist
+
+
+def test_main() -&gt; None:
+    ts: TopologicalSort[int] = TopologicalSort()
+    edges = [(5, 2), (5, 0), (4, 0), (4, 1), (2, 3), (3, 1)]
+    for u, v in edges:
+        ts.add_edge(u, v)
+
+    kahn_result = ts.kahn_sort()
+    dfs_result = ts.dfs_sort()
+
+    assert kahn_result is not None
+    assert dfs_result is not None
+    assert not ts.has_cycle()
+
+    # Test with cycle
+    ts_cycle: TopologicalSort[int] = TopologicalSort()
+    ts_cycle.add_edge(1, 2)
+    ts_cycle.add_edge(2, 3)
+    ts_cycle.add_edge(3, 1)
+    assert ts_cycle.has_cycle()
+
+</code></pre>
+    </div>
+    <div class="algorithm-page">
+        <div class="algorithm-header">
+            <h2>Union Find</h2>
+            <div class="algorithm-filename">union_find.py</div>
+        </div>
+        <pre><code>&quot;&quot;&quot;
+Union-find (disjoint-set union, DSU) maintains a collection of disjoint sets under two operations:
+
+* find(x): return the representative (root) of the set containing x.
+* union(x, y): merge the sets containing x and y.
+
+Time complexity: O(alpha(n)) per operation with path compression and union by rank,
+where alpha is the inverse Ackermann function (effectively constant for practical purposes).
+&quot;&quot;&quot;
+
+from __future__ import annotations
+
+# Don&#x27;t use annotations during contest
+from typing import TYPE_CHECKING, cast
+
+if TYPE_CHECKING:
+    from typing_extensions import Self
+
+
+class UnionFind:
+    def __init__(self) -&gt; None:
+        self.parent = self
+        self.rank = 0
+
+    def merge(self, other: Self) -&gt; None:
+        &quot;&quot;&quot;Override to define custom merge behavior when sets are united.&quot;&quot;&quot;
+
+    def find(self) -&gt; Self:
+        &quot;&quot;&quot;Return root of this set with path compression.&quot;&quot;&quot;
+        if self.parent == self:
+            return self
+        self.parent = self.parent.find()
+        return cast(&quot;Self&quot;, self.parent)
+
+    def union(self, other: Self) -&gt; Self:
+        &quot;&quot;&quot;Unite sets containing self and other. Returns the new root.&quot;&quot;&quot;
+        x = self.find()
+        y = other.find()
+        if x is y:
+            return x
+        if x.rank &lt; y.rank:
+            x.parent = y
+            y.merge(x)
+            return y
+        if x.rank &gt; y.rank:
+            y.parent = x
+            x.merge(y)
+            return x
+        x.parent = y
+        y.merge(x)
+        y.rank += 1
+        return y
+
+
+class Test(UnionFind):
+    &quot;&quot;&quot;Better to modify copy of UnionFind class and avoid having to type cast everywhere.&quot;&quot;&quot;
+
+    def __init__(self) -&gt; None:
+        super().__init__()
+        self.size = 1
+
+    def merge(self, other: Self) -&gt; None:
+        assert isinstance(other, Test)
+        self.size += other.size
+
+
+def test_main() -&gt; None:
+    a, b, c = Test(), Test(), Test()
+    d = a.union(b)
+    e = d.union(c)
+    assert e.find().size == 3
+    assert a.find().size == 3
+
+</code></pre>
+    </div>
+</body>
+</html>
