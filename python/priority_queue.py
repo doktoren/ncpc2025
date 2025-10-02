@@ -85,6 +85,7 @@ def test_main() -> None:
     p["x"] = 15
     p["y"] = 23
     p["z"] = 8
+    assert p.peek() == ("z", 8)
     assert p.pop() == ("z", 8)
     assert p.pop() == ("x", 15)
 

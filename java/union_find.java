@@ -15,16 +15,13 @@ class union_find {
     static class UnionFind {
         private int[] parent;
         private int[] rank;
-        private int[] size;
 
         UnionFind(int n) {
             parent = new int[n];
             rank = new int[n];
-            size = new int[n];
             for (int i = 0; i < n; i++) {
                 parent[i] = i;
                 rank[i] = 0;
-                size[i] = 1;
             }
         }
 
@@ -46,15 +43,15 @@ class union_find {
             // Union by rank
             if (rank[rootX] < rank[rootY]) {
                 parent[rootX] = rootY;
-                size[rootY] += size[rootX];
+                merge(rootY, rootX);
                 return rootY;
             } else if (rank[rootX] > rank[rootY]) {
                 parent[rootY] = rootX;
-                size[rootX] += size[rootY];
+                merge(rootX, rootY);
                 return rootX;
             } else {
                 parent[rootY] = rootX;
-                size[rootX] += size[rootY];
+                merge(rootX, rootY);
                 rank[rootX]++;
                 return rootX;
             }
@@ -64,13 +61,34 @@ class union_find {
             return find(x) == find(y);
         }
 
+        void merge(int root, int child) {
+            // Override to define custom merge behavior when sets are united
+        }
+    }
+
+    static class Test extends UnionFind {
+        private int[] size;
+
+        Test(int n) {
+            super(n);
+            size = new int[n];
+            for (int i = 0; i < n; i++) {
+                size[i] = 1;
+            }
+        }
+
+        @Override
+        void merge(int root, int child) {
+            size[root] += size[child];
+        }
+
         int getSize(int x) {
             return size[find(x)];
         }
     }
 
     static void testMain() {
-        UnionFind a = new UnionFind(3);
+        Test a = new Test(3);
         int d = a.union(0, 1);
         int e = a.union(d, 2);
         assert a.getSize(e) == 3;
@@ -80,13 +98,13 @@ class union_find {
     // Don't write tests below during competition.
 
     static void testSingleElement() {
-        UnionFind uf = new UnionFind(1);
+        Test uf = new Test(1);
         assert uf.find(0) == 0;
         assert uf.getSize(0) == 1;
     }
 
     static void testUnionSameSet() {
-        UnionFind uf = new UnionFind(2);
+        Test uf = new Test(2);
         uf.union(0, 1);
         // Unioning again should be safe
         int root = uf.union(0, 1);
@@ -95,7 +113,7 @@ class union_find {
     }
 
     static void testMultipleUnions() {
-        UnionFind uf = new UnionFind(10);
+        Test uf = new Test(10);
         // Chain union: 0-1-2-3-4-5-6-7-8-9
         for (int i = 0; i < 9; i++) {
             uf.union(i, i + 1);
@@ -112,12 +130,12 @@ class union_find {
 
     static void testUnionOrderIndependence() {
         // Test that union order doesn't affect final result
-        UnionFind uf1 = new UnionFind(3);
+        Test uf1 = new Test(3);
         uf1.union(0, 1);
         uf1.union(1, 2);
         int root1 = uf1.find(0);
 
-        UnionFind uf2 = new UnionFind(3);
+        Test uf2 = new Test(3);
         uf2.union(2, 1);
         uf2.union(1, 0);
         int root2 = uf2.find(0);
@@ -127,7 +145,7 @@ class union_find {
     }
 
     static void testDisconnectedSets() {
-        UnionFind uf = new UnionFind(4);
+        Test uf = new Test(4);
 
         uf.union(0, 1);
         uf.union(2, 3);
@@ -141,7 +159,7 @@ class union_find {
     }
 
     static void testLargeSet() {
-        UnionFind uf = new UnionFind(100);
+        Test uf = new Test(100);
 
         // Union in pairs
         for (int i = 0; i < 100; i += 2) {

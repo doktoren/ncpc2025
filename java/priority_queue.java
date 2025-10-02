@@ -125,6 +125,7 @@ class priority_queue {
         p.push(15);
         p.push(23);
         p.push(8);
+        assert p.peek() == 8;
         assert p.pop() == 8;
         assert p.pop() == 15;
     }

@@ -115,6 +115,8 @@ void test_main() {
     p.set("x", 15);
     p.set("y", 23);
     p.set("z", 8);
+    auto peek_result = p.peek();
+    assert(peek_result.first == "z" && peek_result.second == 8);
     auto result1 = p.pop();
     assert(result1.first == "z" && result1.second == 8);
     auto result2 = p.pop();

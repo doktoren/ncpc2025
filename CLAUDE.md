@@ -18,6 +18,8 @@ All algorithms MUST be kept in sync across Python, C++, and Java implementations
 - Same edge case handling
 - Same complexity guarantees
 - Consistent documentation and comments
+- Generic implementations: All data structures should support generic types where applicable (not restrict to int/long unless necessary)
+- Basic vs Optional: Separate basic functionality from optional/extending functionality with comment markers
 
 ## Development Commands
 
@@ -57,7 +59,11 @@ cd java && ./test_single.sh <algorithm>
 Each module follows a strict structure optimized for competition typing:
 
 1. **Implementation** (classes/algorithms)
+   - Basic functionality (core operations needed in most problems)
+   - **Optional marker**: `# Optional functionality (not always needed during competition)` (Python) or `// Optional functionality (not always needed during competition)` (C++/Java)
+   - Optional/extending functionality (advanced features, helper methods, optimizations)
 2. **`test_main()`** (Python), `testMain()` (Java), or `test_main()` (C++) - The ONLY function to type during competition
+   - Same split: basic tests, then optional marker, then optional tests
 3. **Competition barrier**:
    - Python: `# Don't write tests below during competition.`
    - Java: `// Don't write tests below during competition.`
@@ -118,18 +124,25 @@ Each module follows a strict structure optimized for competition typing:
 - `Self` return types for proper inheritance support
 - `Final` annotations for immutable fields
 - Consistent error handling with descriptive messages
+- Inheritance-based extension pattern (e.g., `UnionFind` base class, `Test` extending class for optional features)
 
 **C++:**
-- Template-based generic implementations
+- Template-based generic implementations (`template<typename T>`)
 - RAII for automatic resource management
 - STL container usage for efficiency
 - Exception-based error handling
+- Inheritance-based extension pattern with virtual methods
 
 **Java:**
-- Generic implementations with bounded type parameters
+- Generic implementations with bounded type parameters (e.g., `<T extends Comparable<T>>`)
 - Standard library collections (ArrayList, HashMap, PriorityQueue)
 - Static methods within classes matching filename
 - Exception-based error handling with descriptive messages
+- Inheritance-based extension pattern (e.g., `UnionFind` base class, `Test` extending class for optional features)
+
+**Error Handling Conventions:**
+- Invalid range queries (e.g., `range_query` in FenwickTree): Return zero/default value instead of throwing exceptions for consistency
+- Out of bounds access: Throw appropriate exceptions (`IndexError` in Python, `IndexOutOfBoundsException` in Java, `std::out_of_range` in C++)
 
 ### Competition Guidelines
 
@@ -168,6 +181,11 @@ Each module follows a strict structure optimized for competition typing:
 - `test_main()` functions use multi-digit expected values (12, 39, etc.) to catch real implementation errors
 - Multiple assertions per test to verify different aspects
 - No verbose output - silent success, clear failure via assertions
+- **Function Coverage Requirements:**
+  - All implemented public methods MUST be called in `test_main()` (directly or indirectly)
+  - If method A calls method B internally and A is tested, B doesn't need separate testing UNLESS A is optional and B is basic
+  - Optional methods should be tested if they provide important functionality (e.g., `from_array`, `peek`)
+  - The goal: ensure no write-down-from-paper errors by calling every function at least once
 
 ### Type System Usage
 

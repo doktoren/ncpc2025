@@ -78,17 +78,16 @@ public:
     }
 
     T range_query(int left, int right) {
-        if (left > right) {
+        if (left > right || left < 0 || right >= size) {
             return zero;
-        }
-        if (left < 0 || right >= size) {
-            throw std::out_of_range("Range out of bounds");
         }
         if (left == 0) {
             return query(right);
         }
         return query(right) - query(left - 1);
     }
+
+    // Optional functionality (not always needed during competition)
 
     T get_value(int index) {
         if (index < 0 || index >= size) {
@@ -149,7 +148,12 @@ void test_main() {
     f.update(4, 19);
     assert(f.query(4) == 39);
     assert(f.range_query(1, 3) == 13);
+
+    // Optional functionality (not always needed during competition)
+
     assert(f.get_value(2) == 13);
+    auto g = FenwickTree<int>::from_array({1, 2, 3, 4, 5}, 0);
+    assert(g.query(4) == 15);
 }
 
 // Don't write tests below during competition.
@@ -274,22 +278,9 @@ void test_bounds_checking() {
     }
     assert(caught);
 
-    // Test range_query bounds
-    caught = false;
-    try {
-        ft.range_query(-1, 2);
-    } catch (const std::out_of_range&) {
-        caught = true;
-    }
-    assert(caught);
-
-    caught = false;
-    try {
-        ft.range_query(0, 5);
-    } catch (const std::out_of_range&) {
-        caught = true;
-    }
-    assert(caught);
+    // Test range_query bounds - should return zero for invalid ranges
+    assert(ft.range_query(-1, 2) == 0);
+    assert(ft.range_query(0, 5) == 0);
 
     // Test get_value bounds
     caught = false;

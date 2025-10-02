@@ -91,6 +91,8 @@ class FenwickTree(Generic[ValueT]):
             return self.query(right)
         return self.query(right) - self.query(left - 1)
 
+    # Optional functionality (not always needed during competition)
+
     def get_value(self, index: int) -> ValueT:
         """Get the current value at a specific index."""
         if not (0 <= index < self.size):
@@ -142,7 +144,12 @@ def test_main() -> None:
     f.update(4, 19)
     assert f.query(4) == 39
     assert f.range_query(1, 3) == 13
+
+    # Optional functionality (not always needed during competition)
+
     assert f.get_value(2) == 13
+    g = FenwickTree.from_array([1, 2, 3, 4, 5], 0)
+    assert g.query(4) == 15
 
 
 # Don't write tests below during competition.
@@ -242,18 +249,9 @@ def test_bounds_checking() -> None:
     except IndexError:
         pass
 
-    # Test range_query bounds
-    try:
-        ft.range_query(-1, 2)
-        assert False, "Should raise IndexError for negative left"
-    except IndexError:
-        pass
-
-    try:
-        ft.range_query(0, 5)
-        assert False, "Should raise IndexError for right >= size"
-    except IndexError:
-        pass
+    # Test range_query bounds - should return zero for invalid ranges
+    assert ft.range_query(-1, 2) == 0
+    assert ft.range_query(0, 5) == 0
 
     # Test get_value bounds
     try:
