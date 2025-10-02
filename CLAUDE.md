@@ -121,6 +121,7 @@ Each module follows a strict structure optimized for competition typing:
 - `kmp.py` - String matching algorithm
 - `lca.py` - Lowest Common Ancestor queries
 - `polygon_area.py` - Shoelace formula for polygon area
+- `sprague_grundy.py` - Sprague-Grundy theorem for impartial games
 
 **C++ (`cpp/`):**
 - `fenwick_tree.cpp` - Binary Indexed Tree template implementation
@@ -135,6 +136,7 @@ Each module follows a strict structure optimized for competition typing:
 - `kmp.cpp` - String matching algorithm
 - `lca.cpp` - Lowest Common Ancestor with binary lifting
 - `polygon_area.cpp` - Shoelace formula for polygon area
+- `sprague_grundy.cpp` - Sprague-Grundy theorem for impartial games
 
 **Java (`java/`):**
 - `fenwick_tree.java` - Binary Indexed Tree implementation
@@ -149,6 +151,7 @@ Each module follows a strict structure optimized for competition typing:
 - `kmp.java` - String matching algorithm
 - `lca.java` - Lowest Common Ancestor with binary lifting
 - `polygon_area.java` - Shoelace formula for polygon area
+- `sprague_grundy.java` - Sprague-Grundy theorem for impartial games
 
 **Key Design Patterns:**
 

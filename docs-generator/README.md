@@ -4,25 +4,21 @@ This tool generates printable PDF documents containing source code for algorithm
 
 ## Usage
 
-To see all available options:
-
-```bash
-uv run --python 3.13 generate_docs.py --help
-```
+The script automatically generates 6 PDF documents (3 languages × 2 versions each):
+- `algorithms_python.pdf` / `algorithms_python_extra.pdf`
+- `algorithms_cpp.pdf` / `algorithms_cpp_extra.pdf`
+- `algorithms_java.pdf` / `algorithms_java_extra.pdf`
 
 Basic usage:
 ```bash
-# Generate PDF docs for Python algorithms
-uv run --python 3.13 --with pygments --with playwright generate_docs.py python
+# Generate all PDF documentation (6 files total)
+python3 generate_docs.py
 
-# Generate PDF docs for all languages
-uv run --python 3.13 --with pygments --with playwright generate_docs.py all
-
-# Include development tests (normally excluded)
-uv run --python 3.13 --with pygments --with playwright generate_docs.py python --include-dev-tests
+# Or use the uv wrapper script (recommended)
+../update_docs.sh
 ```
 
-The script processes algorithm files from the parent directory's `python/`, `cpp/`, and `java/` folders and generates PDF documents in the `output/` directory.
+The script processes algorithm files from the parent directory's `python/`, `cpp/`, and `java/` folders and generates PDF documents in the `output/` directory. No arguments are needed - it always generates all combinations.
 
 ## Implementation Details
 

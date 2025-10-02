@@ -1,22 +1,27 @@
 """
-Sprague-Grundy reference (impartial, finite, acyclic, normal-play).
+Sprague-Grundy theorem implementation for impartial games (finite, acyclic, normal-play).
+
+The Sprague-Grundy theorem states that every impartial game is equivalent to a Nim heap
+of size equal to its Grundy number (nimber). For multiple independent games,
+XOR the Grundy numbers to determine the combined game value.
 
 API:
-- GrundyEngine(get_valid_moves): gør det let at plugge et spil på.
-- grundy(state): nimber for en state (hashable).
-- grundy_multi(states): XOR af nimbers for uafhængige delspil.
+- GrundyEngine(get_valid_moves): makes it easy to plug in any game.
+- grundy(state): compute nimber for a state (must be hashable).
+- grundy_multi(states): XOR of nimbers for independent subgames.
 - is_winning_position(states): True iff XOR != 0.
 
-Inkluderer:
-- Nim (én bunke).
-- Subtraction game (tilladte træk = {1,3,4}) med periode-detektion.
-- Kayles (bowlingpins) m. split til delspil via tuple-repræsentation.
+Includes implementations for:
+- Nim (single heap).
+- Subtraction game (allowed moves = {1,3,4}) with period detection.
+- Kayles (bowling pins) with splits into subgames via tuple representation.
 
-Krav:
-- State skal være hashable og kanonisk repræsenteret (fx tuple/sorteret tuple).
-- get_valid_moves(state) må ikke skabe cykler.
+Requirements:
+- State must be hashable and canonically represented (e.g., tuple/sorted tuple).
+- get_valid_moves(state) must not create cycles.
 """
 
+# Don't use annotations during contest
 from __future__ import annotations
 
 from functools import lru_cache
@@ -28,7 +33,7 @@ MovesFn = Callable[[State], Iterable[State]]
 
 
 def mex(values: Iterable[int]) -> int:
-    """Minimum EXcludant: mindste ikke-negative heltal, der ikke forekommer i 'values'."""
+    """Minimum EXcludant: smallest non-negative integer not occurring in 'values'."""
     s = set(values)
     g = 0
     while g in s:
@@ -37,7 +42,7 @@ def mex(values: Iterable[int]) -> int:
 
 
 class GrundyEngine:
-    """Wrapper der binder en move-funktion og leverer grundy(), XOR osv."""
+    """Wrapper that binds a move function and provides grundy(), XOR operations, etc."""
     def __init__(self, get_valid_moves: MovesFn) -> None:
         self._moves: Final = get_valid_moves
 
@@ -63,12 +68,10 @@ class GrundyEngine:
         return self.grundy_multi(states) != 0
 
 
-# -----------------------------
-# Hjælpefunktioner til tests
-# -----------------------------
+# Optional functionality (not always needed during competition)
 
 def detect_period(seq: list[int], min_period: int = 1, max_period: int | None = None) -> int | None:
-    """Find mindste periode p, så seq gentager sig (helt) med periode p."""
+    """Find smallest period p such that seq repeats (completely) with period p."""
     n = len(seq)
     if max_period is None:
         max_period = n // 2
@@ -83,18 +86,14 @@ def detect_period(seq: list[int], min_period: int = 1, max_period: int | None = 
     return None
 
 
-# -----------------------------
-# Spil-definitioner (bruges i tests)
-# -----------------------------
-
 def nim_moves_single_heap(n: int) -> Iterable[int]:
-    """Nim: én bunke. Træk: tag 1..n sten."""
+    """Nim: single heap. Move: take 1..n stones."""
     for k in range(n):
-        yield k  # efterlad 0..n-1
+        yield k  # leave 0..n-1
 
 
 def subtraction_game_moves_factory(allowed: set[int]) -> MovesFn:
-    """Subtraction game: state = int; tilladte træk = trækstørrelser i 'allowed'."""
+    """Subtraction game: state = int; allowed moves = move sizes in 'allowed'."""
     allowed_sorted = tuple(sorted(allowed))
     def moves(n: int) -> Iterable[int]:
         for d in allowed_sorted:
@@ -105,16 +104,16 @@ def subtraction_game_moves_factory(allowed: set[int]) -> MovesFn:
 
 def kayles_moves(segments: tuple[int, ...]) -> Iterable[tuple[int, ...]]:
     """
-    Kayles (bowlingpins):
-    State: sorteret tuple af segment-længder. Et træk fjerner 1 pin eller 2 nabo-pins i ét segment
-    og splitter dermed i op til to nye segmenter. Returnér ny kanonisk (sorteret) state.
+    Kayles (bowling pins):
+    State: sorted tuple of segment lengths. A move removes 1 pin or 2 adjacent pins in one segment,
+    thus splitting it into up to two new segments. Return new canonical (sorted) state.
     """
     res: set[tuple[int, ...]] = set()
     for idx, n in enumerate(segments):
         if n <= 0:
             continue
 
-        # Fjern én pin ved position i (0..n-1)
+        # Remove one pin at position i (0..n-1)
         for i in range(n):
             left = i
             right = n - i - 1
@@ -126,7 +125,7 @@ def kayles_moves(segments: tuple[int, ...]) -> Iterable[tuple[int, ...]]:
             new_seg.extend(segments[idx + 1 :])
             res.add(tuple(sorted(new_seg)))
 
-        # Fjern to nabo-pins ved position i,i+1 (0..n-2)
+        # Remove two adjacent pins at position i,i+1 (0..n-2)
         for i in range(n - 1):
             left = i
             right = n - i - 2
@@ -141,49 +140,62 @@ def kayles_moves(segments: tuple[int, ...]) -> Iterable[tuple[int, ...]]:
     return res
 
 
-# -----------------------------
-# Tests
-# -----------------------------
-
-def test_nim_basic() -> None:
+def test_main() -> None:
+    # Test Nim with larger values
     eng = GrundyEngine(nim_moves_single_heap)
-    # Kendt: grundy(n) = n
+    assert eng.grundy(42) == 42
+    assert eng.grundy_multi([17, 23, 31]) == 25  # 17^23^31 = 25
+    assert eng.is_winning_position([15, 27, 36]) is True  # 15^27^36 = 48 != 0
+
+    # Test subtraction game {1,3,4} with period 7
+    eng2 = GrundyEngine(subtraction_game_moves_factory({1, 3, 4}))
+    assert eng2.grundy(14) == 0  # 14 % 7 = 0 → grundy = 0
+    assert eng2.grundy(15) == 1  # 15 % 7 = 1 → grundy = 1
+    assert eng2.grundy(18) == 2  # 18 % 7 = 4 → grundy = 2
+
+    # Test Kayles
+    eng3 = GrundyEngine(kayles_moves)
+    assert eng3.grundy((7,)) == 2  # K(7) = 2
+    assert eng3.grundy((3, 5)) == 7  # K(3)^K(5) = 3^4 = 7
+
+
+# Don't write tests below during competition.
+
+
+def test_nim_extended() -> None:
+    eng = GrundyEngine(nim_moves_single_heap)
+    # Known: grundy(n) = n for all n in Nim
     for n in range(0, 64):
         assert eng.grundy(n) == n
 
-    # Multi-heap: XOR-regel
-    assert eng.grundy_multi([3, 4, 5]) == (3 ^ 4 ^ 5)
-    assert eng.is_winning_position([1, 2, 3]) is False  # 1^2^3 = 0
-    assert eng.is_winning_position([1, 2, 4]) is True   # 1^2^4 != 0
-
 
 def test_subtraction_game_period() -> None:
-    # Tilladte træk = {1,3,4}. Klassisk periodisk sekvens.
+    # Allowed moves = {1,3,4}. Classic periodic sequence.
     moves = subtraction_game_moves_factory({1, 3, 4})
     eng = GrundyEngine(moves)
 
     seq = [eng.grundy(n) for n in range(0, 200)]
-    # For {1,3,4} er perioden 7: [0,1,0,1,2,3,2] ...
+    # For {1,3,4} the period is 7: [0,1,0,1,2,3,2] ...
     p = detect_period(seq, min_period=1, max_period=50)
     assert p == 7
 
     base = seq[:p]
-    # Tjek gentagelse
+    # Check repetition
     for i, g in enumerate(seq):
         assert g == base[i % p]
 
-    # Vindbare N: dem med grundy(n) != 0
+    # Winning N: those with grundy(n) != 0
     wins = [n for n, g in enumerate(seq[:30]) if g != 0]
     assert wins[:10] == [1, 3, 4, 5, 6, 8, 10, 11, 12, 13]
 
 
 def test_sum_of_independent_subgames() -> None:
-    # Samme subtraction game. Samlet stilling = flere uafhængige bunker (ints).
+    # Same subtraction game. Combined position = multiple independent heaps (ints).
     eng = GrundyEngine(subtraction_game_moves_factory({1, 3, 4}))
 
-    # Byg nogle stillinger
+    # Build some positions
     A = [5, 7]   # grundy(5)=3, grundy(7)=2 → XOR=1 → winning
-    B = [8, 9]   # g(8)=0? Lad os beregne:
+    B = [8, 9]   # Let's compute what g(8) and g(9) are:
     GA = eng.grundy_multi(A)
     GB = eng.grundy_multi(B)
     assert GA != 0
@@ -195,22 +207,22 @@ def test_sum_of_independent_subgames() -> None:
 def test_kayles_small() -> None:
     eng = GrundyEngine(kayles_moves)
 
-    # Kendte første værdier for K(n) (rimelig små n)
-    # Ikke alle præcis kendte i hovedet, men vi validerer konsistens/monotone checks.
+    # Known first values for K(n) (reasonably small n)
+    # Not all precisely known by heart, but we validate consistency/monotone checks.
     vals = [eng.grundy((n,)) for n in range(0, 15)]
-    # Ikke trivielt mønster; vi checker et par håndplukkede facts (fra direkte beregning):
+    # Not trivial pattern; we check a few hand-picked facts (from direct computation):
     assert vals[:10] == [0, 1, 2, 3, 1, 4, 3, 2, 1, 4]
-    # Splits: (n,) kan ende i (a,b) → XOR-regel implicit i rekursionen.
-    # Ekstra sanity: sammensatte segmenter
+    # Splits: (n,) can end in (a,b) → XOR rule implicit in recursion.
+    # Extra sanity: composite segments
     assert eng.grundy((2, 2)) == (eng.grundy((2,)) ^ eng.grundy((2,)))
 
 
 def test_long_application_scan() -> None:
     """
-    Typisk konkurrenceanvendelse:
-    - Givet en parameter N, udled for hvilke N stillingen er vindbar.
-    - Brug periode hvis den findes.
-    Her bruger vi subtraction game {1,3,4}.
+    Typical competition application:
+    - Given a parameter N, derive for which N the position is winning.
+    - Use period if it exists.
+    Here we use subtraction game {1,3,4}.
     """
     eng = GrundyEngine(subtraction_game_moves_factory({1, 3, 4}))
     N = 500
@@ -218,26 +230,22 @@ def test_long_application_scan() -> None:
     period = detect_period(seq, min_period=1, max_period=100)
     assert period == 7
 
-    # Vindbare N op til 60:
+    # Winning N up to 60:
     winning_N = [n for n in range(61) if seq[n] != 0]
-    # Spot-check de første par værdier
+    # Spot-check the first few values
     assert winning_N[:12] == [1, 3, 4, 5, 6, 8, 10, 11, 12, 13, 15, 17]
 
 
 def test_cycle_guard_note() -> None:
     """
-    Teori-krav: ingen cykler. Denne test er 'meta' og dokumenterer antagelsen.
-    Vi bygger IKKE en cyklisk moves-funktion her; vi noterer blot kravet.
+    Theory requirement: no cycles. This test is 'meta' and documents the assumption.
+    We do NOT build a cyclic moves function here; we just note the requirement.
     """
     assert True
 
 
-# -----------------------------
-# Kompakt samlet test
-# -----------------------------
-
-def test_main() -> None:
-    test_nim_basic()
+def test() -> None:
+    test_nim_extended()
     test_subtraction_game_period()
     test_sum_of_independent_subgames()
     test_kayles_small()
@@ -247,6 +255,7 @@ def test_main() -> None:
 
 def main() -> None:
     test_main()
+    test()
     print("All Sprague–Grundy tests passed!")
 
 
