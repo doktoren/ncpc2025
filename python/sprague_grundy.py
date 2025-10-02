@@ -86,27 +86,36 @@ def detect_period(seq: list[int], min_period: int = 1, max_period: int | None = 
     return None
 
 
-def nim_moves_single_heap(n: int) -> Iterable[int]:
+def nim_moves_single_heap(n: Hashable) -> Iterable[Hashable]:
     """Nim: single heap. Move: take 1..n stones."""
+    assert isinstance(n, int)
     yield from range(n)  # leave 0..n-1
 
 
-def subtraction_game_moves_factory(allowed: set[int]) -> MovesFn:
+def subtraction_game_moves_factory(allowed: set[int]) -> Callable[[Hashable], Iterable[Hashable]]:
     """Subtraction game: state = int; allowed moves = move sizes in 'allowed'."""
     allowed_sorted = tuple(sorted(allowed))
-    def moves(n: int) -> Iterable[int]:
+    def moves(n: Hashable) -> Iterable[Hashable]:
+        assert isinstance(n, int)
         for d in allowed_sorted:
             if d <= n:
                 yield n - d
     return moves
 
 
-def kayles_moves(segments: tuple[int, ...]) -> Iterable[tuple[int, ...]]:
+def kayles_moves(segments: Hashable) -> Iterable[Hashable]:
     """
     Kayles (bowling pins):
     State: sorted tuple of segment lengths. A move removes 1 pin or 2 adjacent pins in one segment,
     thus splitting it into up to two new segments. Return new canonical (sorted) state.
+
+    Args:
+        segments: A tuple[int, ...] representing segment lengths (sorted).
+
+    Returns:
+        Set of new states (each a tuple[int, ...]).
     """
+    assert isinstance(segments, tuple), "segments must be a tuple of ints"
     res: set[tuple[int, ...]] = set()
     for idx, n in enumerate(segments):
         if n <= 0:

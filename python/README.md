@@ -1,4 +1,4 @@
-# Environment
+# Data structures and algorithms for programming competitions
 
 Python has been locked to 3.9.18 for use with [NCPC 20225](https://docs.icpc.global/worldfinals-programming-environment/)
 

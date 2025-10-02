@@ -4,7 +4,7 @@ target-version = "py39"
 exclude = [".ruff_cache", "**/.pytest_cache", "**/venv"]
 [lint]
 select = ["ALL"]
-ignore = ["B011", "N", "BLE", "C901", "COM", "D", "E741", "EM101", "ERA001", "G004", "PLC0415", "PLR0913", "PLR2004", "PT015", "S101", "T201", "TRY003"]
+ignore = ["B011", "N", "BLE", "C901", "COM", "D", "E741", "EM101", "ERA001", "G004", "PLC0415", "PLR0913", "PLR2004", "PT015", "RUF002", "RUF003", "S101", "T201", "TRY003"]
 extend-select = ["D100"]
 # N = pep8-naming
 # BLE = flake8-blind-except
@@ -19,6 +19,8 @@ extend-select = ["D100"]
 # PLC0415 = `import` should be at the top-level of a file
 # PLR0913 = Too many arguments in function definition
 # PLR2004 = magic-value-comparison
+# RUF002 = Ambiguous unicode character in docstring
+# RUF003 = Ambiguous unicode character in comment
 # S101 = assert used
 # T201 = print used
 # TRY003 = Avoid specifying long messages outside the exception class

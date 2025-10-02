@@ -103,6 +103,11 @@ The script automatically processes all algorithms from `python/`, `cpp/`, and `j
 
 All languages enforce a **100-character line limit** to ensure optimal PDF formatting for the generated documentation and printable references.
 
+**IMPORTANT: Linting Policy**:
+- Do NOT suppress or whitelist new linting errors/warnings without explicit user approval
+- Fix the underlying issue instead of suppressing warnings
+- Existing suppressions in lint configurations are approved, but new ones require discussion
+
 **Linting Infrastructure:**
 
 **Python:**
@@ -165,6 +170,11 @@ Each module follows a strict structure optimized for competition typing:
 - `lca.py` - Lowest Common Ancestor queries
 - `polygon_area.py` - Shoelace formula for polygon area
 - `sprague_grundy.py` - Sprague-Grundy theorem for impartial games
+- `kosaraju_scc.py` - Strongly Connected Components using Kosaraju's algorithm
+- `two_sat.py` - 2-SAT solver using SCC on implication graph
+- `convex_hull.py` - Convex hull using Andrew's monotone chain algorithm
+- `bellman_ford.py` - Single-source shortest paths with negative edge weights
+- `suffix_array.py` - Suffix array construction with LCP array (Kasai's algorithm)
 
 **C++ (`cpp/`):**
 - `fenwick_tree.cpp` - Binary Indexed Tree template implementation
@@ -180,6 +190,11 @@ Each module follows a strict structure optimized for competition typing:
 - `lca.cpp` - Lowest Common Ancestor with binary lifting
 - `polygon_area.cpp` - Shoelace formula for polygon area
 - `sprague_grundy.cpp` - Sprague-Grundy theorem for impartial games
+- `kosaraju_scc.cpp` - Strongly Connected Components using Kosaraju's algorithm
+- `two_sat.cpp` - 2-SAT solver using SCC on implication graph
+- `convex_hull.cpp` - Convex hull using Andrew's monotone chain algorithm
+- `bellman_ford.cpp` - Single-source shortest paths with negative edge weights
+- `suffix_array.cpp` - Suffix array construction with LCP array (Kasai's algorithm)
 
 **Java (`java/`):**
 - `fenwick_tree.java` - Binary Indexed Tree implementation
@@ -195,6 +210,11 @@ Each module follows a strict structure optimized for competition typing:
 - `lca.java` - Lowest Common Ancestor with binary lifting
 - `polygon_area.java` - Shoelace formula for polygon area
 - `sprague_grundy.java` - Sprague-Grundy theorem for impartial games
+- `kosaraju_scc.java` - Strongly Connected Components using Kosaraju's algorithm
+- `two_sat.java` - 2-SAT solver using SCC on implication graph
+- `convex_hull.java` - Convex hull using Andrew's monotone chain algorithm
+- `bellman_ford.java` - Single-source shortest paths with negative edge weights
+- `suffix_array.java` - Suffix array construction with LCP array (Kasai's algorithm)
 
 **Key Design Patterns:**
 
