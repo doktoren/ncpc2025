@@ -9,24 +9,22 @@ Space complexity: O(ALPHABET_SIZE * N * M) in the worst case, where N is the num
 of strings and M is the average length of strings.
 */
 
-#include <string>
-#include <vector>
 #include <algorithm>
 #include <cassert>
 #include <iostream>
+#include <string>
+#include <vector>
 
 class PrefixTree {
-private:
+  private:
     std::vector<std::string> keys;
     std::vector<PrefixTree*> values;
 
-public:
+  public:
     PrefixTree() {}
 
     ~PrefixTree() {
-        for (auto* child : values) {
-            delete child;
-        }
+        for (auto* child : values) { delete child; }
     }
 
     void pp(int indent = 0) {
@@ -34,26 +32,18 @@ public:
         for (size_t i = 0; i < keys.size(); i++) {
             for (int j = 0; j < indent; j++) std::cout << " ";
             std::cout << keys[i] << ": " << (values[i] == nullptr ? "-" : "") << std::endl;
-            if (values[i] != nullptr) {
-                values[i]->pp(indent + 2);
-            }
+            if (values[i] != nullptr) { values[i]->pp(indent + 2); }
         }
     }
 
     void find_all(const std::string& s, int offset, std::vector<int>& append_to) {
         // Find all strings in tree that are prefixes of s[offset:]. Appends end positions.
-        if (!keys.empty() && keys[0] == "") {
-            append_to.push_back(offset);
-        }
-        if (offset >= s.length()) {
-            return;
-        }
+        if (!keys.empty() && keys[0] == "") { append_to.push_back(offset); }
+        if (offset >= s.length()) { return; }
         std::string target_char = s.substr(offset, 1);
         auto it = std::lower_bound(keys.begin(), keys.end(), target_char);
         int index = it - keys.begin();
-        if (index == keys.size()) {
-            return;
-        }
+        if (index == keys.size()) { return; }
         std::string key_substr = s.substr(offset, keys[index].length());
         if (key_substr == keys[index]) {
             PrefixTree* pt = values[index];
@@ -69,7 +59,8 @@ public:
         // Return length of longest string in tree
         int result = 0;
         for (size_t i = 0; i < keys.size(); i++) {
-            result = std::max(result, (int)keys[i].length() + (values[i] == nullptr ? 0 : values[i]->max_len()));
+            result = std::max(
+                result, (int)keys[i].length() + (values[i] == nullptr ? 0 : values[i]->max_len()));
         }
         return result;
     }
@@ -84,9 +75,7 @@ public:
 
         auto it = std::lower_bound(keys.begin(), keys.end(), s);
         int pos = it - keys.begin();
-        if (pos > 0 && !keys[pos - 1].empty() && keys[pos - 1][0] == s[0]) {
-            pos--;
-        }
+        if (pos > 0 && !keys[pos - 1].empty() && keys[pos - 1][0] == s[0]) { pos--; }
         if (pos < keys.size() && !keys[pos].empty() && keys[pos][0] == s[0]) {
             // Merge
             if (s.find(keys[pos]) == 0 && s.length() >= keys[pos].length()) {
@@ -111,7 +100,8 @@ public:
             } else {
                 // Find common prefix
                 int prefix = 1;
-                while (prefix < s.length() && prefix < keys[pos].length() && s[prefix] == keys[pos][prefix]) {
+                while (prefix < s.length() && prefix < keys[pos].length() &&
+                       s[prefix] == keys[pos][prefix]) {
                     prefix++;
                 }
                 PrefixTree* child = new PrefixTree();
@@ -216,10 +206,9 @@ void test_different_offsets() {
 
 void test_multiple_words() {
     PrefixTree p;
-    std::vector<std::string> words = {"the", "then", "there", "answer", "any", "by", "bye", "their"};
-    for (const auto& word : words) {
-        p.add(word);
-    }
+    std::vector<std::string> words = {"the", "then", "there", "answer",
+                                      "any", "by",   "bye",   "their"};
+    for (const auto& word : words) { p.add(word); }
 
     std::vector<int> l;
     p.find_all("their", 0, l);
@@ -241,8 +230,8 @@ void test_common_prefix() {
     std::vector<int> l;
     p.find_all("prefix", 0, l);
     assert(l.size() == 2);
-    assert(l[0] == 3);   // "pre"
-    assert(l[1] == 6);   // "prefix"
+    assert(l[0] == 3);  // "pre"
+    assert(l[1] == 6);  // "prefix"
 }
 
 void test_max_len() {

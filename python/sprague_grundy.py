@@ -24,9 +24,9 @@ Requirements:
 # Don't use annotations during contest
 from __future__ import annotations
 
-from functools import lru_cache
-from typing import Callable, Hashable, Iterable, Final
-
+from collections.abc import Hashable, Iterable
+from functools import cache
+from typing import Callable, Final
 
 State = Hashable
 MovesFn = Callable[[State], Iterable[State]]
@@ -46,7 +46,7 @@ class GrundyEngine:
     def __init__(self, get_valid_moves: MovesFn) -> None:
         self._moves: Final = get_valid_moves
 
-        @lru_cache(maxsize=None)
+        @cache
         def _grundy_cached(state: State) -> int:
             nxt = tuple(self._moves(state))
             if not nxt:
@@ -88,8 +88,7 @@ def detect_period(seq: list[int], min_period: int = 1, max_period: int | None = 
 
 def nim_moves_single_heap(n: int) -> Iterable[int]:
     """Nim: single heap. Move: take 1..n stones."""
-    for k in range(n):
-        yield k  # leave 0..n-1
+    yield from range(n)  # leave 0..n-1
 
 
 def subtraction_game_moves_factory(allowed: set[int]) -> MovesFn:
@@ -165,7 +164,7 @@ def test_main() -> None:
 def test_nim_extended() -> None:
     eng = GrundyEngine(nim_moves_single_heap)
     # Known: grundy(n) = n for all n in Nim
-    for n in range(0, 64):
+    for n in range(64):
         assert eng.grundy(n) == n
 
 
@@ -174,7 +173,7 @@ def test_subtraction_game_period() -> None:
     moves = subtraction_game_moves_factory({1, 3, 4})
     eng = GrundyEngine(moves)
 
-    seq = [eng.grundy(n) for n in range(0, 200)]
+    seq = [eng.grundy(n) for n in range(200)]
     # For {1,3,4} the period is 7: [0,1,0,1,2,3,2] ...
     p = detect_period(seq, min_period=1, max_period=50)
     assert p == 7
@@ -199,7 +198,7 @@ def test_sum_of_independent_subgames() -> None:
     GA = eng.grundy_multi(A)
     GB = eng.grundy_multi(B)
     assert GA != 0
-    assert GB == (eng.grundy(8) ^ eng.grundy(9))
+    assert (eng.grundy(8) ^ eng.grundy(9)) == GB
     assert eng.is_winning_position(A) is True
     assert eng.is_winning_position(B) == (GB != 0)
 
@@ -209,7 +208,7 @@ def test_kayles_small() -> None:
 
     # Known first values for K(n) (reasonably small n)
     # Not all precisely known by heart, but we validate consistency/monotone checks.
-    vals = [eng.grundy((n,)) for n in range(0, 15)]
+    vals = [eng.grundy((n,)) for n in range(15)]
     # Not trivial pattern; we check a few hand-picked facts (from direct computation):
     assert vals[:10] == [0, 1, 2, 3, 1, 4, 3, 2, 1, 4]
     # Splits: (n,) can end in (a,b) → XOR rule implicit in recursion.
@@ -256,7 +255,7 @@ def test() -> None:
 def main() -> None:
     test_main()
     test()
-    print("All Sprague–Grundy tests passed!")
+    print("All Sprague-Grundy tests passed!")
 
 
 if __name__ == "__main__":

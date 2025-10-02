@@ -1,22 +1,23 @@
 /*
-A bipartite matching algorithm finds the largest set of pairings between two disjoint vertex sets U and V
-in a bipartite graph such that no vertex is in more than one pair.
+A bipartite matching algorithm finds the largest set of pairings between two disjoint vertex sets U
+and V in a bipartite graph such that no vertex is in more than one pair.
 
 Augmenting paths: repeatedly search for a path that alternates between unmatched and matched edges,
-starting and ending at free vertices. Flipping the edges along such a path increases the matching size by 1.
+starting and ending at free vertices. Flipping the edges along such a path increases the matching
+size by 1.
 
 Time complexity: O(V · E), where V is the number of vertices and E the number of edges.
 */
 
-#include <iostream>
-#include <vector>
-#include <map>
 #include <algorithm>
 #include <cassert>
+#include <iostream>
+#include <map>
+#include <vector>
 
-template<typename SourceT, typename SinkT>
+template <typename SourceT, typename SinkT>
 class BipartiteMatch {
-private:
+  private:
     std::map<SourceT, std::vector<SinkT>> edges;
     std::map<SourceT, SinkT> used_sources;
     std::map<SinkT, SourceT> used_sinks;
@@ -32,9 +33,7 @@ private:
     }
 
     bool update(SourceT start_source, int cur_color) {
-        if (used_sources.find(start_source) != used_sources.end()) {
-            return false;
-        }
+        if (used_sources.find(start_source) != used_sources.end()) { return false; }
 
         std::vector<SourceT> source_stack = {start_source};
         std::vector<SinkT> sink_stack;
@@ -46,9 +45,7 @@ private:
             index_stack.pop_back();
 
             if (index == edges[source].size()) {
-                if (index_stack.empty()) {
-                    return false;
-                }
+                if (index_stack.empty()) { return false; }
                 source_stack.pop_back();
                 sink_stack.pop_back();
                 continue;
@@ -74,13 +71,11 @@ private:
         }
     }
 
-public:
+  public:
     std::map<SourceT, SinkT> match;
 
     BipartiteMatch(const std::vector<std::pair<SourceT, SinkT>>& edge_list) {
-        for (const auto& [source, sink] : edge_list) {
-            edges[source].push_back(sink);
-        }
+        for (const auto& [source, sink] : edge_list) { edges[source].push_back(sink); }
 
         // Get ordered sources for deterministic behavior
         std::vector<SourceT> ordered_sources;
@@ -104,9 +99,7 @@ public:
         while (progress) {
             progress = false;
             for (const auto& source : ordered_sources) {
-                if (update(source, cur_color)) {
-                    progress = true;
-                }
+                if (update(source, cur_color)) { progress = true; }
             }
             cur_color++;
         }
@@ -116,9 +109,8 @@ public:
 };
 
 void test_main() {
-    BipartiteMatch<int, std::string> b({
-        {1, "X"}, {2, "Y"}, {3, "X"}, {1, "Z"}, {2, "Z"}, {3, "Y"}
-    });
+    BipartiteMatch<int, std::string> b(
+        {{1, "X"}, {2, "Y"}, {3, "X"}, {1, "Z"}, {2, "Z"}, {3, "Y"}});
     assert(b.match.size() == 3);
     assert(b.match[1] == "Z");
     assert(b.match[2] == "Y");
@@ -128,27 +120,22 @@ void test_main() {
 // Don't write tests below during competition.
 
 void test_a() {
-    BipartiteMatch<int, double> bm({
-        {1, 2.2}, {2, 3.3}, {1, 1.1}, {2, 2.2}, {3, 3.3}
-    });
+    BipartiteMatch<int, double> bm({{1, 2.2}, {2, 3.3}, {1, 1.1}, {2, 2.2}, {3, 3.3}});
     assert(bm.match[1] == 1.1);
     assert(bm.match[2] == 2.2);
     assert(bm.match[3] == 3.3);
 }
 
 void test_b() {
-    BipartiteMatch<std::string, std::string> bm({
-        {"1", "3"}, {"2", "4"}, {"3", "2"}, {"4", "4"}, {"1", "1"}
-    });
+    BipartiteMatch<std::string, std::string> bm(
+        {{"1", "3"}, {"2", "4"}, {"3", "2"}, {"4", "4"}, {"1", "1"}});
     assert(bm.match["3"] == "2");
     assert(bm.match["1"] == "3");
     assert(bm.match["2"] == "4");
 }
 
 void test_c() {
-    BipartiteMatch<int, std::string> bm({
-        {1, "B"}, {2, "A"}, {3, "A"}
-    });
+    BipartiteMatch<int, std::string> bm({{1, "B"}, {2, "A"}, {3, "A"}});
     assert(bm.match[1] == "B");
     assert(bm.match[2] == "A");
     assert(bm.match.size() == 2);
@@ -167,9 +154,7 @@ void test_single_edge() {
 
 void test_no_matching() {
     // All sources want same sink
-    BipartiteMatch<int, std::string> bm({
-        {1, "A"}, {2, "A"}, {3, "A"}
-    });
+    BipartiteMatch<int, std::string> bm({{1, "A"}, {2, "A"}, {3, "A"}});
     // Only one can be matched
     assert(bm.match.size() == 1);
     assert(bm.match[bm.match.begin()->first] == "A");
@@ -177,19 +162,13 @@ void test_no_matching() {
 
 void test_perfect_matching() {
     // Perfect matching possible
-    BipartiteMatch<int, int> bm({
-        {1, 10}, {2, 20}, {3, 30}
-    });
+    BipartiteMatch<int, int> bm({{1, 10}, {2, 20}, {3, 30}});
     assert(bm.match.size() == 3);
 }
 
 void test_augmenting_path() {
     // Requires augmenting path to find maximum matching
-    BipartiteMatch<int, std::string> bm({
-        {1, "A"}, {1, "B"},
-        {2, "B"}, {2, "C"},
-        {3, "C"}
-    });
+    BipartiteMatch<int, std::string> bm({{1, "A"}, {1, "B"}, {2, "B"}, {2, "C"}, {3, "C"}});
     assert(bm.match.size() == 3);
 }
 
@@ -197,9 +176,7 @@ void test_large_bipartite() {
     // Larger graph
     std::vector<std::pair<int, int>> edges;
     for (int i = 0; i < 10; i++) {
-        for (int j = i; j < std::min(i + 3, 10); j++) {
-            edges.push_back({i, j + 100});
-        }
+        for (int j = i; j < std::min(i + 3, 10); j++) { edges.push_back({i, j + 100}); }
     }
 
     BipartiteMatch<int, int> bm(edges);

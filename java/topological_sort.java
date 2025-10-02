@@ -89,7 +89,8 @@ class topological_sort {
             return result;
         }
 
-        private boolean dfsVisit(int u, Set<Integer> visited, Set<Integer> recStack, Stack<Integer> stack) {
+        private boolean dfsVisit(
+                int u, Set<Integer> visited, Set<Integer> recStack, Stack<Integer> stack) {
             visited.add(u);
             recStack.add(u);
 

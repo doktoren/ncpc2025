@@ -13,7 +13,7 @@ where alpha is the inverse Ackermann function (effectively constant for practica
 #include <set>
 
 class UnionFind {
-public:
+  public:
     UnionFind* parent;
     int rank;
 
@@ -24,9 +24,7 @@ public:
     }
 
     UnionFind* find() {
-        if (parent == this) {
-            return this;
-        }
+        if (parent == this) { return this; }
         parent = parent->find();
         return parent;
     }
@@ -34,9 +32,7 @@ public:
     UnionFind* union_with(UnionFind* other) {
         UnionFind* x = this->find();
         UnionFind* y = other->find();
-        if (x == y) {
-            return x;
-        }
+        if (x == y) { return x; }
         if (x->rank < y->rank) {
             x->parent = y;
             y->merge(x);
@@ -55,7 +51,7 @@ public:
 };
 
 class Test : public UnionFind {
-public:
+  public:
     int size;
 
     Test() : UnionFind(), size(1) {}
@@ -103,26 +99,18 @@ void test_union_same_set() {
 
 void test_multiple_unions() {
     Test* nodes[10];
-    for (int i = 0; i < 10; i++) {
-        nodes[i] = new Test();
-    }
+    for (int i = 0; i < 10; i++) { nodes[i] = new Test(); }
 
     // Chain union: 0-1-2-3-4-5-6-7-8-9
-    for (int i = 0; i < 9; i++) {
-        nodes[i]->union_with(nodes[i + 1]);
-    }
+    for (int i = 0; i < 9; i++) { nodes[i]->union_with(nodes[i + 1]); }
 
     // All should have same root
     UnionFind* root = nodes[0]->find();
-    for (int i = 0; i < 10; i++) {
-        assert(nodes[i]->find() == root);
-    }
+    for (int i = 0; i < 10; i++) { assert(nodes[i]->find() == root); }
 
     assert(static_cast<Test*>(root)->size == 10);
 
-    for (int i = 0; i < 10; i++) {
-        delete nodes[i];
-    }
+    for (int i = 0; i < 10; i++) { delete nodes[i]; }
 }
 
 void test_union_order_independence() {
@@ -142,8 +130,12 @@ void test_union_order_independence() {
     assert(root1->size == 3);
     assert(root2->size == 3);
 
-    delete a1; delete b1; delete c1;
-    delete a2; delete b2; delete c2;
+    delete a1;
+    delete b1;
+    delete c1;
+    delete a2;
+    delete b2;
+    delete c2;
 }
 
 void test_disconnected_sets() {
@@ -163,45 +155,36 @@ void test_disconnected_sets() {
     assert(static_cast<Test*>(a->find())->size == 2);
     assert(static_cast<Test*>(c->find())->size == 2);
 
-    delete a; delete b; delete c; delete d;
+    delete a;
+    delete b;
+    delete c;
+    delete d;
 }
 
 void test_large_set() {
     // Create a large union-find structure
     Test* nodes[100];
-    for (int i = 0; i < 100; i++) {
-        nodes[i] = new Test();
-    }
+    for (int i = 0; i < 100; i++) { nodes[i] = new Test(); }
 
     // Union in pairs
-    for (int i = 0; i < 100; i += 2) {
-        nodes[i]->union_with(nodes[i + 1]);
-    }
+    for (int i = 0; i < 100; i += 2) { nodes[i]->union_with(nodes[i + 1]); }
 
     // Now we have 50 sets of size 2
     std::set<UnionFind*> roots;
-    for (int i = 0; i < 100; i++) {
-        roots.insert(nodes[i]->find());
-    }
+    for (int i = 0; i < 100; i++) { roots.insert(nodes[i]->find()); }
     assert(roots.size() == 50);
 
     // Union all pairs together
     for (int i = 0; i < 100; i += 4) {
-        if (i + 2 < 100) {
-            nodes[i]->union_with(nodes[i + 2]);
-        }
+        if (i + 2 < 100) { nodes[i]->union_with(nodes[i + 2]); }
     }
 
     // Now we have 25 sets of size 4
     roots.clear();
-    for (int i = 0; i < 100; i++) {
-        roots.insert(nodes[i]->find());
-    }
+    for (int i = 0; i < 100; i++) { roots.insert(nodes[i]->find()); }
     assert(roots.size() == 25);
 
-    for (int i = 0; i < 100; i++) {
-        delete nodes[i];
-    }
+    for (int i = 0; i < 100; i++) { delete nodes[i]; }
 }
 
 int main() {

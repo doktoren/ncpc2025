@@ -84,7 +84,7 @@ class kmp {
 
         // Test failure function
         int[] failure = computeLPS("abcabcab");
-        assert Arrays.equals(failure, new int[]{0, 0, 0, 1, 2, 3, 4, 5});
+        assert Arrays.equals(failure, new int[] {0, 0, 0, 1, 2, 3, 4, 5});
     }
 
     // Don't write tests below during competition.
@@ -116,13 +116,13 @@ class kmp {
 
     static void testLPS() {
         int[] lps = computeLPS("AAAA");
-        assert Arrays.equals(lps, new int[]{0, 1, 2, 3});
+        assert Arrays.equals(lps, new int[] {0, 1, 2, 3});
 
         lps = computeLPS("ABCDE");
-        assert Arrays.equals(lps, new int[]{0, 0, 0, 0, 0});
+        assert Arrays.equals(lps, new int[] {0, 0, 0, 0, 0});
 
         lps = computeLPS("AABAAA");
-        assert Arrays.equals(lps, new int[]{0, 1, 0, 1, 2, 2});
+        assert Arrays.equals(lps, new int[] {0, 1, 0, 1, 2, 2});
     }
 
     static void testFullMatch() {

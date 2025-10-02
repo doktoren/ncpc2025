@@ -9,6 +9,8 @@ Time complexity: O(log n) for add/update and pop operations, O(log n) for remove
 Space complexity: O(n) where n is the number of items in the queue.
 """
 
+from __future__ import annotations
+
 import heapq
 import itertools
 

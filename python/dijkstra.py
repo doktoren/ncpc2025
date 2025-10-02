@@ -39,7 +39,9 @@ class Dijkstra(Generic[NodeT, WeightT]):
             self.graph[u] = []
         self.graph[u].append((v, weight))
 
-    def shortest_paths(self, source: NodeT) -> tuple[dict[NodeT, WeightT], dict[NodeT, NodeT | None]]:
+    def shortest_paths(
+        self, source: NodeT
+    ) -> tuple[dict[NodeT, WeightT], dict[NodeT, NodeT | None]]:
         """
         Find shortest paths from source to all reachable vertices.
 

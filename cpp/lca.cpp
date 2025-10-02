@@ -9,30 +9,28 @@ Time complexity: O(n log n) preprocessing, O(log n) per LCA query.
 Space complexity: O(n log n) for the binary lifting table.
 */
 
+#include <algorithm>
+#include <cassert>
 #include <iostream>
-#include <vector>
 #include <map>
 #include <set>
-#include <algorithm>
 #include <stdexcept>
-#include <cassert>
+#include <vector>
 
-template<typename NodeT>
+template <typename NodeT>
 class LCA {
-private:
+  private:
     NodeT root;
     std::map<NodeT, std::vector<NodeT>> graph;
     std::map<NodeT, int> depth;
     std::map<NodeT, std::map<int, NodeT>> up;  // up[node][i] = 2^i-th ancestor
-    std::set<NodeT> has_parent;  // nodes that have a parent
+    std::set<NodeT> has_parent;                // nodes that have a parent
     int max_log;
 
     void dfs_depth(NodeT node, bool has_par, NodeT par, int d) {
         depth[node] = d;
         for (const auto& neighbor : graph[node]) {
-            if (!has_par || neighbor != par) {
-                dfs_depth(neighbor, true, node, d + 1);
-            }
+            if (!has_par || neighbor != par) { dfs_depth(neighbor, true, node, d + 1); }
         }
     }
 
@@ -42,13 +40,11 @@ private:
             has_parent.insert(node);
         }
         for (const auto& neighbor : graph[node]) {
-            if (!has_par || neighbor != par) {
-                dfs_parents(neighbor, true, node);
-            }
+            if (!has_par || neighbor != par) { dfs_parents(neighbor, true, node); }
         }
     }
 
-public:
+  public:
     LCA(NodeT root) : root(root), max_log(0) {}
 
     void add_edge(NodeT u, NodeT v) {
@@ -62,9 +58,7 @@ public:
 
         int n = depth.size();
         max_log = 0;
-        while ((1 << max_log) <= n) {
-            max_log++;
-        }
+        while ((1 << max_log) <= n) { max_log++; }
 
         // Fill first column (direct parents)
         dfs_parents(root, false, root);
@@ -83,23 +77,17 @@ public:
     }
 
     NodeT lca(NodeT u, NodeT v) {
-        if (depth[u] < depth[v]) {
-            std::swap(u, v);
-        }
+        if (depth[u] < depth[v]) { std::swap(u, v); }
 
         // Bring u to same level as v
         int diff = depth[u] - depth[v];
         for (int i = 0; i < max_log; i++) {
             if ((diff >> i) & 1) {
-                if (up[u].count(i)) {
-                    u = up[u][i];
-                }
+                if (up[u].count(i)) { u = up[u][i]; }
             }
         }
 
-        if (u == v) {
-            return u;
-        }
+        if (u == v) { return u; }
 
         // Binary search for LCA
         for (int i = max_log - 1; i >= 0; i--) {
@@ -126,9 +114,7 @@ public:
 void test_main() {
     LCA<int> lca(1);
     std::vector<std::pair<int, int>> edges = {{1, 2}, {1, 3}, {2, 4}, {2, 5}, {3, 6}};
-    for (const auto& [u, v] : edges) {
-        lca.add_edge(u, v);
-    }
+    for (const auto& [u, v] : edges) { lca.add_edge(u, v); }
 
     lca.preprocess();
 
@@ -143,9 +129,7 @@ void test_linear_chain() {
     // Test on a simple linear chain: 1-2-3-4-5
     LCA<int> lca(1);
     std::vector<std::pair<int, int>> edges = {{1, 2}, {2, 3}, {3, 4}, {4, 5}};
-    for (const auto& [u, v] : edges) {
-        lca.add_edge(u, v);
-    }
+    for (const auto& [u, v] : edges) { lca.add_edge(u, v); }
 
     lca.preprocess();
 
@@ -175,9 +159,7 @@ void test_binary_tree() {
     // Perfect binary tree
     LCA<int> lca(1);
     std::vector<std::pair<int, int>> edges = {{1, 2}, {1, 3}, {2, 4}, {2, 5}, {3, 6}, {3, 7}};
-    for (const auto& [u, v] : edges) {
-        lca.add_edge(u, v);
-    }
+    for (const auto& [u, v] : edges) { lca.add_edge(u, v); }
 
     lca.preprocess();
 
@@ -202,9 +184,7 @@ void test_binary_tree() {
 void test_star_tree() {
     // Star tree with center at 1
     LCA<int> lca(1);
-    for (int i = 2; i <= 10; i++) {
-        lca.add_edge(1, i);
-    }
+    for (int i = 2; i <= 10; i++) { lca.add_edge(1, i); }
 
     lca.preprocess();
 
@@ -226,9 +206,7 @@ void test_star_tree() {
 void test_deep_tree() {
     // Deep tree (linear chain of depth 100)
     LCA<int> lca(1);
-    for (int i = 1; i < 100; i++) {
-        lca.add_edge(i, i + 1);
-    }
+    for (int i = 1; i < 100; i++) { lca.add_edge(i, i + 1); }
 
     lca.preprocess();
 
@@ -261,13 +239,9 @@ void test_string_nodes() {
 void test_unbalanced_tree() {
     // Highly unbalanced tree (path with branches)
     LCA<int> lca(1);
-    std::vector<std::pair<int, int>> edges = {
-        {1, 2}, {2, 3}, {3, 4}, {4, 5},
-        {2, 10}, {3, 11}, {4, 12}
-    };
-    for (const auto& [u, v] : edges) {
-        lca.add_edge(u, v);
-    }
+    std::vector<std::pair<int, int>> edges = {{1, 2},  {2, 3},  {3, 4}, {4, 5},
+                                              {2, 10}, {3, 11}, {4, 12}};
+    for (const auto& [u, v] : edges) { lca.add_edge(u, v); }
 
     lca.preprocess();
 
@@ -277,7 +251,7 @@ void test_unbalanced_tree() {
     assert(lca.lca(11, 12) == 3);
 
     // Distance in unbalanced tree
-    assert(lca.distance(10, 5) == 4);  // 10->2->3->4->5
+    assert(lca.distance(10, 5) == 4);   // 10->2->3->4->5
     assert(lca.distance(11, 12) == 3);  // 11->3->4->12
 }
 
@@ -288,17 +262,11 @@ void test_large_balanced_tree() {
     for (int i = 1; i <= 7; i++) {  // Internal nodes
         int left_child = 2 * i;
         int right_child = 2 * i + 1;
-        if (left_child <= 15) {
-            edges.push_back({i, left_child});
-        }
-        if (right_child <= 15) {
-            edges.push_back({i, right_child});
-        }
+        if (left_child <= 15) { edges.push_back({i, left_child}); }
+        if (right_child <= 15) { edges.push_back({i, right_child}); }
     }
 
-    for (const auto& [u, v] : edges) {
-        lca.add_edge(u, v);
-    }
+    for (const auto& [u, v] : edges) { lca.add_edge(u, v); }
 
     lca.preprocess();
 
@@ -317,18 +285,10 @@ void test_large_balanced_tree() {
 void test_complex_tree() {
     // More complex tree structure
     LCA<int> lca(0);
-    std::vector<std::pair<int, int>> edges = {
-        {0, 1}, {0, 2}, {0, 3},
-        {1, 4}, {1, 5},
-        {2, 6}, {2, 7}, {2, 8},
-        {3, 9},
-        {4, 10}, {4, 11},
-        {6, 12}, {6, 13},
-        {9, 14}, {9, 15}
-    };
-    for (const auto& [u, v] : edges) {
-        lca.add_edge(u, v);
-    }
+    std::vector<std::pair<int, int>> edges = {{0, 1},  {0, 2},  {0, 3},  {1, 4},  {1, 5},
+                                              {2, 6},  {2, 7},  {2, 8},  {3, 9},  {4, 10},
+                                              {4, 11}, {6, 12}, {6, 13}, {9, 14}, {9, 15}};
+    for (const auto& [u, v] : edges) { lca.add_edge(u, v); }
 
     lca.preprocess();
 
@@ -365,9 +325,7 @@ void test_large_star() {
     // Large star graph to test scalability
     LCA<int> lca(0);
     int n = 100;
-    for (int i = 1; i <= n; i++) {
-        lca.add_edge(0, i);
-    }
+    for (int i = 1; i <= n; i++) { lca.add_edge(0, i); }
 
     lca.preprocess();
 
@@ -382,9 +340,7 @@ void test_long_path() {
     // Very long path to test binary lifting efficiency
     LCA<int> lca(0);
     int n = 64;  // Power of 2 for clean binary lifting
-    for (int i = 0; i < n; i++) {
-        lca.add_edge(i, i + 1);
-    }
+    for (int i = 0; i < n; i++) { lca.add_edge(i, i + 1); }
 
     lca.preprocess();
 
@@ -402,12 +358,9 @@ void test_long_path() {
 void test_fibonacci_tree() {
     // Tree based on Fibonacci structure
     LCA<int> lca(1);
-    std::vector<std::pair<int, int>> edges = {
-        {1, 2}, {1, 3}, {2, 4}, {2, 5}, {3, 6}, {4, 7}, {5, 8}, {5, 9}
-    };
-    for (const auto& [u, v] : edges) {
-        lca.add_edge(u, v);
-    }
+    std::vector<std::pair<int, int>> edges = {{1, 2}, {1, 3}, {2, 4}, {2, 5},
+                                              {3, 6}, {4, 7}, {5, 8}, {5, 9}};
+    for (const auto& [u, v] : edges) { lca.add_edge(u, v); }
 
     lca.preprocess();
 

@@ -178,7 +178,8 @@ def test_multiple_words() -> None:
     l: list[int] = []
     p.find_all("their", 0, l)
     # "the", "their" are prefixes of "their"
-    assert 3 in l and 5 in l
+    assert 3 in l
+    assert 5 in l
 
 
 def test_common_prefix() -> None:

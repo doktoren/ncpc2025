@@ -10,10 +10,10 @@ Time complexity: O(n) where n is the number of vertices.
 Space complexity: O(1) additional space.
 */
 
+#include <cassert>
+#include <cmath>
 #include <iostream>
 #include <vector>
-#include <cmath>
-#include <cassert>
 
 struct Point {
     double x, y;
@@ -30,9 +30,7 @@ double polygon_area(const std::vector<Point>& vertices) {
     Returns:
         The area of the polygon (always positive)
     */
-    if (vertices.size() < 3) {
-        return 0.0;
-    }
+    if (vertices.size() < 3) { return 0.0; }
 
     int n = vertices.size();
     double area = 0.0;
@@ -59,9 +57,7 @@ double polygon_signed_area(const std::vector<Point>& vertices) {
     Returns:
         The signed area (positive for CCW, negative for CW)
     */
-    if (vertices.size() < 3) {
-        return 0.0;
-    }
+    if (vertices.size() < 3) { return 0.0; }
 
     int n = vertices.size();
     double area = 0.0;
@@ -142,10 +138,8 @@ void test_pentagon() {
 
 void test_concave_polygon() {
     // L-shaped polygon (concave)
-    std::vector<Point> l_shape = {
-        {0.0, 0.0}, {2.0, 0.0}, {2.0, 1.0},
-        {1.0, 1.0}, {1.0, 2.0}, {0.0, 2.0}
-    };
+    std::vector<Point> l_shape = {{0.0, 0.0}, {2.0, 0.0}, {2.0, 1.0},
+                                  {1.0, 1.0}, {1.0, 2.0}, {0.0, 2.0}};
     // Area = 2x1 rectangle + 1x1 square = 3
     assert(polygon_area(l_shape) == 3.0);
 }

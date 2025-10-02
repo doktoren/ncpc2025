@@ -13,19 +13,19 @@ Time complexity: O(log n) for update and query operations.
 Space complexity: O(n) where n is the size of the array.
 */
 
-#include <vector>
-#include <stdexcept>
 #include <cassert>
 #include <iostream>
+#include <stdexcept>
+#include <vector>
 
-template<typename T>
+template <typename T>
 class FenwickTree {
-private:
+  private:
     int size;
     T zero;
-    std::vector<T> tree; // 1-indexed tree for easier bit manipulation
+    std::vector<T> tree;  // 1-indexed tree for easier bit manipulation
 
-public:
+  public:
     FenwickTree(int size, T zero) : size(size), zero(zero), tree(size + 1, zero) {}
 
     static FenwickTree from_array(const std::vector<T>& arr, T zero) {
@@ -34,9 +34,7 @@ public:
 
         // Compute prefix sums
         std::vector<T> prefix(n + 1, zero);
-        for (int i = 0; i < n; i++) {
-            prefix[i + 1] = prefix[i] + arr[i];
-        }
+        for (int i = 0; i < n; i++) { prefix[i + 1] = prefix[i] + arr[i]; }
 
         // Build tree in O(n): each tree[i] contains sum of range [i - (i & -i) + 1, i]
         for (int i = 1; i <= n; i++) {
@@ -48,9 +46,7 @@ public:
     }
 
     void update(int index, T delta) {
-        if (index < 0 || index >= size) {
-            throw std::out_of_range("Index out of bounds");
-        }
+        if (index < 0 || index >= size) { throw std::out_of_range("Index out of bounds"); }
 
         // Convert to 1-indexed
         index++;
@@ -62,9 +58,7 @@ public:
     }
 
     T query(int index) {
-        if (index < 0 || index >= size) {
-            throw std::out_of_range("Index out of bounds");
-        }
+        if (index < 0 || index >= size) { throw std::out_of_range("Index out of bounds"); }
 
         // Convert to 1-indexed
         index++;
@@ -78,24 +72,16 @@ public:
     }
 
     T range_query(int left, int right) {
-        if (left > right || left < 0 || right >= size) {
-            return zero;
-        }
-        if (left == 0) {
-            return query(right);
-        }
+        if (left > right || left < 0 || right >= size) { return zero; }
+        if (left == 0) { return query(right); }
         return query(right) - query(left - 1);
     }
 
     // Optional functionality (not always needed during competition)
 
     T get_value(int index) {
-        if (index < 0 || index >= size) {
-            throw std::out_of_range("Index out of bounds");
-        }
-        if (index == 0) {
-            return query(0);
-        }
+        if (index < 0 || index >= size) { throw std::out_of_range("Index out of bounds"); }
+        if (index == 0) { return query(0); }
         return query(index) - query(index - 1);
     }
 
@@ -108,12 +94,10 @@ public:
 
         T prefix_before = (start_index > 0) ? query(start_index - 1) : zero;
         T total = query(size - 1);
-        if (total == prefix_before) {
-            return -1;
-        }
+        if (total == prefix_before) { return -1; }
 
         // Fenwick lower_bound: first idx with prefix_sum(idx) > prefix_before
-        int idx = 0;  // 1-based cursor
+        int idx = 0;   // 1-based cursor
         T cur = zero;  // running prefix at 'idx'
         int bit = 1;
         while (bit <= size) bit <<= 1;
@@ -174,8 +158,8 @@ void test_basic() {
 
     // Query operations
     assert(ft.query(0) == 5);
-    assert(ft.query(2) == 8);  // 5 + 0 + 3
-    assert(ft.query(4) == 15); // 5 + 0 + 3 + 0 + 7
+    assert(ft.query(2) == 8);   // 5 + 0 + 3
+    assert(ft.query(4) == 15);  // 5 + 0 + 3 + 0 + 7
 
     // Range queries
     assert(ft.range_query(0, 2) == 8);
@@ -200,13 +184,13 @@ void test_from_array() {
     }
 
     // Test range queries
-    assert(ft.range_query(1, 3) == 3 + 5 + 7); // 15
-    assert(ft.range_query(2, 4) == 5 + 7 + 9); // 21
+    assert(ft.range_query(1, 3) == 3 + 5 + 7);  // 15
+    assert(ft.range_query(2, 4) == 5 + 7 + 9);  // 21
 
     // Test updates
-    ft.update(2, 10); // arr[2] becomes 15
+    ft.update(2, 10);  // arr[2] becomes 15
     assert(ft.get_value(2) == 15);
-    assert(ft.range_query(1, 3) == 3 + 15 + 7); // 25
+    assert(ft.range_query(1, 3) == 3 + 15 + 7);  // 25
 }
 
 void test_edge_cases() {
@@ -220,7 +204,7 @@ void test_edge_cases() {
 
     // Empty range
     FenwickTree<int> ft_large(10, 0);
-    assert(ft_large.range_query(5, 3) == 0); // left > right
+    assert(ft_large.range_query(5, 3) == 0);  // left > right
 }
 
 void test_negative_values() {
@@ -232,13 +216,13 @@ void test_negative_values() {
     ft.update(2, 8);
     ft.update(3, -3);
 
-    assert(ft.query(3) == 10); // 10 + (-5) + 8 + (-3)
-    assert(ft.range_query(1, 2) == 3); // (-5) + 8
+    assert(ft.query(3) == 10);          // 10 + (-5) + 8 + (-3)
+    assert(ft.range_query(1, 2) == 3);  // (-5) + 8
 
     // Update with negative delta
-    ft.update(0, -5); // Subtract 5 from position 0
+    ft.update(0, -5);  // Subtract 5 from position 0
     assert(ft.get_value(0) == 5);
-    assert(ft.query(3) == 5); // 5 + (-5) + 8 + (-3)
+    assert(ft.query(3) == 5);  // 5 + (-5) + 8 + (-3)
 }
 
 void test_bounds_checking() {
@@ -248,34 +232,26 @@ void test_bounds_checking() {
     bool caught = false;
     try {
         ft.update(-1, 10);
-    } catch (const std::out_of_range&) {
-        caught = true;
-    }
+    } catch (const std::out_of_range&) { caught = true; }
     assert(caught);
 
     caught = false;
     try {
         ft.update(5, 10);
-    } catch (const std::out_of_range&) {
-        caught = true;
-    }
+    } catch (const std::out_of_range&) { caught = true; }
     assert(caught);
 
     // Test query bounds
     caught = false;
     try {
         ft.query(-1);
-    } catch (const std::out_of_range&) {
-        caught = true;
-    }
+    } catch (const std::out_of_range&) { caught = true; }
     assert(caught);
 
     caught = false;
     try {
         ft.query(5);
-    } catch (const std::out_of_range&) {
-        caught = true;
-    }
+    } catch (const std::out_of_range&) { caught = true; }
     assert(caught);
 
     // Test range_query bounds - should return zero for invalid ranges
@@ -286,17 +262,13 @@ void test_bounds_checking() {
     caught = false;
     try {
         ft.get_value(-1);
-    } catch (const std::out_of_range&) {
-        caught = true;
-    }
+    } catch (const std::out_of_range&) { caught = true; }
     assert(caught);
 
     caught = false;
     try {
         ft.get_value(5);
-    } catch (const std::out_of_range&) {
-        caught = true;
-    }
+    } catch (const std::out_of_range&) { caught = true; }
     assert(caught);
 }
 
@@ -337,9 +309,7 @@ void test_linear_from_array() {
         }
 
         // Verify individual values
-        for (size_t i = 0; i < arr.size(); i++) {
-            assert(ft.get_value(i) == arr[i]);
-        }
+        for (size_t i = 0; i < arr.size(); i++) { assert(ft.get_value(i) == arr[i]); }
 
         // Test range queries
         if (arr.size() >= 3) {
@@ -350,18 +320,14 @@ void test_linear_from_array() {
 
     // Test on larger array
     std::vector<int> large_arr(1000);
-    for (int i = 0; i < 1000; i++) {
-        large_arr[i] = i;
-    }
+    for (int i = 0; i < 1000; i++) { large_arr[i] = i; }
     auto ft_optimized = FenwickTree<int>::from_array(large_arr, 0);
 
     // Verify correctness on large array
     std::vector<int> test_indices = {0, 100, 500, 999};
     for (int i : test_indices) {
         int expected = 0;
-        for (int j = 0; j <= i; j++) {
-            expected += large_arr[j];
-        }
+        for (int j = 0; j <= i; j++) { expected += large_arr[j]; }
         assert(ft_optimized.query(i) == expected);
     }
 }

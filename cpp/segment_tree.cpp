@@ -9,16 +9,16 @@ Time complexity: O(log n) for query and update operations, O(n) for construction
 Space complexity: O(n) for the tree structure.
 */
 
-#include <iostream>
-#include <vector>
-#include <stdexcept>
 #include <cassert>
+#include <iostream>
 #include <numeric>
+#include <stdexcept>
 #include <string>
+#include <vector>
 
-template<typename T>
+template <typename T>
 class SegmentTree {
-private:
+  private:
     int n;
     T zero;
     std::vector<T> tree;
@@ -49,37 +49,32 @@ private:
     }
 
     T query_helper(int node, int start, int end, int left, int right) {
-        if (right < start || left > end) {
-            return zero;
-        }
-        if (left <= start && end <= right) {
-            return tree[node];
-        }
+        if (right < start || left > end) { return zero; }
+        if (left <= start && end <= right) { return tree[node]; }
         int mid = (start + end) / 2;
         T left_sum = query_helper(2 * node, start, mid, left, right);
         T right_sum = query_helper(2 * node + 1, mid + 1, end, left, right);
         return left_sum + right_sum;
     }
 
-public:
+  public:
     SegmentTree(const std::vector<T>& arr, T zero) : n(arr.size()), zero(zero) {
         tree.resize(4 * n, zero);
-        if (!arr.empty()) {
-            build(arr, 1, 0, n - 1);
-        }
+        if (!arr.empty()) { build(arr, 1, 0, n - 1); }
     }
 
     void update(int idx, T val) {
         if (idx < 0 || idx >= n) {
-            throw std::out_of_range("Index " + std::to_string(idx) + " out of bounds for size " + std::to_string(n));
+            throw std::out_of_range("Index " + std::to_string(idx) + " out of bounds for size " +
+                                    std::to_string(n));
         }
         update_helper(1, 0, n - 1, idx, val);
     }
 
     T query(int left, int right) {
         if (left < 0 || right >= n || left > right) {
-            throw std::out_of_range("Invalid range [" + std::to_string(left) + ", " + std::to_string(right) +
-                                   "] for size " + std::to_string(n));
+            throw std::out_of_range("Invalid range [" + std::to_string(left) + ", " +
+                                    std::to_string(right) + "] for size " + std::to_string(n));
         }
         return query_helper(1, 0, n - 1, left, right);
     }
@@ -220,41 +215,31 @@ void test_invalid_indices() {
     bool caught = false;
     try {
         st.update(-1, 5);
-    } catch (const std::out_of_range&) {
-        caught = true;
-    }
+    } catch (const std::out_of_range&) { caught = true; }
     assert(caught);
 
     caught = false;
     try {
         st.update(3, 5);
-    } catch (const std::out_of_range&) {
-        caught = true;
-    }
+    } catch (const std::out_of_range&) { caught = true; }
     assert(caught);
 
     caught = false;
     try {
         st.query(-1, 2);
-    } catch (const std::out_of_range&) {
-        caught = true;
-    }
+    } catch (const std::out_of_range&) { caught = true; }
     assert(caught);
 
     caught = false;
     try {
         st.query(0, 3);
-    } catch (const std::out_of_range&) {
-        caught = true;
-    }
+    } catch (const std::out_of_range&) { caught = true; }
     assert(caught);
 
     caught = false;
     try {
         st.query(2, 1);  // left > right
-    } catch (const std::out_of_range&) {
-        caught = true;
-    }
+    } catch (const std::out_of_range&) { caught = true; }
     assert(caught);
 }
 

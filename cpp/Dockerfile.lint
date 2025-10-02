@@ -1,0 +1,16 @@
+FROM ubuntu:22.04
+
+RUN apt-get update -qq && \
+    apt-get install -qq -y \
+    clang-format \
+    cppcheck \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create a user that matches the host user
+RUN groupadd -g 1000 jesper && \
+    useradd -u 1000 -g 1000 -s /bin/bash jesper
+
+USER jesper
+WORKDIR /workspace
+
+CMD ["./lint.sh"]

@@ -43,7 +43,7 @@ class segment_tree {
                 build(arr, leftChild, start, mid);
                 build(arr, rightChild, mid + 1, end);
 
-                tree[node] = combineOp.apply((T)tree[leftChild], (T)tree[rightChild]);
+                tree[node] = combineOp.apply((T) tree[leftChild], (T) tree[rightChild]);
             }
         }
 
@@ -66,7 +66,7 @@ class segment_tree {
                     update(rightChild, mid + 1, end, idx, value);
                 }
 
-                tree[node] = combineOp.apply((T)tree[leftChild], (T)tree[rightChild]);
+                tree[node] = combineOp.apply((T) tree[leftChild], (T) tree[rightChild]);
             }
         }
 
@@ -84,7 +84,7 @@ class segment_tree {
             }
 
             if (l <= start && end <= r) {
-                return (T)tree[node];
+                return (T) tree[node];
             }
 
             int mid = (start + end) / 2;
@@ -142,7 +142,7 @@ class segment_tree {
         SegmentTree<Long> st = new SegmentTree<>(arr, 0L, (a, b) -> a + b);
 
         for (int i = 0; i < 5; i++) {
-            st.update(i, (long)(i + 1));
+            st.update(i, (long) (i + 1));
         }
 
         assert st.query(0, 4) == 15L;
@@ -152,7 +152,7 @@ class segment_tree {
     static void testLargeArray() {
         Long[] arr = new Long[1000];
         for (int i = 0; i < 1000; i++) {
-            arr[i] = (long)(i + 1);
+            arr[i] = (long) (i + 1);
         }
 
         SegmentTree<Long> st = new SegmentTree<>(arr, 0L, (a, b) -> a + b);

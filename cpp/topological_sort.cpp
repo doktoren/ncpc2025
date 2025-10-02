@@ -9,18 +9,18 @@ Time complexity: O(V + E) for both algorithms, where V is vertices and E is edge
 Space complexity: O(V + E) for the graph representation and auxiliary data structures.
 */
 
-#include <iostream>
-#include <vector>
-#include <map>
-#include <queue>
 #include <algorithm>
-#include <optional>
-#include <stdexcept>
 #include <cassert>
+#include <iostream>
+#include <map>
+#include <optional>
+#include <queue>
+#include <stdexcept>
+#include <vector>
 
-template<typename NodeT>
+template <typename NodeT>
 class TopologicalSort {
-private:
+  private:
     std::map<NodeT, std::vector<NodeT>> graph;
     std::map<NodeT, int> in_degree;
 
@@ -36,9 +36,7 @@ private:
 
         color[node] = GRAY;
         for (const auto& neighbor : graph[node]) {
-            if (!dfs_helper(neighbor, color, result)) {
-                return false;
-            }
+            if (!dfs_helper(neighbor, color, result)) { return false; }
         }
 
         color[node] = BLACK;
@@ -46,7 +44,7 @@ private:
         return true;
     }
 
-public:
+  public:
     void add_edge(NodeT u, NodeT v) {
         if (graph.find(u) == graph.end()) {
             graph[u] = {};
@@ -71,9 +69,7 @@ public:
         std::queue<NodeT> q;
 
         for (const auto& [node, deg] : in_deg) {
-            if (deg == 0) {
-                q.push(node);
-            }
+            if (deg == 0) { q.push(node); }
         }
 
         std::vector<NodeT> result;
@@ -85,16 +81,12 @@ public:
 
             for (const auto& neighbor : graph[node]) {
                 in_deg[neighbor]--;
-                if (in_deg[neighbor] == 0) {
-                    q.push(neighbor);
-                }
+                if (in_deg[neighbor] == 0) { q.push(neighbor); }
             }
         }
 
         // Check if all nodes are processed (no cycle)
-        if (result.size() != in_degree.size()) {
-            return std::nullopt;
-        }
+        if (result.size() != in_degree.size()) { return std::nullopt; }
 
         return result;
     }
@@ -106,16 +98,12 @@ public:
         Returns the topological ordering, or nullopt if the graph has a cycle.
         */
         std::map<NodeT, Color> color;
-        for (const auto& [node, _] : in_degree) {
-            color[node] = WHITE;
-        }
+        for (const auto& [node, _] : in_degree) { color[node] = WHITE; }
 
         std::vector<NodeT> result;
 
         for (const auto& [node, _] : in_degree) {
-            if (color[node] == WHITE && !dfs_helper(node, color, result)) {
-                return std::nullopt;
-            }
+            if (color[node] == WHITE && !dfs_helper(node, color, result)) { return std::nullopt; }
         }
 
         std::reverse(result.begin(), result.end());
@@ -133,14 +121,10 @@ public:
         Returns a map from each node to its longest path length.
         */
         auto topo_order = kahn_sort();
-        if (!topo_order.has_value()) {
-            throw std::runtime_error("Graph contains a cycle");
-        }
+        if (!topo_order.has_value()) { throw std::runtime_error("Graph contains a cycle"); }
 
         std::map<NodeT, int> dist;
-        for (const auto& [node, _] : in_degree) {
-            dist[node] = 0;
-        }
+        for (const auto& [node, _] : in_degree) { dist[node] = 0; }
 
         for (const auto& node : topo_order.value()) {
             for (const auto& neighbor : graph[node]) {
@@ -155,9 +139,7 @@ public:
 void test_main() {
     TopologicalSort<int> ts;
     std::vector<std::pair<int, int>> edges = {{5, 2}, {5, 0}, {4, 0}, {4, 1}, {2, 3}, {3, 1}};
-    for (const auto& [u, v] : edges) {
-        ts.add_edge(u, v);
-    }
+    for (const auto& [u, v] : edges) { ts.add_edge(u, v); }
 
     auto kahn_result = ts.kahn_sort();
     auto dfs_result = ts.dfs_sort();
@@ -220,9 +202,7 @@ void test_linear_chain() {
     auto kahn = kahn_result.value();
     assert(kahn.size() == 5);
     // Verify 1 comes before 2, 2 before 3, etc.
-    for (size_t i = 0; i < kahn.size() - 1; i++) {
-        assert(kahn[i] < kahn[i + 1]);
-    }
+    for (size_t i = 0; i < kahn.size() - 1; i++) { assert(kahn[i] < kahn[i + 1]); }
 }
 
 void test_multiple_sources() {
@@ -317,9 +297,7 @@ void test_longest_path_with_cycle() {
     bool caught = false;
     try {
         ts.longest_path();
-    } catch (const std::runtime_error&) {
-        caught = true;
-    }
+    } catch (const std::runtime_error&) { caught = true; }
     assert(caught);
 }
 
@@ -346,9 +324,7 @@ void test_large_graph() {
     TopologicalSort<int> ts;
 
     // Create a chain of 1000 nodes
-    for (int i = 0; i < 999; i++) {
-        ts.add_edge(i, i + 1);
-    }
+    for (int i = 0; i < 999; i++) { ts.add_edge(i, i + 1); }
 
     auto result = ts.kahn_sort();
     assert(result.has_value());

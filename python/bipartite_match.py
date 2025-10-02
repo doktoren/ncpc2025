@@ -1,9 +1,10 @@
 """
-A bipartite matching algorithm finds the largest set of pairings between two disjoint vertex sets U and V
-in a bipartite graph such that no vertex is in more than one pair.
+A bipartite matching algorithm finds the largest set of pairings between two disjoint vertex sets
+U and V in a bipartite graph such that no vertex is in more than one pair.
 
 Augmenting paths: repeatedly search for a path that alternates between unmatched and matched edges,
-starting and ending at free vertices. Flipping the edges along such a path increases the matching size by 1.
+starting and ending at free vertices. Flipping the edges along such a path increases the matching
+size by 1.
 
 Time complexity: O(V · E), where V is the number of vertices and E the number of edges.
 """
@@ -158,7 +159,7 @@ def test_no_matching() -> None:
     )
     # Only one can be matched
     assert len(bm.match) == 1
-    assert bm.match[list(bm.match.keys())[0]] == "A"
+    assert bm.match[next(iter(bm.match.keys()))] == "A"
 
 
 def test_perfect_matching() -> None:
@@ -183,10 +184,9 @@ def test_augmenting_path() -> None:
 
 def test_large_bipartite() -> None:
     # Larger graph
-    edges = []
+    edges: list[tuple[int, int]] = []
     for i in range(10):
-        for j in range(i, min(i + 3, 10)):
-            edges.append((i, j + 100))
+        edges.extend((i, j + 100) for j in range(i, min(i + 3, 10)))
 
     bm: BipartiteMatch[int, int] = BipartiteMatch(edges)
     # Should find a good matching

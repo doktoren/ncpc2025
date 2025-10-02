@@ -1,0 +1,24 @@
+FROM openjdk:21-slim
+
+RUN apt-get update -qq && \
+    apt-get install -qq -y \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# Download google-java-format
+RUN mkdir -p /opt/tools && \
+    wget -q https://github.com/google/google-java-format/releases/download/v1.18.1/google-java-format-1.18.1-all-deps.jar \
+    -O /opt/tools/google-java-format.jar
+
+# Download checkstyle
+RUN wget -q https://github.com/checkstyle/checkstyle/releases/download/checkstyle-10.12.4/checkstyle-10.12.4-all.jar \
+    -O /opt/tools/checkstyle.jar
+
+# Create a user that matches the host user
+RUN groupadd -g 1000 jesper && \
+    useradd -u 1000 -g 1000 -s /bin/bash jesper
+
+USER jesper
+WORKDIR /workspace
+
+CMD ["./lint.sh"]

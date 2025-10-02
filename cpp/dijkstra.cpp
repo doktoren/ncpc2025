@@ -8,43 +8,41 @@ Time complexity: O((V + E) log V) with binary heap, where V is vertices and E is
 Space complexity: O(V + E) for the graph representation and auxiliary data structures.
 */
 
-#include <iostream>
-#include <vector>
-#include <map>
-#include <queue>
-#include <set>
-#include <optional>
 #include <algorithm>
 #include <cassert>
+#include <iostream>
 #include <limits>
+#include <map>
+#include <optional>
+#include <queue>
+#include <set>
+#include <vector>
 
-template<typename NodeT, typename WeightT>
+template <typename NodeT, typename WeightT>
 class Dijkstra {
-private:
+  private:
     WeightT infinity;
     WeightT zero;
     std::map<NodeT, std::vector<std::pair<NodeT, WeightT>>> graph;
 
-public:
+  public:
     Dijkstra(WeightT infinity, WeightT zero) : infinity(infinity), zero(zero) {}
 
     void add_edge(NodeT u, NodeT v, WeightT weight) {
         graph[u].push_back({v, weight});
     }
 
-    std::pair<std::map<NodeT, WeightT>, std::map<NodeT, std::optional<NodeT>>>
-    shortest_paths(NodeT source) {
+    std::pair<std::map<NodeT, WeightT>, std::map<NodeT, std::optional<NodeT>>> shortest_paths(
+        NodeT source) {
         std::map<NodeT, WeightT> distances;
         std::map<NodeT, std::optional<NodeT>> predecessors;
         distances[source] = zero;
         predecessors[source] = std::nullopt;
 
         // Min heap: pair of (distance, node)
-        std::priority_queue<
-            std::pair<WeightT, NodeT>,
-            std::vector<std::pair<WeightT, NodeT>>,
-            std::greater<std::pair<WeightT, NodeT>>
-        > pq;
+        std::priority_queue<std::pair<WeightT, NodeT>, std::vector<std::pair<WeightT, NodeT>>,
+                            std::greater<std::pair<WeightT, NodeT>>>
+            pq;
 
         pq.push({zero, source});
         std::set<NodeT> visited;
@@ -53,14 +51,10 @@ public:
             auto [current_dist, u] = pq.top();
             pq.pop();
 
-            if (visited.count(u)) {
-                continue;
-            }
+            if (visited.count(u)) { continue; }
             visited.insert(u);
 
-            if (graph.find(u) == graph.end()) {
-                continue;
-            }
+            if (graph.find(u) == graph.end()) { continue; }
 
             for (const auto& [v, weight] : graph[u]) {
                 WeightT new_dist = current_dist + weight;
@@ -79,9 +73,7 @@ public:
     std::optional<std::vector<NodeT>> shortest_path(NodeT source, NodeT target) {
         auto [distances, predecessors] = shortest_paths(source);
 
-        if (predecessors.find(target) == predecessors.end()) {
-            return std::nullopt;
-        }
+        if (predecessors.find(target) == predecessors.end()) { return std::nullopt; }
 
         std::vector<NodeT> path;
         std::optional<NodeT> current = target;
@@ -181,16 +173,12 @@ void test_dense_graph() {
 
     // Add edges between all pairs
     std::map<std::pair<int, int>, int> weights = {
-        {{0, 1}, 4}, {{0, 2}, 2}, {{0, 3}, 7}, {{0, 4}, 1},
-        {{1, 0}, 4}, {{1, 2}, 3}, {{1, 3}, 2}, {{1, 4}, 5},
-        {{2, 0}, 2}, {{2, 1}, 3}, {{2, 3}, 4}, {{2, 4}, 8},
-        {{3, 0}, 7}, {{3, 1}, 2}, {{3, 2}, 4}, {{3, 4}, 6},
-        {{4, 0}, 1}, {{4, 1}, 5}, {{4, 2}, 8}, {{4, 3}, 6},
+        {{0, 1}, 4}, {{0, 2}, 2}, {{0, 3}, 7}, {{0, 4}, 1}, {{1, 0}, 4}, {{1, 2}, 3}, {{1, 3}, 2},
+        {{1, 4}, 5}, {{2, 0}, 2}, {{2, 1}, 3}, {{2, 3}, 4}, {{2, 4}, 8}, {{3, 0}, 7}, {{3, 1}, 2},
+        {{3, 2}, 4}, {{3, 4}, 6}, {{4, 0}, 1}, {{4, 1}, 5}, {{4, 2}, 8}, {{4, 3}, 6},
     };
 
-    for (const auto& [edge, weight] : weights) {
-        d.add_edge(edge.first, edge.second, weight);
-    }
+    for (const auto& [edge, weight] : weights) { d.add_edge(edge.first, edge.second, weight); }
 
     auto [distances, _] = d.shortest_paths(0);
 
@@ -205,24 +193,18 @@ void test_large_graph() {
     // Linear chain: 0->1->2->...->99
     Dijkstra<int, int> d(999999, 0);
 
-    for (int i = 0; i < 99; i++) {
-        d.add_edge(i, i + 1, 1);
-    }
+    for (int i = 0; i < 99; i++) { d.add_edge(i, i + 1, 1); }
 
     auto [distances, _] = d.shortest_paths(0);
 
     // Distance to node i should be i
-    for (int i = 0; i < 100; i++) {
-        assert(distances[i] == i);
-    }
+    for (int i = 0; i < 100; i++) { assert(distances[i] == i); }
 
     // Test path reconstruction
     auto path = d.shortest_path(0, 50);
     assert(path.has_value());
     assert(path.value().size() == 51);
-    for (int i = 0; i <= 50; i++) {
-        assert(path.value()[i] == i);
-    }
+    for (int i = 0; i <= 50; i++) { assert(path.value()[i] == i); }
 }
 
 void test_decimal_weights() {
@@ -247,9 +229,7 @@ void test_stress_many_nodes() {
     auto [distances, _] = d.shortest_paths(center);
 
     // Distance to node i should be i
-    for (int i = 1; i <= 500; i++) {
-        assert(distances[i] == i);
-    }
+    for (int i = 1; i <= 500; i++) { assert(distances[i] == i); }
 
     // Path from center to any node should be direct
     auto path = d.shortest_path(center, 100);

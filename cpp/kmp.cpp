@@ -9,10 +9,10 @@ Time complexity: O(n + m) where n is text length and m is pattern length.
 Space complexity: O(m) for the failure function table.
 */
 
-#include <iostream>
-#include <vector>
-#include <string>
 #include <cassert>
+#include <iostream>
+#include <string>
+#include <vector>
 
 std::vector<int> compute_failure_function(const std::string& pattern) {
     /*
@@ -26,13 +26,9 @@ std::vector<int> compute_failure_function(const std::string& pattern) {
     int j = 0;
 
     for (int i = 1; i < m; i++) {
-        while (j > 0 && pattern[i] != pattern[j]) {
-            j = failure[j - 1];
-        }
+        while (j > 0 && pattern[i] != pattern[j]) { j = failure[j - 1]; }
 
-        if (pattern[i] == pattern[j]) {
-            j++;
-        }
+        if (pattern[i] == pattern[j]) { j++; }
 
         failure[i] = j;
     }
@@ -46,27 +42,19 @@ std::vector<int> kmp_search(const std::string& text, const std::string& pattern)
 
     Returns a list of 0-indexed positions where pattern begins in text.
     */
-    if (pattern.empty()) {
-        return {};
-    }
+    if (pattern.empty()) { return {}; }
 
     int n = text.length(), m = pattern.length();
-    if (m > n) {
-        return {};
-    }
+    if (m > n) { return {}; }
 
     std::vector<int> failure = compute_failure_function(pattern);
     std::vector<int> matches;
     int j = 0;  // index for pattern
 
     for (int i = 0; i < n; i++) {  // index for text
-        while (j > 0 && text[i] != pattern[j]) {
-            j = failure[j - 1];
-        }
+        while (j > 0 && text[i] != pattern[j]) { j = failure[j - 1]; }
 
-        if (text[i] == pattern[j]) {
-            j++;
-        }
+        if (text[i] == pattern[j]) { j++; }
 
         if (j == m) {
             matches.push_back(i - m + 1);
@@ -219,9 +207,7 @@ void test_stress_many_matches() {
     std::string text(100, 'a');
     std::string pattern(10, 'a');
     std::vector<int> expected;
-    for (int i = 0; i <= 90; i++) {
-        expected.push_back(i);
-    }
+    for (int i = 0; i <= 90; i++) { expected.push_back(i); }
     assert(kmp_search(text, pattern) == expected);
     assert(kmp_count(text, pattern) == 91);
 }
@@ -270,7 +256,8 @@ void test_unicode_strings() {
     // Unicode text and pattern
     std::string text = "αβγδεζηθ";
     std::string pattern = "γδε";
-    assert(kmp_search(text, pattern) == std::vector<int>({4}));  // Note: byte offset, not char offset
+    assert(kmp_search(text, pattern) ==
+           std::vector<int>({4}));  // Note: byte offset, not char offset
 
     text = "🙂🙃🙂🙃🙂";
     pattern = "🙂🙃";

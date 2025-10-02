@@ -1,5 +1,6 @@
 /*
-Edmonds-Karp is a specialization of the Ford-Fulkerson method for computing the maximum flow in a directed graph.
+Edmonds-Karp is a specialization of the Ford-Fulkerson method for computing the maximum flow in a
+directed graph.
 
 * It repeatedly searches for an augmenting path from source to sink.
 * The search is done with BFS, guaranteeing the path found is the shortest (fewest edges).
@@ -9,22 +10,22 @@ Edmonds-Karp is a specialization of the Ford-Fulkerson method for computing the 
 Time complexity: O(V · E²), where V is the number of vertices and E the number of edges.
 */
 
-#include <vector>
-#include <queue>
 #include <algorithm>
-#include <limits>
 #include <cassert>
 #include <iostream>
+#include <limits>
+#include <queue>
+#include <vector>
 
-template<typename T>
+template <typename T>
 class EdmondsKarp {
-private:
+  private:
     int n;
     std::vector<std::vector<T>> capacity;
     std::vector<std::vector<T>> flow;
     T total_flow;
 
-public:
+  public:
     EdmondsKarp(int vertices) : n(vertices), total_flow(0) {
         capacity.assign(n, std::vector<T>(n, 0));
         flow.assign(n, std::vector<T>(n, 0));
@@ -52,9 +53,7 @@ public:
                     q.push(v);
                     parent[v] = u;
                     visited[v] = true;
-                    if (v == sink) {
-                        return true;
-                    }
+                    if (v == sink) { return true; }
                 }
             }
         }

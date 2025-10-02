@@ -18,6 +18,7 @@ import java.util.function.BinaryOperator;
 class fenwick_tree {
     interface Summable<T> {
         T add(T other);
+
         T subtract(T other);
     }
 
@@ -48,7 +49,8 @@ class fenwick_tree {
         }
 
         // O(n) constructor from array using prefix sums
-        static <T> FenwickTree<T> fromArray(T[] arr, T zero, BinaryOperator<T> addOp, BinaryOperator<T> subtractOp) {
+        static <T> FenwickTree<T> fromArray(
+                T[] arr, T zero, BinaryOperator<T> addOp, BinaryOperator<T> subtractOp) {
             int n = arr.length;
             FenwickTree<T> ft = new FenwickTree<>(n, zero, addOp, subtractOp);
 
@@ -56,13 +58,13 @@ class fenwick_tree {
             Object[] prefix = new Object[n + 1];
             prefix[0] = zero;
             for (int i = 0; i < n; i++) {
-                prefix[i + 1] = addOp.apply((T)prefix[i], arr[i]);
+                prefix[i + 1] = addOp.apply((T) prefix[i], arr[i]);
             }
 
             // Build tree in O(n): each tree[i] contains sum of range [i - (i & -i) + 1, i]
             for (int i = 1; i <= n; i++) {
                 int rangeStart = i - (i & (-i)) + 1;
-                ft.tree[i] = subtractOp.apply((T)prefix[i], (T)prefix[rangeStart - 1]);
+                ft.tree[i] = subtractOp.apply((T) prefix[i], (T) prefix[rangeStart - 1]);
             }
 
             return ft;
@@ -71,11 +73,12 @@ class fenwick_tree {
         @SuppressWarnings("unchecked")
         void update(int i, T delta) {
             if (i < 0 || i >= size) {
-                throw new IndexOutOfBoundsException("Index " + i + " out of bounds for size " + size);
+                throw new IndexOutOfBoundsException(
+                        "Index " + i + " out of bounds for size " + size);
             }
             i++; // Convert to 1-based indexing
             while (i <= size) {
-                tree[i] = addOp.apply((T)tree[i], delta);
+                tree[i] = addOp.apply((T) tree[i], delta);
                 i += i & (-i);
             }
         }
@@ -83,12 +86,13 @@ class fenwick_tree {
         @SuppressWarnings("unchecked")
         T query(int i) {
             if (i < 0 || i >= size) {
-                throw new IndexOutOfBoundsException("Index " + i + " out of bounds for size " + size);
+                throw new IndexOutOfBoundsException(
+                        "Index " + i + " out of bounds for size " + size);
             }
             i++; // Convert to 1-based indexing
             T sum = zero;
             while (i > 0) {
-                sum = addOp.apply(sum, (T)tree[i]);
+                sum = addOp.apply(sum, (T) tree[i]);
                 i -= i & (-i);
             }
             return sum;
@@ -108,7 +112,8 @@ class fenwick_tree {
 
         T getValue(int i) {
             if (i < 0 || i >= size) {
-                throw new IndexOutOfBoundsException("Index " + i + " out of bounds for size " + size);
+                throw new IndexOutOfBoundsException(
+                        "Index " + i + " out of bounds for size " + size);
             }
             if (i == 0) {
                 return query(0);
@@ -139,8 +144,9 @@ class fenwick_tree {
             while (bit > 0) {
                 int nxt = idx + bit;
                 if (nxt <= size) {
-                    T cand = addOp.apply(cur, (T)tree[nxt]);
-                    if (comparator.compare(cand, prefixBefore) <= 0) { // move right while prefix <= target
+                    T cand = addOp.apply(cur, (T) tree[nxt]);
+                    if (comparator.compare(cand, prefixBefore)
+                            <= 0) { // move right while prefix <= target
                         cur = cand;
                         idx = nxt;
                     }
@@ -165,7 +171,9 @@ class fenwick_tree {
         // Optional functionality (not always needed during competition)
 
         assert f.getValue(2) == 13L;
-        FenwickTree<Long> g = FenwickTree.fromArray(new Long[]{1L, 2L, 3L, 4L, 5L}, 0L, (a, b) -> a + b, (a, b) -> a - b);
+        FenwickTree<Long> g =
+                FenwickTree.fromArray(
+                        new Long[] {1L, 2L, 3L, 4L, 5L}, 0L, (a, b) -> a + b, (a, b) -> a - b);
         assert g.query(4) == 15L;
     }
 
@@ -210,7 +218,7 @@ class fenwick_tree {
     static void testLargeUpdates() {
         FenwickTree<Long> ft = new FenwickTree<>(1000, 0L, (a, b) -> a + b, (a, b) -> a - b);
         for (int i = 0; i < 1000; i++) {
-            ft.update(i, (long)(i + 1));
+            ft.update(i, (long) (i + 1));
         }
         assert ft.query(999) == 500500L;
         assert ft.rangeQuery(0, 99) == 5050L;
@@ -314,7 +322,7 @@ class fenwick_tree {
         assert ft.rangeQuery(2, 4) == 5 + 7 + 9; // 21
 
         // Test updates
-        ft.update(2, 10L);  // arr[2] becomes 15
+        ft.update(2, 10L); // arr[2] becomes 15
         assert ft.getValue(2) == 15L;
         assert ft.rangeQuery(1, 3) == 3 + 15 + 7; // 25
     }
@@ -330,7 +338,7 @@ class fenwick_tree {
 
         // Empty range
         FenwickTree<Long> ftLarge = new FenwickTree<>(10, 0L, (a, b) -> a + b, (a, b) -> a - b);
-        assert ftLarge.rangeQuery(5, 3) == 0L;  // left > right
+        assert ftLarge.rangeQuery(5, 3) == 0L; // left > right
     }
 
     public static void main(String[] args) {

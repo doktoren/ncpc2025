@@ -26,7 +26,23 @@ All algorithms MUST be kept in sync across Python, C++, and Java implementations
 **Primary development workflow:**
 ```bash
 ./test_all.sh  # Test all algorithms (Python + C++ + Java)
-./lint.sh      # Python linting, type checking, and testing
+./python/lint.sh      # Python linting, type checking, and testing
+```
+
+**Linting commands:**
+```bash
+# Python linting (ruff + mypy) - line limit: 100 chars
+cd python && ./lint.sh
+
+# C++ linting (clang-format + cppcheck) - line limit: 100 chars
+cd cpp && docker run --rm -v $(pwd):/workspace ncpc2025-cpp-lint
+
+# Java linting (google-java-format + checkstyle) - line limit: 100 chars
+cd java && docker run --rm -v $(pwd):/workspace ncpc2025-java-lint
+
+# Auto-fix formatting:
+cd cpp && docker run --rm -v $(pwd):/workspace ncpc2025-cpp-lint clang-format -i *.cpp
+cd java && docker run --rm -v $(pwd):/workspace ncpc2025-java-lint java -jar /opt/tools/google-java-format.jar --replace *.java
 ```
 
 **Individual commands:**
@@ -48,9 +64,6 @@ cd java && ./test_all.sh
 
 # Test individual Java algorithm
 cd java && ./test_single.sh <algorithm>
-
-# Python linting
-./lint.sh
 
 # Documentation generation
 cd docs-generator && python3 generate_docs.py
@@ -85,6 +98,36 @@ Each PDF includes:
 - After first install: `uv run playwright install`
 
 The script automatically processes all algorithms from `python/`, `cpp/`, and `java/` directories, creating both competition-only versions (stopping at competition barriers) and full versions (including development tests).
+
+## Code Quality and Linting
+
+All languages enforce a **100-character line limit** to ensure optimal PDF formatting for the generated documentation and printable references.
+
+**Linting Infrastructure:**
+
+**Python:**
+- **Tools**: ruff (linting + formatting) + mypy (type checking)
+- **Configuration**: `python/ruff.toml` with 100-char line limit
+- **Command**: `cd python && ./lint.sh`
+
+**C++:**
+- **Tools**: clang-format (formatting) + cppcheck (static analysis)
+- **Configuration**: `cpp/.clang-format` with Google style + 100-char limit
+- **Docker Image**: `ncpc2025-cpp-lint` (includes clang-format + cppcheck)
+- **Command**: `cd cpp && docker run --rm -v $(pwd):/workspace ncpc2025-cpp-lint`
+- **Build**: `cd cpp && docker build -f Dockerfile.lint -t ncpc2025-cpp-lint .`
+
+**Java:**
+- **Tools**: google-java-format (formatting) + checkstyle (static analysis)
+- **Configuration**: `java/checkstyle.xml` with relaxed rules for competition code
+- **Docker Image**: `ncpc2025-java-lint` (includes google-java-format + checkstyle)
+- **Command**: `cd java && docker run --rm -v $(pwd):/workspace ncpc2025-java-lint`
+- **Build**: `cd java && docker build -f Dockerfile.lint -t ncpc2025-java-lint .`
+
+**Competition-Optimized Rules:**
+- C++: Suppresses warnings for assert side effects, missing explicit constructors, and other common competition patterns
+- Java: Allows snake_case class names, single-letter variables, and single-line if statements without braces
+- All languages: Focus on readability and consistency while allowing competition-specific shortcuts
 
 ## Code Architecture
 

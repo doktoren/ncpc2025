@@ -9,17 +9,17 @@ Time complexity: O(log n) for add/update and pop operations, O(log n) for remove
 Space complexity: O(n) where n is the number of items in the queue.
 */
 
-#include <queue>
-#include <unordered_map>
-#include <functional>
 #include <cassert>
+#include <functional>
 #include <iostream>
+#include <queue>
 #include <stdexcept>
+#include <unordered_map>
 #include <utility>
 
-template<typename KeyT, typename PriorityT>
+template <typename KeyT, typename PriorityT>
 class PriorityQueue {
-private:
+  private:
     struct Entry {
         PriorityT priority;
         KeyT key;
@@ -38,14 +38,14 @@ private:
     size_t next_version;
     int size_count;
 
-public:
+  public:
     PriorityQueue() : next_version(0), size_count(0) {}
 
     void set(const KeyT& key, const PriorityT& priority) {
         // Add a new task or update the priority of an existing task
         if (key_versions.find(key) != key_versions.end()) {
             // Key exists, this will invalidate the old entry
-            size_count--; // We'll increment it back below
+            size_count--;  // We'll increment it back below
         }
 
         size_count++;
@@ -216,18 +216,14 @@ void test_empty_operations() {
     bool caught = false;
     try {
         pq.pop();
-    } catch (const std::runtime_error&) {
-        caught = true;
-    }
+    } catch (const std::runtime_error&) { caught = true; }
     assert(caught);
 
     // Test peek on empty queue
     caught = false;
     try {
         pq.peek();
-    } catch (const std::runtime_error&) {
-        caught = true;
-    }
+    } catch (const std::runtime_error&) { caught = true; }
     assert(caught);
 }
 
@@ -239,9 +235,7 @@ void test_remove_nonexistent() {
     bool caught = false;
     try {
         pq.remove("nonexistent");
-    } catch (const std::runtime_error&) {
-        caught = true;
-    }
+    } catch (const std::runtime_error&) { caught = true; }
     assert(caught);
 }
 
@@ -271,9 +265,7 @@ void test_duplicate_priorities() {
     results.push_back(pq.pop());
 
     assert(results.size() == 3);
-    for (const auto& [key, priority] : results) {
-        assert(priority == 10);
-    }
+    for (const auto& [key, priority] : results) { assert(priority == 10); }
 }
 
 void test_with_floats() {

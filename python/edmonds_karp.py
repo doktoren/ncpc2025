@@ -1,5 +1,6 @@
 """
-Edmonds-Karp is a specialization of the Ford-Fulkerson method for computing the maximum flow in a directed graph.
+Edmonds-Karp is a specialization of the Ford-Fulkerson method for computing the maximum flow
+in a directed graph.
 
 * It repeatedly searches for an augmenting path from source to sink.
 * The search is done with BFS, guaranteeing the path found is the shortest (fewest edges).
@@ -84,8 +85,12 @@ class EdmondsKarp(Generic[NodeT, CapacityT]):
             nodes: dict[NodeT, Node[NodeT, CapacityT]] = {}
             for source_t, sink_t, capacity in edges:
                 source = nodes.setdefault(source_t, Node(source_t))
-                assert sink_t not in source.edges, f"The edge ({source_t}, {sink_t}) is specified more than once"
-                source.edges[sink_t] = Edge(source, nodes.setdefault(sink_t, Node(sink_t)), capacity)
+                assert sink_t not in source.edges, (
+                    f"The edge ({source_t}, {sink_t}) is specified more than once"
+                )
+                source.edges[sink_t] = Edge(
+                    source, nodes.setdefault(sink_t, Node(sink_t)), capacity
+                )
             for source_t, sink_t, _ in edges:
                 sink = nodes[sink_t]
                 if source_t not in sink.edges:
@@ -165,7 +170,10 @@ class EdmondsKarp(Generic[NodeT, CapacityT]):
             for node in self.nodes.values():
                 for edge in node.edges.values():
                     if edge.capacity < edge.initial_capacity:
-                        print(f"Flow {edge.source.node} ---{edge.flow}/{edge.initial_capacity}---> {edge.sink.node}")
+                        print(
+                            f"Flow {edge.source.node} ---{edge.flow}/{edge.initial_capacity}---> "
+                            f"{edge.sink.node}"
+                        )
 
 
 def test_main() -> None:

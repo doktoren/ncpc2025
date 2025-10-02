@@ -146,7 +146,8 @@ public class sprague_grundy {
         return moves;
     }
 
-    public static Function<Integer, Collection<Integer>> subtractionGameMovesFactory(Set<Integer> allowed) {
+    public static Function<Integer, Collection<Integer>> subtractionGameMovesFactory(
+            Set<Integer> allowed) {
         List<Integer> allowedSorted = new ArrayList<>(allowed);
         Collections.sort(allowedSorted);
 
@@ -221,15 +222,16 @@ public class sprague_grundy {
         assert eng.isWinningPosition(Arrays.asList(15, 27, 36)) == true; // 15^27^36 = 48 != 0
 
         // Test subtraction game {1,3,4} with period 7
-        GrundyEngine<Integer> eng2 = new GrundyEngine<>(subtractionGameMovesFactory(Set.of(1, 3, 4)));
+        GrundyEngine<Integer> eng2 =
+                new GrundyEngine<>(subtractionGameMovesFactory(Set.of(1, 3, 4)));
         assert eng2.grundy(14) == 0; // 14 % 7 = 0 → grundy = 0
         assert eng2.grundy(15) == 1; // 15 % 7 = 1 → grundy = 1
         assert eng2.grundy(18) == 2; // 18 % 7 = 4 → grundy = 2
 
         // Test Kayles
         GrundyEngine<KaylesState> eng3 = new GrundyEngine<>(kaylesMovesFactory());
-        assert eng3.grundy(new KaylesState(new int[]{7})) == 2; // K(7) = 2
-        assert eng3.grundy(new KaylesState(new int[]{3, 5})) == 7; // K(3)^K(5) = 3^4 = 7
+        assert eng3.grundy(new KaylesState(new int[] {7})) == 2; // K(7) = 2
+        assert eng3.grundy(new KaylesState(new int[] {3, 5})) == 7; // K(3)^K(5) = 3^4 = 7
     }
 
     // Don't write tests below during competition.
@@ -244,7 +246,8 @@ public class sprague_grundy {
 
     public static void testSubtractionGamePeriod() {
         // Allowed moves = {1,3,4}. Classic periodic sequence.
-        GrundyEngine<Integer> eng = new GrundyEngine<>(subtractionGameMovesFactory(Set.of(1, 3, 4)));
+        GrundyEngine<Integer> eng =
+                new GrundyEngine<>(subtractionGameMovesFactory(Set.of(1, 3, 4)));
 
         List<Integer> seq = new ArrayList<>();
         for (int n = 0; n < 200; n++) {
@@ -274,7 +277,8 @@ public class sprague_grundy {
 
     public static void testSumOfIndependentSubgames() {
         // Same subtraction game. Combined position = multiple independent heaps (ints).
-        GrundyEngine<Integer> eng = new GrundyEngine<>(subtractionGameMovesFactory(Set.of(1, 3, 4)));
+        GrundyEngine<Integer> eng =
+                new GrundyEngine<>(subtractionGameMovesFactory(Set.of(1, 3, 4)));
 
         // Build some positions
         List<Integer> A = Arrays.asList(5, 7); // grundy(5)=3, grundy(7)=2 → XOR=1 → winning
@@ -293,7 +297,7 @@ public class sprague_grundy {
         // Known first values for K(n) (reasonably small n)
         List<Integer> vals = new ArrayList<>();
         for (int n = 0; n < 15; n++) {
-            vals.add(eng.grundy(new KaylesState(new int[]{n})));
+            vals.add(eng.grundy(new KaylesState(new int[] {n})));
         }
 
         // Not trivial pattern; we check a few hand-picked facts (from direct computation):
@@ -302,8 +306,9 @@ public class sprague_grundy {
 
         // Splits: (n,) can end in (a,b) → XOR rule implicit in recursion.
         // Extra sanity: composite segments
-        assert eng.grundy(new KaylesState(new int[]{2, 2})) ==
-               (eng.grundy(new KaylesState(new int[]{2})) ^ eng.grundy(new KaylesState(new int[]{2})));
+        assert eng.grundy(new KaylesState(new int[] {2, 2}))
+                == (eng.grundy(new KaylesState(new int[] {2}))
+                        ^ eng.grundy(new KaylesState(new int[] {2})));
     }
 
     public static void testLongApplicationScan() {
@@ -313,7 +318,8 @@ public class sprague_grundy {
         - Use period if it exists.
         Here we use subtraction game {1,3,4}.
         */
-        GrundyEngine<Integer> eng = new GrundyEngine<>(subtractionGameMovesFactory(Set.of(1, 3, 4)));
+        GrundyEngine<Integer> eng =
+                new GrundyEngine<>(subtractionGameMovesFactory(Set.of(1, 3, 4)));
         int N = 500;
         List<Integer> seq = new ArrayList<>();
         for (int n = 0; n <= N; n++) {
