@@ -12,17 +12,14 @@ uv run --python 3.13 generate_docs.py --help
 
 Basic usage:
 ```bash
-# Generate docs for Python algorithms
-uv run --python 3.13 generate_docs.py python
+# Generate docs for Python algorithms (with syntax highlighting)
+uv run --python 3.13 --with pygments generate_docs.py python
 
 # Generate docs for all languages
-uv run --python 3.13 generate_docs.py all
-
-# Include syntax highlighting (requires pygments)
-uv run --python 3.13 --with pygments generate_docs.py python --syntax-highlighting
+uv run --python 3.13 --with pygments generate_docs.py all
 
 # Include development tests (normally excluded)
-uv run --python 3.13 generate_docs.py python --include-dev-tests
+uv run --python 3.13 --with pygments generate_docs.py python --include-dev-tests
 ```
 
 The script processes algorithm files from the parent directory's `python/`, `cpp/`, and `java/` folders and generates HTML documents in the `output/` directory.
@@ -43,20 +40,34 @@ The script processes algorithm files from the parent directory's `python/`, `cpp
 
 **Current Behavior**: Each algorithm starts on a new page (using `page-break-before: always`) but not necessarily an odd page.
 
-### 2. Chrome Print Color Stripping ❌ UNRESOLVED
+### 2. Comprehensive Syntax Highlighting ✅ RESOLVED
+
+**Problem**: Limited syntax highlighting coverage, especially for C++ and Java languages.
+
+**Solution Implemented**:
+- **Complete Pygments class coverage**: Added CSS for all language-specific syntax elements
+- **C++ improvements**: Keywords, types (`int`, `string`), preprocessor directives (`#include`), multiline comments
+- **Java improvements**: Declarations (`public`, `static`), types (`String`, `List`), annotations, attributes
+- **Consistent color scheme**: Different colors for keywords, types, comments, functions, strings, numbers
+
+**Current Status**: **Resolved** - All three languages now have comprehensive syntax highlighting with 1000+ highlighted elements per language.
+
+**Current Behavior**: Rich color highlighting works in browser view with language-specific syntax elements properly colored.
+
+### 3. Chrome Print Color Support ✅ RESOLVED
 
 **Problem**: Chrome strips colors when printing to save ink, making syntax highlighting invisible in print preview and printed output.
 
-**Attempts Made**:
-- Used `color-adjust: exact` and `-webkit-print-color-adjust: exact` properties
-- Moved color CSS into print media queries with `!important` declarations
-- Implemented print-friendly alternatives using text styling (bold, italic, underline, opacity)
+**Solution Implemented**:
+- Applied `-webkit-print-color-adjust: exact`, `color-adjust: exact`, and `print-color-adjust: exact` CSS properties
+- Used darker, print-friendly colors that work better in print mode
+- Added print-specific color overrides with `!important` declarations
 
-**Current Status**: **Unresolved** - Chrome continues to strip both colors and text styling effects when printing. The print-friendly alternatives (bold, italic, underline) are also ignored or rendered inconsistently in Chrome's print output.
+**Current Status**: **Resolved** - Syntax highlighting colors now appear when printing from Chrome, provided the user enables "Background graphics" in print settings or generates PDFs programmatically with `print_background=True`.
 
-**Current Behavior**: Syntax highlighting works in browser view (colors) but is effectively invisible when printing from Chrome. Text styling alternatives are also not reliably rendered in print output.
+**Current Behavior**: Syntax highlighting works in both browser view and print output. Users need to enable "More settings" → "Options" → "Background graphics" in Chrome's print dialog for colors to appear in printed output.
 
-### 3. CSS Print Media Limitations ⚠️ ONGOING
+### 4. CSS Print Media Limitations ⚠️ ONGOING
 
 **Problem**: Web browsers have inconsistent implementation of CSS print properties, making reliable print formatting challenging.
 
@@ -72,11 +83,12 @@ The script processes algorithm files from the parent directory's `python/`, `cpp
 - ✅ Table of contents on first page
 - ✅ Fixed-width fonts optimized for code display
 - ✅ Extracts only competition-relevant code (stops at competition barriers)
-- ✅ Optional syntax highlighting with print-friendly fallbacks
+- ✅ **Syntax highlighting always enabled** with print-friendly colors
 - ✅ Support for all languages or individual language selection
 - ✅ Configurable output directory
 - ✅ Clean page breaks between algorithms
 - ✅ Responsive design (works in browser and print)
+- ✅ **Chrome print color support** (requires "Background graphics" setting)
 
 ## Future Todos
 
@@ -95,10 +107,52 @@ The script processes algorithm files from the parent directory's `python/`, `cpp
 8. **Batch processing**: Support processing multiple algorithm directories simultaneously
 9. **Integration with build tools**: Add makefile or script integration for automated documentation generation
 
+## Debugging Tools
+
+For debugging print preview and CSS rendering issues, use the included Playwright-based tools:
+
+### Setup
+```bash
+# Install debugging dependencies
+uv pip install -r debug/requirements-debug.txt
+
+# Install browser binaries (one time setup)
+uv run playwright install
+```
+
+### Automated Testing
+```bash
+# Generate screenshots and PDFs across browsers
+uv run --python 3.13 debug/debug_print.py
+
+# Check debug_output/ for:
+# - *_screen.png (normal browser view)
+# - *_print.png (print media emulation)
+# - chromium_print.pdf (actual PDF output)
+```
+
+### Interactive Debugging
+```bash
+# Open browsers manually for inspection
+uv run --python 3.13 debug/debug_interactive.py
+
+# Compare rendering across Chrome, Firefox, Safari
+# Test print dialogs and CSS media queries
+```
+
+### What the Debug Tools Show
+- **CSS computed values** for syntax highlighting elements
+- **Page break properties** and their actual behavior
+- **Visual differences** between screen and print media
+- **Cross-browser comparison** of rendering
+
 ## Technical Notes
 
 - **Python 3.13 compatibility**: Updated to use modern Python syntax (`list[T]` instead of `List[T]`)
 - **Ruff linting**: Passes all linting checks with Python 3.13
-- **Conditional styling**: Print-specific CSS only added when syntax highlighting is enabled
+- **Comprehensive syntax highlighting**: Complete Pygments coverage for Python, C++, and Java with 1000+ elements per language
+- **Print color support**: Uses `-webkit-print-color-adjust: exact` and darker colors for print compatibility
+- **Language-specific highlighting**: Types, declarations, preprocessor directives, annotations properly colored
 - **Competition barriers**: Respects existing comment markers to exclude development tests
 - **Cross-language consistency**: Maintains same structure and functionality across Python, C++, and Java
+- **Playwright debugging**: Automated and interactive tools for testing print behavior across browsers

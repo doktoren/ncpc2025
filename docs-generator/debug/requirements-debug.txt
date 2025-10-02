@@ -1,0 +1,2 @@
+# Debugging dependencies for print preview and CSS testing
+playwright>=1.40.0

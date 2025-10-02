@@ -94,7 +94,7 @@ class DocumentGenerator:
 
         return '\n'.join(competition_lines)
 
-    def generate_html(self, algorithms: list[Algorithm], syntax_highlighting: bool = False) -> str:
+    def generate_html(self, algorithms: list[Algorithm]) -> str:
         """Generate complete HTML document."""
         return f"""<!DOCTYPE html>
 <html lang="en">
@@ -103,7 +103,7 @@ class DocumentGenerator:
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Algorithm Reference - {self.language.title()}</title>
     <style>
-{self._generate_css(syntax_highlighting)}
+{self._generate_css()}
     </style>
 </head>
 <body>
@@ -116,23 +116,12 @@ class DocumentGenerator:
     </div>
 
     <!-- Algorithm pages -->
-{self._generate_algorithm_pages(algorithms, syntax_highlighting)}
+{self._generate_algorithm_pages(algorithms)}
 </body>
 </html>"""
 
-    def _generate_css(self, syntax_highlighting: bool = False) -> str:
+    def _generate_css(self) -> str:
         """Generate CSS for print optimization."""
-        print_syntax_css = ""
-        if syntax_highlighting:
-            print_syntax_css = """
-            /* Print-friendly syntax highlighting using text styles */
-            .highlight .c { font-style: italic !important; opacity: 0.7; } /* Comment */
-            .highlight .k { font-weight: bold !important; text-decoration: underline; } /* Keyword */
-            .highlight .s { font-weight: bold !important; } /* String */
-            .highlight .nf { font-weight: bold !important; font-style: italic; } /* Name.Function */
-            .highlight .nc { font-weight: bold !important; text-transform: uppercase; } /* Name.Class */
-            .highlight .nb { font-weight: bold !important; } /* Name.Builtin */"""
-
         return """        body {
             font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
             font-size: 9pt;
@@ -174,7 +163,46 @@ class DocumentGenerator:
 
             .no-break {
                 page-break-inside: avoid;
-            }""" + print_syntax_css + """
+            }
+
+            /* Chrome print color preservation */
+            * {
+                -webkit-print-color-adjust: exact !important;
+                color-adjust: exact !important;
+                print-color-adjust: exact !important;
+            }
+
+            /* Print-optimized syntax highlighting with darker colors */
+            .c { color: #408040 !important; font-style: italic !important; } /* Comment - dark green */
+            .c1 { color: #408040 !important; font-style: italic !important; } /* Comment.Single */
+            .cm { color: #408040 !important; font-style: italic !important; } /* Comment.Multiline */
+            .cp { color: #805000 !important; } /* Comment.Preproc - dark orange */
+            .cpf { color: #805000 !important; } /* Comment.PreprocFile - dark orange */
+            .k { color: #000080 !important; font-weight: bold !important; } /* Keyword - dark blue */
+            .kd { color: #000080 !important; font-weight: bold !important; } /* Keyword.Declaration */
+            .kn { color: #000080 !important; font-weight: bold !important; } /* Keyword.Namespace */
+            .kc { color: #000080 !important; font-weight: bold !important; } /* Keyword.Constant */
+            .kt { color: #800040 !important; } /* Keyword.Type - dark magenta */
+            .s { color: #800000 !important; } /* String - dark red */
+            .sa { color: #800000 !important; } /* String.Affix */
+            .sd { color: #800000 !important; font-style: italic !important; } /* String.Doc */
+            .si { color: #800000 !important; font-weight: bold !important; } /* String.Interpol */
+            .na { color: #606020 !important; } /* Name.Attribute - dark olive */
+            .nf { color: #0000cc !important; font-weight: bold !important; } /* Name.Function - blue */
+            .fm { color: #0000cc !important; font-weight: bold !important; } /* Name.Function.Magic */
+            .nc { color: #660066 !important; font-weight: bold !important; } /* Name.Class - purple */
+            .nn { color: #660066 !important; font-weight: bold !important; } /* Name.Namespace */
+            .ne { color: #800000 !important; font-weight: bold !important; } /* Name.Exception */
+            .nd { color: #660066 !important; } /* Name.Decorator */
+            .nb { color: #006600 !important; font-weight: bold !important; } /* Name.Builtin - green */
+            .bp { color: #006600 !important; font-weight: bold !important; } /* Name.Builtin.Pseudo */
+            .o { color: #666666 !important; } /* Operator - dark gray */
+            .ow { color: #660066 !important; font-weight: bold !important; } /* Operator.Word */
+            .mi { color: #666666 !important; } /* Number.Integer */
+            .mf { color: #666666 !important; } /* Number.Float */
+            .n { color: #000000 !important; } /* Name - black */
+            .p { color: #000000 !important; } /* Punctuation */
+            .w { color: #888888 !important; } /* Text.Whitespace */
         }
 
         @media screen {
@@ -255,14 +283,36 @@ class DocumentGenerator:
 
         /* Syntax highlighting classes */
         .highlight { background: transparent; }
-        .highlight .c { color: #408080; font-style: italic } /* Comment */
-        .highlight .k { color: #008000; font-weight: bold } /* Keyword */
-        .highlight .o { color: #666666 } /* Operator */
-        .highlight .n { color: #000000 } /* Name */
-        .highlight .s { color: #BA2121 } /* String */
-        .highlight .nb { color: #008000 } /* Name.Builtin */
-        .highlight .nf { color: #0000FF } /* Name.Function */
-        .highlight .nc { color: #0000FF; font-weight: bold } /* Name.Class */"""
+        .c { color: #408080; font-style: italic } /* Comment */
+        .c1 { color: #408080; font-style: italic } /* Comment.Single */
+        .cm { color: #408080; font-style: italic } /* Comment.Multiline */
+        .cp { color: #BC7A00 } /* Comment.Preproc */
+        .cpf { color: #BC7A00 } /* Comment.PreprocFile */
+        .k { color: #008000; font-weight: bold } /* Keyword */
+        .kd { color: #008000; font-weight: bold } /* Keyword.Declaration */
+        .kn { color: #008000; font-weight: bold } /* Keyword.Namespace */
+        .kc { color: #008000; font-weight: bold } /* Keyword.Constant */
+        .kt { color: #B00040 } /* Keyword.Type */
+        .o { color: #666666 } /* Operator */
+        .ow { color: #AA22FF; font-weight: bold } /* Operator.Word */
+        .n { color: #000000 } /* Name */
+        .na { color: #7D9029 } /* Name.Attribute */
+        .nb { color: #008000 } /* Name.Builtin */
+        .bp { color: #008000 } /* Name.Builtin.Pseudo */
+        .nf { color: #0000FF } /* Name.Function */
+        .fm { color: #0000FF } /* Name.Function.Magic */
+        .nc { color: #0000FF; font-weight: bold } /* Name.Class */
+        .nn { color: #0000FF; font-weight: bold } /* Name.Namespace */
+        .ne { color: #D2413A; font-weight: bold } /* Name.Exception */
+        .nd { color: #AA22FF } /* Name.Decorator */
+        .s { color: #BA2121 } /* String */
+        .sa { color: #BA2121 } /* String.Affix */
+        .sd { color: #BA2121; font-style: italic } /* String.Doc */
+        .si { color: #BB6688; font-weight: bold } /* String.Interpol */
+        .mi { color: #666666 } /* Number.Integer */
+        .mf { color: #666666 } /* Number.Float */
+        .p { color: #000000 } /* Punctuation */
+        .w { color: #bbbbbb } /* Text.Whitespace */"""
 
     def _generate_toc(self, algorithms: list[Algorithm]) -> str:
         """Generate table of contents."""
@@ -276,12 +326,12 @@ class DocumentGenerator:
 
         return '\n'.join(toc_items)
 
-    def _generate_algorithm_pages(self, algorithms: list[Algorithm], syntax_highlighting: bool) -> str:
+    def _generate_algorithm_pages(self, algorithms: list[Algorithm]) -> str:
         """Generate all algorithm pages."""
         pages = []
 
         for algorithm in algorithms:
-            content = self._format_code(algorithm.competition_content, syntax_highlighting)
+            content = self._format_code(algorithm.competition_content)
             name_formatted = algorithm.name.replace('_', ' ').title()
 
             pages.append(f"""    <div class="algorithm-page">
@@ -294,11 +344,8 @@ class DocumentGenerator:
 
         return '\n'.join(pages)
 
-    def _format_code(self, code: str, syntax_highlighting: bool) -> str:
-        """Format code with optional syntax highlighting."""
-        if not syntax_highlighting:
-            return self._escape_html(code)
-
+    def _format_code(self, code: str) -> str:
+        """Format code with syntax highlighting."""
         try:
             from pygments import highlight
             from pygments.lexers import get_lexer_by_name
@@ -311,7 +358,7 @@ class DocumentGenerator:
             }[self.language]
 
             lexer = get_lexer_by_name(lexer_name)
-            formatter = HtmlFormatter(nowrap=True, classprefix='highlight ')
+            formatter = HtmlFormatter(nowrap=True, classprefix='')
 
             return highlight(code, lexer, formatter)
         except ImportError:
@@ -334,8 +381,6 @@ def main():
                        help='Programming language to generate docs for (or "all" for all languages)')
     parser.add_argument('--include-dev-tests', action='store_true',
                        help='Include development tests (below competition barrier)')
-    parser.add_argument('--syntax-highlighting', action='store_true',
-                       help='Enable syntax highlighting (requires pygments)')
     parser.add_argument('--output-dir', type=Path, default=Path('./output'),
                        help='Output directory for generated files')
 
@@ -364,7 +409,7 @@ def main():
                 print(f"Warning: No algorithm files found in '{source_dir}', skipping {language}")
                 continue
 
-            html_content = generator.generate_html(algorithms, args.syntax_highlighting)
+            html_content = generator.generate_html(algorithms)
 
             # Write output file
             output_file = output_dir / f"algorithms_{language}.html"
@@ -397,7 +442,7 @@ def main():
             print(f"No algorithm files found in '{source_dir}'")
             return 1
 
-        html_content = generator.generate_html(algorithms, args.syntax_highlighting)
+        html_content = generator.generate_html(algorithms)
 
         # Write output file
         output_file = output_dir / f"algorithms_{args.language}.html"
@@ -406,13 +451,10 @@ def main():
         print(f"Generated documentation: {output_file}")
         print(f"Found {len(algorithms)} algorithms")
 
-    if args.syntax_highlighting:
-        if importlib.util.find_spec("pygments") is not None:
-            print("Syntax highlighting: enabled")
-        else:
-            print("Syntax highlighting: disabled (pygments not available)")
+    if importlib.util.find_spec("pygments") is not None:
+        print("Syntax highlighting: enabled")
     else:
-        print("Syntax highlighting: disabled")
+        print("Syntax highlighting: disabled (pygments not available)")
 
     return 0
 

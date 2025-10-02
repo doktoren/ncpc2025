@@ -1,0 +1,6 @@
+tests/
+*.png
+*.pdf
+test_*.py
+test_*.html
+debug_output/
