@@ -6,12 +6,53 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a collection of data structure implementations optimized for programming competitions (specifically NCPC 2025). The algorithms are designed to be printed on paper and typed quickly during contests, with minimal character count being crucial.
 
-**Key constraints**:
-- Python 3.9.18 is locked for NCPC 2025 competition environment compatibility
-- C++ (g++ version 13.2.0) with compiler flags: `-x c++ -g -O2 -std=gnu++20 -static {files}`
-- Java (OpenJDK 21.0.4) with compiler flags: `-encoding UTF-8 -sourcepath . -d . {files}` and runtime flags: `-Dfile.encoding=UTF-8 -XX:+UseSerialGC -Xss64m -Xms1024m -Xmx1024m`
+## Development Commands
 
-**CRITICAL: Cross-Language Synchronization**:
+**Complete workflow:**
+```bash
+./test_and_lint.sh  # Lint + test all algorithms (Python + C++ + Java)
+```
+
+**Standardized script interface** - Each language folder (`python/`, `cpp/`, `java/`) has 3 scripts:
+
+| Script | Purpose | All files | Single file |
+|--------|---------|-----------|-------------|
+| `lint.sh` | Check code quality | `./lint.sh` | `./lint.sh skiplist` |
+| `lint_auto_fix.sh` | Auto-fix formatting | `./lint_auto_fix.sh` | `./lint_auto_fix.sh skiplist` |
+| `test.sh` | Run tests | `./test.sh` | `./test.sh skiplist` |
+
+**Examples:**
+```bash
+# Lint + test everything
+./test_and_lint.sh
+
+# Lint specific algorithm
+cd cpp && ./lint.sh skiplist
+
+# Auto-fix then test
+cd python && ./lint_auto_fix.sh && ./test.sh
+```
+
+**Note:** C++ and Java scripts automatically use Docker for exact NCPC 2025 environment compatibility.
+
+## Documentation Generation
+
+**IMPORTANT:** Regenerate PDFs before committing:
+```bash
+cd docs-generator && ./generate_docs.sh
+```
+
+This generates 6 PDF files (Python/C++/Java, each with competition-only and full versions) for printing during contests.
+
+## Code Quality and Linting
+
+**Linting Policy**:
+- Do NOT suppress or whitelist new linting errors/warnings without explicit user approval
+- Fix the underlying issue instead of suppressing warnings
+- Existing suppressions in lint configurations are approved, but new ones require discussion
+- All languages enforce a **100-character line limit** for optimal PDF formatting
+
+**Cross-Language Synchronization**:
 All algorithms MUST be kept in sync across Python, C++, and Java implementations:
 - Same functionality and API surface
 - Same test cases with identical expected values
@@ -21,120 +62,31 @@ All algorithms MUST be kept in sync across Python, C++, and Java implementations
 - Generic implementations: All data structures should support generic types where applicable (not restrict to int/long unless necessary)
 - Basic vs Optional: Separate basic functionality from optional/extending functionality with comment markers
 
-## Development Commands
-
-**Primary development workflow:**
-```bash
-./test_all.sh  # Test all algorithms (Python + C++ + Java)
-./python/lint.sh      # Python linting, type checking, and testing
-```
-
-**Linting commands:**
-```bash
-# Python linting (ruff + mypy) - line limit: 100 chars
-cd python && ./lint.sh
-
-# C++ linting (clang-format + cppcheck) - line limit: 100 chars
-cd cpp && docker run --rm -v $(pwd):/workspace ncpc2025-cpp-lint
-
-# Java linting (google-java-format + checkstyle) - line limit: 100 chars
-cd java && docker run --rm -v $(pwd):/workspace ncpc2025-java-lint
-
-# Auto-fix formatting:
-cd cpp && docker run --rm -v $(pwd):/workspace ncpc2025-cpp-lint clang-format -i *.cpp
-cd java && docker run --rm -v $(pwd):/workspace ncpc2025-java-lint java -jar /opt/tools/google-java-format.jar --replace *.java
-```
-
-**Individual commands:**
-```bash
-# Setup Python dependencies
-uv sync --no-install-project
-
-# Test Python algorithms only
-cd python && python3 <algorithm>.py
-
-# Test C++ algorithms (containerized)
-cd cpp && ./test_all.sh
-
-# Test individual C++ algorithm
-cd cpp && ./test_single.sh <algorithm>
-
-# Test Java algorithms (containerized)
-cd java && ./test_all.sh
-
-# Test individual Java algorithm
-cd java && ./test_single.sh <algorithm>
-
-# Documentation generation
-cd docs-generator && python3 generate_docs.py
-```
-
-## Documentation Generation
-
-The repository includes an automated documentation generator that creates printable PDF references for all algorithms:
-
-```bash
-# Generate all PDF documentation (6 files total)
-cd docs-generator && python3 generate_docs.py
-```
-
-**Generated files:**
-- `algorithms_python.pdf` - Competition code only (Python)
-- `algorithms_python_extra.pdf` - Includes development tests (Python)
-- `algorithms_cpp.pdf` - Competition code only (C++)
-- `algorithms_cpp_extra.pdf` - Includes development tests (C++)
-- `algorithms_java.pdf` - Competition code only (Java)
-- `algorithms_java_extra.pdf` - Includes development tests (Java)
-
-Each PDF includes:
-- Table of contents on first page
-- Each algorithm starting on a new page
-- Fixed-width fonts optimized for printing
-- Comprehensive syntax highlighting
-- Print-optimized colors and formatting
-
-**Requirements:**
-- `uv run --python 3.13 --with pygments --with playwright generate_docs.py`
-- After first install: `uv run playwright install`
-
-The script automatically processes all algorithms from `python/`, `cpp/`, and `java/` directories, creating both competition-only versions (stopping at competition barriers) and full versions (including development tests).
-
-## Code Quality and Linting
-
-All languages enforce a **100-character line limit** to ensure optimal PDF formatting for the generated documentation and printable references.
-
-**IMPORTANT: Linting Policy**:
-- Do NOT suppress or whitelist new linting errors/warnings without explicit user approval
-- Fix the underlying issue instead of suppressing warnings
-- Existing suppressions in lint configurations are approved, but new ones require discussion
-
-**Linting Infrastructure:**
+**Type System and Memory Management**:
 
 **Python:**
-- **Tools**: ruff (linting + formatting) + mypy (type checking)
-- **Configuration**: `python/ruff.toml` with 100-char line limit
-- **Command**: `cd python && ./lint.sh`
+- Protocol-based generics, `Self` return types, `TYPE_CHECKING` blocks
+- All modules include `# Don't use annotations during contest` comments above typing imports
+- During competition: Skip all typing imports and type annotations
 
 **C++:**
-- **Tools**: clang-format (formatting) + cppcheck (static analysis)
-- **Configuration**: `cpp/.clang-format` with Google style + 100-char limit
-- **Docker Image**: `ncpc2025-cpp-lint` (includes clang-format + cppcheck)
-- **Command**: `cd cpp && docker run --rm -v $(pwd):/workspace ncpc2025-cpp-lint`
-- **Build**: `cd cpp && docker build -f Dockerfile.lint -t ncpc2025-cpp-lint .`
+- Template-based generics, RAII for automatic resource management
+- Delete copy/move operations when not needed (prevents warnings and accidental misuse)
 
 **Java:**
-- **Tools**: google-java-format (formatting) + checkstyle (static analysis)
-- **Configuration**: `java/checkstyle.xml` with relaxed rules for competition code
-- **Docker Image**: `ncpc2025-java-lint` (includes google-java-format + checkstyle)
-- **Command**: `cd java && docker run --rm -v $(pwd):/workspace ncpc2025-java-lint`
-- **Build**: `cd java && docker build -f Dockerfile.lint -t ncpc2025-java-lint .`
-
-**Competition-Optimized Rules:**
-- C++: Suppresses warnings for assert side effects, missing explicit constructors, and other common competition patterns
-- Java: Allows snake_case class names, single-letter variables, and single-line if statements without braces
-- All languages: Focus on readability and consistency while allowing competition-specific shortcuts
+- Generics with bounded type parameters (e.g., `<T extends Comparable<T>>`)
+- Static methods within classes matching filename
 
 ## Code Architecture
+
+### Language Constraints and Modern Practices
+
+**Environment constraints** (NCPC 2025):
+- Python 3.9.18
+- C++ with g++ 13.2.0, flags: `-x c++ -g -O2 -std=gnu++20 -static {files}`
+- Java OpenJDK 21.0.4, flags: `-encoding UTF-8 -sourcepath . -d .` (compile), `-Dfile.encoding=UTF-8 -XX:+UseSerialGC -Xss64m -Xms1024m -Xmx1024m` (runtime)
+
+**Coding principle**: Use the most modern, safe, and simple features allowed by these language versions. Leverage all capabilities (generics, type safety, RAII, standard libraries) to write clean, robust code with minimal boilerplate.
 
 ### Competition-Optimized Structure
 Each module follows a strict structure optimized for competition typing:
@@ -152,131 +104,14 @@ Each module follows a strict structure optimized for competition typing:
 4. **Development tests** (comprehensive test suite)
 5. **`main()` function** calling all tests with `test_main()`/`testMain()` last
 
-### Module-Specific Architecture
+### Available Algorithms
 
-**Data Structures Available:**
+See [README.md](README.md) for the complete algorithm list.
 
-**Python (`python/`):**
-- `fenwick_tree.py` - Binary Indexed Tree with O(n) from_array construction
-- `priority_queue.py` - Generic heap with update/remove operations
-- `union_find.py` - Disjoint Set Union with path compression and union by rank
-- `prefix_tree.py` - Trie for string prefix operations
-- `edmonds_karp.py` - Maximum flow algorithm
-- `bipartite_match.py` - Maximum bipartite matching
-- `segment_tree.py` - Range query data structure
-- `dijkstra.py` - Shortest path algorithm
-- `topological_sort.py` - DAG ordering algorithm
-- `kmp.py` - String matching algorithm
-- `lca.py` - Lowest Common Ancestor queries
-- `polygon_area.py` - Shoelace formula for polygon area
-- `sprague_grundy.py` - Sprague-Grundy theorem for impartial games
-- `kosaraju_scc.py` - Strongly Connected Components using Kosaraju's algorithm
-- `two_sat.py` - 2-SAT solver using SCC on implication graph
-- `convex_hull.py` - Convex hull using Andrew's monotone chain algorithm
-- `bellman_ford.py` - Single-source shortest paths with negative edge weights
-- `suffix_array.py` - Suffix array construction with LCP array (Kasai's algorithm)
+**IMPORTANT:** When adding new algorithms, update the table in README.md to keep it synchronized across all three languages.
 
-**C++ (`cpp/`):**
-- `fenwick_tree.cpp` - Binary Indexed Tree template implementation
-- `priority_queue.cpp` - Generic priority queue with update/remove operations
-- `union_find.cpp` - Disjoint Set Union with inheritance-based design
-- `prefix_tree.cpp` - Trie with prefix matching capabilities
-- `edmonds_karp.cpp` - Maximum flow algorithm using adjacency matrix
-- `bipartite_match.cpp` - Maximum bipartite matching
-- `segment_tree.cpp` - Range query data structure
-- `dijkstra.cpp` - Shortest path algorithm
-- `topological_sort.cpp` - DAG ordering algorithm
-- `kmp.cpp` - String matching algorithm
-- `lca.cpp` - Lowest Common Ancestor with binary lifting
-- `polygon_area.cpp` - Shoelace formula for polygon area
-- `sprague_grundy.cpp` - Sprague-Grundy theorem for impartial games
-- `kosaraju_scc.cpp` - Strongly Connected Components using Kosaraju's algorithm
-- `two_sat.cpp` - 2-SAT solver using SCC on implication graph
-- `convex_hull.cpp` - Convex hull using Andrew's monotone chain algorithm
-- `bellman_ford.cpp` - Single-source shortest paths with negative edge weights
-- `suffix_array.cpp` - Suffix array construction with LCP array (Kasai's algorithm)
+### Test Design Requirements
 
-**Java (`java/`):**
-- `fenwick_tree.java` - Binary Indexed Tree implementation
-- `priority_queue.java` - Generic heap with update/remove operations
-- `union_find.java` - Disjoint Set Union with path compression and union by rank
-- `prefix_tree.java` - Trie for string prefix operations
-- `edmonds_karp.java` - Maximum flow algorithm
-- `bipartite_match.java` - Maximum bipartite matching
-- `segment_tree.java` - Range query data structure
-- `dijkstra.java` - Shortest path algorithm
-- `topological_sort.java` - DAG ordering algorithm
-- `kmp.java` - String matching algorithm
-- `lca.java` - Lowest Common Ancestor with binary lifting
-- `polygon_area.java` - Shoelace formula for polygon area
-- `sprague_grundy.java` - Sprague-Grundy theorem for impartial games
-- `kosaraju_scc.java` - Strongly Connected Components using Kosaraju's algorithm
-- `two_sat.java` - 2-SAT solver using SCC on implication graph
-- `convex_hull.java` - Convex hull using Andrew's monotone chain algorithm
-- `bellman_ford.java` - Single-source shortest paths with negative edge weights
-- `suffix_array.java` - Suffix array construction with LCP array (Kasai's algorithm)
-
-**Key Design Patterns:**
-
-**Python:**
-- Generic implementations using protocols (e.g., `Summable`, `Comparable`)
-- `Self` return types for proper inheritance support
-- `Final` annotations for immutable fields
-- Consistent error handling with descriptive messages
-- Inheritance-based extension pattern (e.g., `UnionFind` base class, `Test` extending class for optional features)
-
-**C++:**
-- Template-based generic implementations (`template<typename T>`)
-- RAII for automatic resource management
-- STL container usage for efficiency
-- Exception-based error handling
-- Inheritance-based extension pattern with virtual methods
-
-**Java:**
-- Generic implementations with bounded type parameters (e.g., `<T extends Comparable<T>>`)
-- Standard library collections (ArrayList, HashMap, PriorityQueue)
-- Static methods within classes matching filename
-- Exception-based error handling with descriptive messages
-- Inheritance-based extension pattern (e.g., `UnionFind` base class, `Test` extending class for optional features)
-
-**Error Handling Conventions:**
-- Invalid range queries (e.g., `range_query` in FenwickTree): Return zero/default value instead of throwing exceptions for consistency
-- Out of bounds access: Throw appropriate exceptions (`IndexError` in Python, `IndexOutOfBoundsException` in Java, `std::out_of_range` in C++)
-
-### Competition Guidelines
-
-**What to type during contest:**
-
-**Python:**
-1. Copy implementation classes/functions
-2. Copy `test_main()` function only
-3. **Skip all typing imports** (marked with `# Don't use annotations during contest`)
-
-**Java:**
-1. Copy implementation classes/functions
-2. Copy `testMain()` function only
-3. Include necessary imports (`import` statements)
-
-**C++:**
-1. Copy implementation classes/functions
-2. Copy `test_main()` function only
-3. Include necessary headers (`#include` statements)
-
-**What NOT to type:**
-
-**Python:**
-- Any `from typing` imports or type annotations
-- Any tests below the competition barrier comment
-
-**Java:**
-- Any tests below the competition barrier comment
-- Unnecessary imports or debugging code
-
-**C++:**
-- Any tests below the competition barrier comment
-- Unnecessary includes or debugging code
-
-**Test Design:**
 - `test_main()` functions use multi-digit expected values (12, 39, etc.) to catch real implementation errors
 - Multiple assertions per test to verify different aspects
 - No verbose output - silent success, clear failure via assertions
@@ -285,130 +120,3 @@ Each module follows a strict structure optimized for competition typing:
   - If method A calls method B internally and A is tested, B doesn't need separate testing UNLESS A is optional and B is basic
   - Optional methods should be tested if they provide important functionality (e.g., `from_array`, `peek`)
   - The goal: ensure no write-down-from-paper errors by calling every function at least once
-
-### Type System Usage
-
-**Python:**
-The codebase uses advanced typing features for development but they should be completely skipped during competition:
-- Protocol-based generics for flexible implementations
-- `Self` return types for inheritance-safe APIs
-- `Final` annotations for immutable fields
-- `TYPE_CHECKING` blocks for complex type relationships
-
-All modules include `# Don't use annotations during contest` comments above typing imports as clear reminders.
-
-**Java:**
-Uses standard Java features for clean, efficient code:
-- Generics with bounded type parameters (e.g., `<T extends Comparable<T>>`)
-- Standard library collections (ArrayList, HashMap, PriorityQueue, etc.)
-- Static methods within classes (no instances needed)
-- Import statements only for java.util.* when needed
-
-**C++:**
-Uses modern C++20 features for clean, efficient code:
-- Template metaprogramming for generic algorithms
-- Auto type deduction where appropriate
-- Range-based for loops for readability
-- Smart pointers for automatic memory management
-
-### Compilation and Testing
-
-**Python:**
-```bash
-# Run all tests
-python3 python/fenwick_tree.py
-
-# Lint and type check
-./lint.sh
-```
-
-**Java:**
-```bash
-# Test all algorithms (containerized - recommended)
-cd java && ./test_all.sh
-
-# Test single algorithm (containerized)
-cd java && ./test_single.sh fenwick_tree
-```
-
-**C++:**
-```bash
-# Test all algorithms (containerized - recommended)
-cd cpp && ./test_all.sh
-
-# Test single algorithm (containerized)
-cd cpp && ./test_single.sh fenwick_tree
-
-# Direct compilation (requires g++ 13.2.0)
-cd cpp && g++ -x c++ -g -O2 -std=gnu++20 -static fenwick_tree.cpp -o fenwick_tree && ./fenwick_tree
-```
-
-### Docker Environment
-
-Both C++ and Java implementations include Docker setups that ensure consistent compilation and testing across different environments:
-
-**Java Files:**
-- `java/Dockerfile` - Container definition with OpenJDK 21 and NCPC competition flags
-- `java/test_all.sh` - Script to test all algorithms with smart caching
-- `java/test_single.sh` - Script to test individual algorithms in Docker
-
-**Java Benefits:**
-- Exact JDK version matching NCPC 2025 environment
-- Consistent flag application: `-encoding UTF-8 -sourcepath . -d .` (compile) and `-Dfile.encoding=UTF-8 -XX:+UseSerialGC -Xss64m -Xms1024m -Xmx1024m` (runtime)
-- Isolated testing environment
-- Portable across different host systems
-- Smart caching to avoid unnecessary rebuilds
-- Parallel compilation for fast testing
-
-**C++ Files:**
-- `cpp/Dockerfile` - Container definition with g++ 13.2.0 and NCPC competition flags
-- `cpp/test_all.sh` - Script to test all algorithms with smart caching
-- `cpp/test_single.sh` - Script to test individual algorithms in Docker
-
-**C++ Benefits:**
-- Exact compiler version matching NCPC 2025 environment
-- Consistent flag application: `-x c++ -g -O2 -std=gnu++20 -static`
-- Isolated testing environment
-- Portable across different host systems
-- Smart caching to avoid unnecessary rebuilds
-- Parallel compilation for fast testing
-
-**Usage:**
-```bash
-# Test all Java algorithms
-cd java && ./test_all.sh
-
-# Test specific Java algorithm
-cd java && ./test_single.sh fenwick_tree
-
-# Test all C++ algorithms
-cd cpp && ./test_all.sh
-
-# Test specific C++ algorithm
-cd cpp && ./test_single.sh fenwick_tree
-
-# Interactive development
-cd cpp && docker run -it --rm -v $(pwd):/workspace gcc:13.2.0 bash
-cd java && docker run -it --rm -v $(pwd):/workspace openjdk:21-slim bash
-```
-
-### Memory Management (C++)
-
-All C++ implementations follow RAII principles:
-- Destructors automatically clean up resources
-- Smart pointers used where dynamic allocation is necessary
-- Stack allocation preferred for performance
-- Exception safety guaranteed in all operations
-
-### Performance Considerations
-
-All three language implementations (Python, Java, C++) are optimized for:
-- Minimal code size for fast typing during competition
-- Optimal algorithmic complexity
-- Clear, readable structure for debugging under pressure
-- Comprehensive test coverage to catch errors early
-
-Performance hierarchy:
-- C++ typically offers best runtime performance
-- Java offers good performance with simpler syntax than C++
-- Python may be fastest to implement correctly under time pressure

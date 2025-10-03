@@ -12,7 +12,7 @@ The script automatically generates 6 PDF documents (3 languages × 2 versions ea
 Basic usage:
 ```bash
 # Generate all PDF documentation (6 files total)
-python3 generate_docs.py
+./update_docs.sh
 
 # Or use the uv wrapper script (recommended)
 ../update_docs.sh

@@ -90,7 +90,7 @@ def main():
 
     if not html_files:
         print("No HTML files found in output directory. Generate some first:")
-        print("  uv run --python 3.13 generate_docs.py python")
+        print("  ./update_docs.sh")
         return
 
     print("Available HTML files:")

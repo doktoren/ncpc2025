@@ -32,6 +32,7 @@ They're intended to be printed and manually typed as needed during the contest.
 | Prefix Tree | [Python](./python/prefix_tree.py) | [C++](./cpp/prefix_tree.cpp) | [Java](./java/prefix_tree.java) |
 | Priority Queue | [Python](./python/priority_queue.py) | [C++](./cpp/priority_queue.cpp) | [Java](./java/priority_queue.java) |
 | Segment Tree | [Python](./python/segment_tree.py) | [C++](./cpp/segment_tree.cpp) | [Java](./java/segment_tree.java) |
+| Skiplist | [Python](./python/skiplist.py) | [C++](./cpp/skiplist.cpp) | [Java](./java/skiplist.java) |
 | Sprague-Grundy | [Python](./python/sprague_grundy.py) | [C++](./cpp/sprague_grundy.cpp) | [Java](./java/sprague_grundy.java) |
 | Suffix Array | [Python](./python/suffix_array.py) | [C++](./cpp/suffix_array.cpp) | [Java](./java/suffix_array.java) |
 | Topological Sort | [Python](./python/topological_sort.py) | [C++](./cpp/topological_sort.cpp) | [Java](./java/topological_sort.java) |

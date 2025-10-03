@@ -14,11 +14,15 @@ RUN mkdir -p /opt/tools && \
 RUN wget -q https://github.com/checkstyle/checkstyle/releases/download/checkstyle-10.12.4/checkstyle-10.12.4-all.jar \
     -O /opt/tools/checkstyle.jar
 
-# Create a user that matches the host user
-RUN groupadd -g 1000 jesper && \
-    useradd -u 1000 -g 1000 -s /bin/bash jesper
+# Use build args for user/group ID (defaults to 1000 if not specified)
+ARG USER_ID=1000
+ARG GROUP_ID=1000
 
-USER jesper
+# Create user with matching UID/GID to avoid permission issues
+RUN groupadd -g ${GROUP_ID} user && \
+    useradd -u ${USER_ID} -g ${GROUP_ID} -m -s /bin/bash user
+
+USER user
 WORKDIR /workspace
 
 CMD ["./lint.sh"]
