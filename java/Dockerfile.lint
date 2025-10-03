@@ -1,28 +1,128 @@
-FROM openjdk:21-slim
+# Multi-stage Dockerfile for Java linting with optimal caching
+# Each algorithm is a separate build stage that only rebuilds when its file changes
 
+FROM openjdk:21-slim AS toolchain
 RUN apt-get update -qq && \
     apt-get install -qq -y \
     wget \
     && rm -rf /var/lib/apt/lists/*
 
-# Download google-java-format
+# Download linting tools
 RUN mkdir -p /opt/tools && \
     wget -q https://github.com/google/google-java-format/releases/download/v1.18.1/google-java-format-1.18.1-all-deps.jar \
-    -O /opt/tools/google-java-format.jar
-
-# Download checkstyle
-RUN wget -q https://github.com/checkstyle/checkstyle/releases/download/checkstyle-10.12.4/checkstyle-10.12.4-all.jar \
+    -O /opt/tools/google-java-format.jar && \
+    wget -q https://github.com/checkstyle/checkstyle/releases/download/checkstyle-10.12.4/checkstyle-10.12.4-all.jar \
     -O /opt/tools/checkstyle.jar
 
-# Use build args for user/group ID (defaults to 1000 if not specified)
-ARG USER_ID=1000
-ARG GROUP_ID=1000
-
-# Create user with matching UID/GID to avoid permission issues
-RUN groupadd -g ${GROUP_ID} user && \
-    useradd -u ${USER_ID} -g ${GROUP_ID} -m -s /bin/bash user
-
-USER user
 WORKDIR /workspace
+COPY checkstyle.xml ./
 
-CMD ["./lint.sh"]
+# Create lint script
+RUN echo '#!/bin/bash\n\
+set -e\n\
+ALGORITHM=$1\n\
+mkdir -p /out\n\
+java -jar /opt/tools/google-java-format.jar --aosp --dry-run --set-exit-if-changed ${ALGORITHM}.java\n\
+java -jar /opt/tools/checkstyle.jar -c checkstyle.xml ${ALGORITHM}.java\n\
+echo "${ALGORITHM}" > /out/${ALGORITHM}.success' > /lint.sh && chmod +x /lint.sh
+
+# Individual algorithm lint stages
+FROM toolchain AS bellman_ford
+COPY bellman_ford.java ./
+RUN /lint.sh bellman_ford
+
+FROM toolchain AS bipartite_match
+COPY bipartite_match.java ./
+RUN /lint.sh bipartite_match
+
+FROM toolchain AS convex_hull
+COPY convex_hull.java ./
+RUN /lint.sh convex_hull
+
+FROM toolchain AS dijkstra
+COPY dijkstra.java ./
+RUN /lint.sh dijkstra
+
+FROM toolchain AS edmonds_karp
+COPY edmonds_karp.java ./
+RUN /lint.sh edmonds_karp
+
+FROM toolchain AS fenwick_tree
+COPY fenwick_tree.java ./
+RUN /lint.sh fenwick_tree
+
+FROM toolchain AS kmp
+COPY kmp.java ./
+RUN /lint.sh kmp
+
+FROM toolchain AS kosaraju_scc
+COPY kosaraju_scc.java ./
+RUN /lint.sh kosaraju_scc
+
+FROM toolchain AS lca
+COPY lca.java ./
+RUN /lint.sh lca
+
+FROM toolchain AS polygon_area
+COPY polygon_area.java ./
+RUN /lint.sh polygon_area
+
+FROM toolchain AS prefix_tree
+COPY prefix_tree.java ./
+RUN /lint.sh prefix_tree
+
+FROM toolchain AS priority_queue
+COPY priority_queue.java ./
+RUN /lint.sh priority_queue
+
+FROM toolchain AS segment_tree
+COPY segment_tree.java ./
+RUN /lint.sh segment_tree
+
+FROM toolchain AS skiplist
+COPY skiplist.java ./
+RUN /lint.sh skiplist
+
+FROM toolchain AS sprague_grundy
+COPY sprague_grundy.java ./
+RUN /lint.sh sprague_grundy
+
+FROM toolchain AS suffix_array
+COPY suffix_array.java ./
+RUN /lint.sh suffix_array
+
+FROM toolchain AS topological_sort
+COPY topological_sort.java ./
+RUN /lint.sh topological_sort
+
+FROM toolchain AS two_sat
+COPY two_sat.java ./
+RUN /lint.sh two_sat
+
+FROM toolchain AS union_find
+COPY union_find.java ./
+RUN /lint.sh union_find
+
+# Final stage that aggregates all results
+FROM toolchain AS all
+RUN --mount=from=bellman_ford,src=/out/bellman_ford.success,target=/mnt/bellman_ford.success \
+    --mount=from=bipartite_match,src=/out/bipartite_match.success,target=/mnt/bipartite_match.success \
+    --mount=from=convex_hull,src=/out/convex_hull.success,target=/mnt/convex_hull.success \
+    --mount=from=dijkstra,src=/out/dijkstra.success,target=/mnt/dijkstra.success \
+    --mount=from=edmonds_karp,src=/out/edmonds_karp.success,target=/mnt/edmonds_karp.success \
+    --mount=from=fenwick_tree,src=/out/fenwick_tree.success,target=/mnt/fenwick_tree.success \
+    --mount=from=kmp,src=/out/kmp.success,target=/mnt/kmp.success \
+    --mount=from=kosaraju_scc,src=/out/kosaraju_scc.success,target=/mnt/kosaraju_scc.success \
+    --mount=from=lca,src=/out/lca.success,target=/mnt/lca.success \
+    --mount=from=polygon_area,src=/out/polygon_area.success,target=/mnt/polygon_area.success \
+    --mount=from=prefix_tree,src=/out/prefix_tree.success,target=/mnt/prefix_tree.success \
+    --mount=from=priority_queue,src=/out/priority_queue.success,target=/mnt/priority_queue.success \
+    --mount=from=segment_tree,src=/out/segment_tree.success,target=/mnt/segment_tree.success \
+    --mount=from=skiplist,src=/out/skiplist.success,target=/mnt/skiplist.success \
+    --mount=from=sprague_grundy,src=/out/sprague_grundy.success,target=/mnt/sprague_grundy.success \
+    --mount=from=suffix_array,src=/out/suffix_array.success,target=/mnt/suffix_array.success \
+    --mount=from=topological_sort,src=/out/topological_sort.success,target=/mnt/topological_sort.success \
+    --mount=from=two_sat,src=/out/two_sat.success,target=/mnt/two_sat.success \
+    --mount=from=union_find,src=/out/union_find.success,target=/mnt/union_find.success \
+    ls /mnt/*.success | wc -l > /tmp/count && \
+    echo "All $(cat /tmp/count) algorithms linted successfully"

@@ -3,31 +3,24 @@
 
 set -e
 
-ALGORITHM=$1
+TARGET=${1:-all}
 
+if [ "$TARGET" != "all" ] && [ ! -f "${TARGET}.py" ]; then
+    echo "Error: ${TARGET}.py not found"
+    exit 1
+fi
+
+# Only sync dependencies once at the start
 uv sync --no-install-project
 
-if [ -n "$ALGORITHM" ]; then
-    # Lint specific algorithm
-    if [ ! -f "${ALGORITHM}.py" ]; then
-        echo "Error: ${ALGORITHM}.py not found"
-        exit 1
-    fi
-    echo "Linting ${ALGORITHM}.py..."
-    echo "Running ruff linting..."
-    uv run ruff check "${ALGORITHM}.py"
+echo "Linting Python (target: ${TARGET})..."
 
-    echo "Running mypy type checking..."
-    uv run mypy --config-file mypy.ini "${ALGORITHM}.py"
-
-    echo "✓ ${ALGORITHM} linting passed!"
-else
-    # Lint all files
-    echo "Running ruff linting..."
+if [ "$TARGET" = "all" ]; then
     uv run ruff check
-
-    echo "Running mypy type checking..."
     uv run mypy --config-file mypy.ini .
-
-    echo "✓ All linting passed!"
+else
+    uv run ruff check "${TARGET}.py"
+    uv run mypy --config-file mypy.ini "${TARGET}.py"
 fi
+
+echo "✓ Linting passed!"

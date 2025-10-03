@@ -1,100 +1,94 @@
-# Multi-stage Dockerfile for C++ linting with optimal caching
+# Multi-stage Dockerfile for C++ algorithms with optimal caching
 # Each algorithm is a separate build stage that only rebuilds when its file changes
 
 FROM gcc:13.2.0 AS toolchain
-RUN apt-get update -qq && \
-    apt-get install -qq -y \
-    clang-format \
-    cppcheck \
-    && rm -rf /var/lib/apt/lists/*
 WORKDIR /workspace
-COPY .clang-format* ./
 
-# Create lint script
+# Create test script
 RUN echo '#!/bin/bash\n\
 set -e\n\
 ALGORITHM=$1\n\
 mkdir -p /out\n\
-clang-format --dry-run --Werror ${ALGORITHM}.cpp\n\
-cppcheck --enable=warning,performance,portability --suppress=assertWithSideEffect --error-exitcode=1 ${ALGORITHM}.cpp\n\
-echo "${ALGORITHM}" > /out/${ALGORITHM}.success' > /lint.sh && chmod +x /lint.sh
+g++ -x c++ -g -O2 -std=gnu++20 -static ${ALGORITHM}.cpp -o /out/${ALGORITHM}\n\
+/out/${ALGORITHM}\n\
+echo "${ALGORITHM}" > /out/${ALGORITHM}.success' > /test.sh && chmod +x /test.sh
 
-# Individual algorithm lint stages
+# Individual algorithm stages
 FROM toolchain AS bellman_ford
 COPY bellman_ford.cpp ./
-RUN /lint.sh bellman_ford
+RUN /test.sh bellman_ford
 
 FROM toolchain AS bipartite_match
 COPY bipartite_match.cpp ./
-RUN /lint.sh bipartite_match
+RUN /test.sh bipartite_match
 
 FROM toolchain AS convex_hull
 COPY convex_hull.cpp ./
-RUN /lint.sh convex_hull
+RUN /test.sh convex_hull
 
 FROM toolchain AS dijkstra
 COPY dijkstra.cpp ./
-RUN /lint.sh dijkstra
+RUN /test.sh dijkstra
 
 FROM toolchain AS edmonds_karp
 COPY edmonds_karp.cpp ./
-RUN /lint.sh edmonds_karp
+RUN /test.sh edmonds_karp
 
 FROM toolchain AS fenwick_tree
 COPY fenwick_tree.cpp ./
-RUN /lint.sh fenwick_tree
+RUN /test.sh fenwick_tree
 
 FROM toolchain AS kmp
 COPY kmp.cpp ./
-RUN /lint.sh kmp
+RUN /test.sh kmp
 
 FROM toolchain AS kosaraju_scc
 COPY kosaraju_scc.cpp ./
-RUN /lint.sh kosaraju_scc
+RUN /test.sh kosaraju_scc
 
 FROM toolchain AS lca
 COPY lca.cpp ./
-RUN /lint.sh lca
+RUN /test.sh lca
 
 FROM toolchain AS polygon_area
 COPY polygon_area.cpp ./
-RUN /lint.sh polygon_area
+RUN /test.sh polygon_area
 
 FROM toolchain AS prefix_tree
 COPY prefix_tree.cpp ./
-RUN /lint.sh prefix_tree
+RUN /test.sh prefix_tree
 
 FROM toolchain AS priority_queue
 COPY priority_queue.cpp ./
-RUN /lint.sh priority_queue
+RUN /test.sh priority_queue
 
 FROM toolchain AS segment_tree
 COPY segment_tree.cpp ./
-RUN /lint.sh segment_tree
+RUN /test.sh segment_tree
 
 FROM toolchain AS skiplist
 COPY skiplist.cpp ./
-RUN /lint.sh skiplist
+RUN /test.sh skiplist
 
 FROM toolchain AS sprague_grundy
 COPY sprague_grundy.cpp ./
-RUN /lint.sh sprague_grundy
+RUN /test.sh sprague_grundy
 
 FROM toolchain AS suffix_array
 COPY suffix_array.cpp ./
-RUN /lint.sh suffix_array
+RUN /test.sh suffix_array
 
 FROM toolchain AS topological_sort
 COPY topological_sort.cpp ./
-RUN /lint.sh topological_sort
+RUN /test.sh topological_sort
 
 FROM toolchain AS two_sat
 COPY two_sat.cpp ./
-RUN /lint.sh two_sat
+RUN /test.sh two_sat
 
 FROM toolchain AS union_find
 COPY union_find.cpp ./
-RUN /lint.sh union_find
+RUN /test.sh union_find
 
 # Final stage that aggregates all results
 FROM toolchain AS all
@@ -118,4 +112,4 @@ RUN --mount=from=bellman_ford,src=/out/bellman_ford.success,target=/mnt/bellman_
     --mount=from=two_sat,src=/out/two_sat.success,target=/mnt/two_sat.success \
     --mount=from=union_find,src=/out/union_find.success,target=/mnt/union_find.success \
     ls /mnt/*.success | wc -l > /tmp/count && \
-    echo "All $(cat /tmp/count) algorithms linted successfully"
+    echo "All $(cat /tmp/count) algorithms tested successfully"

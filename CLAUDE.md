@@ -126,7 +126,9 @@ Each module follows a strict structure optimized for competition typing:
 
 See [README.md](README.md) for the complete algorithm list.
 
-**IMPORTANT:** When adding new algorithms, update the table in README.md to keep it synchronized across all three languages.
+**IMPORTANT:** When adding new algorithms:
+1. Update the table in README.md to keep it synchronized across all three languages
+2. Update all 4 Dockerfiles (cpp/Dockerfile.test, cpp/Dockerfile.lint, java/Dockerfile.test, java/Dockerfile.lint) to add new build stages for the algorithm
 
 ### Test Design Requirements
 

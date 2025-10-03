@@ -3,22 +3,17 @@
 
 set -e
 
-ALGORITHM=$1
+# Build toolchain image with linting tools
+echo "Building toolchain image..."
+DOCKER_BUILDKIT=1 docker build \
+    --target toolchain \
+    -f Dockerfile.lint \
+    -t ncpc2025-java-lint-toolchain \
+    -q . >/dev/null 2>&1
 
-if [ -n "$ALGORITHM" ]; then
-    # Fix specific algorithm
-    if [ ! -f "${ALGORITHM}.java" ]; then
-        echo "Error: ${ALGORITHM}.java not found"
-        exit 1
-    fi
-    echo "Auto-fixing formatting for ${ALGORITHM}.java..."
-    docker run --rm -v $(pwd):/workspace ncpc2025-java-lint \
-        java -jar /opt/tools/google-java-format.jar --aosp --replace "${ALGORITHM}.java"
-    echo "✓ ${ALGORITHM}.java formatted!"
-else
-    # Fix all files
-    echo "Auto-fixing formatting for all Java files..."
-    docker run --rm -v $(pwd):/workspace ncpc2025-java-lint \
-        java -jar /opt/tools/google-java-format.jar --aosp --replace *.java
-    echo "✓ All Java files formatted!"
-fi
+# Format specified file(s) or all files
+FILES="${1:-*.java}"
+echo "Auto-fixing formatting for ${FILES}..."
+docker run --rm -v $(pwd):/workspace ncpc2025-java-lint-toolchain \
+    java -jar /opt/tools/google-java-format.jar --aosp --replace ${FILES}
+echo "✓ Formatting complete!"
