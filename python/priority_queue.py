@@ -5,6 +5,11 @@ This module provides a generic priority queue that supports adding items with pr
 updating priorities, removing items, and popping the item with the lowest priority.
 The implementation uses Python's heapq module for efficient heap operations.
 
+Standard library alternatives:
+- C++: std::priority_queue (basic operations only, no key-based updates/removal)
+- Python: heapq module (min-heap only, no key-based updates/removal)
+- Java: PriorityQueue class (basic operations only, no key-based updates/removal)
+
 Time complexity: O(log n) for add/update and pop operations, O(log n) for remove.
 Space complexity: O(n) where n is the number of items in the queue.
 """

@@ -30,12 +30,6 @@ if [ -n "$ALGORITHM" ]; then
         echo 'Running cppcheck static analysis...'
         if ! cppcheck --enable=warning,performance,portability \
             --suppress=assertWithSideEffect \
-            --suppress=noExplicitConstructor \
-            --suppress=unassignedVariable \
-            --suppress=useStlAlgorithm \
-            --suppress=stlFindInsert \
-            --suppress=passedByValue \
-            --suppress=stlIfStrFind \
             --error-exitcode=1 \
             ${ALGORITHM}.cpp 2>&1; then
             echo 'C++ linting FAILED!'
@@ -74,12 +68,6 @@ else
         echo 'Running cppcheck static analysis...'
         if ! cppcheck --enable=warning,performance,portability \
             --suppress=assertWithSideEffect \
-            --suppress=noExplicitConstructor \
-            --suppress=unassignedVariable \
-            --suppress=useStlAlgorithm \
-            --suppress=stlFindInsert \
-            --suppress=passedByValue \
-            --suppress=stlIfStrFind \
             --error-exitcode=1 \
             *.cpp 2>&1; then
             echo 'C++ linting FAILED!'

@@ -8,6 +8,11 @@ Supports:
 - update(old_item, new_item): Update item in heap - O(n)
 - remove(item): Remove specific item - O(n)
 
+Standard library alternatives:
+- C++: std::priority_queue (basic operations only, no key-based updates/removal)
+- Python: heapq module (min-heap only, no key-based updates/removal)
+- Java: PriorityQueue class (basic operations only, no key-based updates/removal)
+
 Space complexity: O(n)
 */
 

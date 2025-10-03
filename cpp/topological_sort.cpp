@@ -46,14 +46,10 @@ class TopologicalSort {
 
   public:
     void add_edge(NodeT u, NodeT v) {
-        if (graph.find(u) == graph.end()) {
-            graph[u] = {};
-            in_degree[u] = 0;
-        }
-        if (in_degree.find(v) == in_degree.end()) {
-            in_degree[v] = 0;
-            graph[v] = {};
-        }
+        graph.try_emplace(u, std::vector<NodeT>{});
+        in_degree.try_emplace(u, 0);
+        in_degree.try_emplace(v, 0);
+        graph.try_emplace(v, std::vector<NodeT>{});
 
         graph[u].push_back(v);
         in_degree[v]++;

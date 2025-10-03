@@ -1,3 +1,19 @@
+/*
+Skip list is a probabilistic data structure that maintains a sorted collection of elements.
+
+It uses multiple levels of linked lists to achieve O(log n) average time complexity for
+search, insertion, and deletion operations. Elements are inserted with randomly determined
+heights, creating express lanes for faster traversal.
+
+Standard library alternatives:
+- C++: std::set / std::map (red-black tree, O(log n) guaranteed)
+- Python: No built-in sorted set (use bisect module for sorted lists)
+- Java: TreeSet / TreeMap (red-black tree, O(log n) guaranteed)
+
+Time complexity: O(log n) average for search, insert, and delete operations.
+Space complexity: O(n) on average, where n is the number of elements.
+*/
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;

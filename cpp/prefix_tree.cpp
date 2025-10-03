@@ -78,7 +78,7 @@ class PrefixTree {
         if (pos > 0 && !keys[pos - 1].empty() && keys[pos - 1][0] == s[0]) { pos--; }
         if (pos < keys.size() && !keys[pos].empty() && keys[pos][0] == s[0]) {
             // Merge
-            if (s.find(keys[pos]) == 0 && s.length() >= keys[pos].length()) {
+            if (s.starts_with(keys[pos]) && s.length() >= keys[pos].length()) {
                 // s starts with keys[pos]
                 PrefixTree* pt = values[pos];
                 if (pt == nullptr) {
@@ -88,7 +88,7 @@ class PrefixTree {
                     values[pos] = pt = child;
                 }
                 pt->add(s.substr(keys[pos].length()));
-            } else if (keys[pos].find(s) == 0 && keys[pos].length() >= s.length()) {
+            } else if (keys[pos].starts_with(s) && keys[pos].length() >= s.length()) {
                 // keys[pos] starts with s
                 PrefixTree* child = new PrefixTree();
                 child->keys.push_back("");

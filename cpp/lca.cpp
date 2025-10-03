@@ -27,14 +27,14 @@ class LCA {
     std::set<NodeT> has_parent;                // nodes that have a parent
     int max_log;
 
-    void dfs_depth(NodeT node, bool has_par, NodeT par, int d) {
+    void dfs_depth(NodeT node, bool has_par, const NodeT& par, int d) {
         depth[node] = d;
         for (const auto& neighbor : graph[node]) {
             if (!has_par || neighbor != par) { dfs_depth(neighbor, true, node, d + 1); }
         }
     }
 
-    void dfs_parents(NodeT node, bool has_par, NodeT par) {
+    void dfs_parents(NodeT node, bool has_par, const NodeT& par) {
         if (has_par) {
             up[node][0] = par;
             has_parent.insert(node);
@@ -45,7 +45,7 @@ class LCA {
     }
 
   public:
-    LCA(NodeT root) : root(root), max_log(0) {}
+    LCA(const NodeT& root) : root(root), max_log(0) {}
 
     void add_edge(NodeT u, NodeT v) {
         graph[u].push_back(v);

@@ -11,7 +11,7 @@ Create a git commit following the NCPC 2025 repository workflow.
 
 2. **Regenerate documentation** (if code changes were made):
    ```bash
-   cd docs-generator && ./update_docs.sh && cd ..
+   ./update_docs.sh && cd ..
    ```
 
 3. **Review changes**:

@@ -91,7 +91,25 @@ All algorithms MUST be kept in sync across Python, C++, and Java implementations
 ### Competition-Optimized Structure
 Each module follows a strict structure optimized for competition typing:
 
-1. **Implementation** (classes/algorithms)
+1. **File header** (algorithm description)
+   - **Python**: Multi-line docstring starting with `"""` describing the algorithm, its key operations, time complexity, and space complexity
+   - **C++/Java**: Multi-line comment starting with `/*` describing the algorithm, its key operations, time complexity, and space complexity
+   - Format: Brief description, explanation of how it works, time/space complexity analysis
+   - Example from fenwick_tree.cpp:
+     ```
+     /*
+     Fenwick tree (Binary Indexed Tree) for efficient range sum queries and point updates.
+
+     A Fenwick tree maintains cumulative frequency information and supports two main operations:
+     * update(i, delta): add delta to the element at index i
+     * query(i): return the sum of elements from index 0 to i (inclusive)
+     ...
+
+     Time complexity: O(log n) for update and query operations.
+     Space complexity: O(n) where n is the size of the array.
+     */
+     ```
+2. **Implementation** (classes/algorithms)
    - Basic functionality (core operations needed in most problems)
    - **Optional marker**: `# Optional functionality (not always needed during competition)` (Python) or `// Optional functionality (not always needed during competition)` (C++/Java)
    - Optional/extending functionality (advanced features, helper methods, optimizations)

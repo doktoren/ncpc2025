@@ -34,7 +34,7 @@ class SegmentTree {
         }
     }
 
-    void update_helper(int node, int start, int end, int idx, T val) {
+    void update_helper(int node, int start, int end, int idx, const T& val) {
         if (start == end) {
             tree[node] = val;
         } else {
@@ -63,7 +63,7 @@ class SegmentTree {
         if (!arr.empty()) { build(arr, 1, 0, n - 1); }
     }
 
-    void update(int idx, T val) {
+    void update(int idx, const T& val) {
         if (idx < 0 || idx >= n) {
             throw std::out_of_range("Index " + std::to_string(idx) + " out of bounds for size " +
                                     std::to_string(n));

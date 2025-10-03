@@ -70,7 +70,7 @@ class Dijkstra {
         return {distances, predecessors};
     }
 
-    std::optional<std::vector<NodeT>> shortest_path(NodeT source, NodeT target) {
+    std::optional<std::vector<NodeT>> shortest_path(const NodeT& source, const NodeT& target) {
         auto [distances, predecessors] = shortest_paths(source);
 
         if (predecessors.find(target) == predecessors.end()) { return std::nullopt; }

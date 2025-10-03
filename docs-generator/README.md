@@ -11,11 +11,8 @@ The script automatically generates 6 PDF documents (3 languages × 2 versions ea
 
 Basic usage:
 ```bash
-# Generate all PDF documentation (6 files total)
+# Generate all PDF documentation (6 files total). Run from root folder.
 ./update_docs.sh
-
-# Or use the uv wrapper script (recommended)
-../update_docs.sh
 ```
 
 The script processes algorithm files from the parent directory's `python/`, `cpp/`, and `java/` folders and generates PDF documents in the `output/` directory. No arguments are needed - it always generates all combinations.

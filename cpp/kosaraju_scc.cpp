@@ -47,8 +47,8 @@ class KosarajuSCC {
     void add_edge(NodeT u, NodeT v) {
         graph[u].push_back(v);
         transpose[v].push_back(u);
-        if (graph.find(v) == graph.end()) { graph[v] = {}; }
-        if (transpose.find(u) == transpose.end()) { transpose[u] = {}; }
+        graph.try_emplace(v, std::vector<NodeT>{});
+        transpose.try_emplace(u, std::vector<NodeT>{});
     }
 
     std::vector<std::vector<NodeT>> find_sccs() {
