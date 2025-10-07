@@ -143,7 +143,7 @@ class DocumentGenerator:
         @media print {
             @page {
                 size: A4;
-                margin: 1cm 0.8cm;
+                margin: 0.5cm;
             }
 
             body {
@@ -413,10 +413,10 @@ class DocumentGenerator:
                     path=str(output_file),
                     format='A4',
                     margin={
-                        'top': '1cm',
-                        'bottom': '1cm',
-                        'left': '0.8cm',
-                        'right': '0.8cm'
+                        'top': '0.5cm',
+                        'bottom': '0.5cm',
+                        'left': '0.5cm',
+                        'right': '0.5cm'
                     },
                     print_background=True,
                     prefer_css_page_size=True
